@@ -27,8 +27,16 @@ repositories {
 }
 
 dependencies {
+    // Jersey
     compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$jersey_version"
 
+    // Authentication
+    compile "org.slf4j:slf4j-simple:$slf4j_version"
+
+    // FreeMaker
+    compile "org.freemarker:freemarker:$freemaker_version"
+
+    // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_version")
 

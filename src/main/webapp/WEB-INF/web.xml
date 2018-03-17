@@ -15,6 +15,21 @@
 	</filter-mapping>
 
 	<servlet>
+		<servlet-name>JerseyLoginServletContainer</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>rest.login.JerseyLoginApp</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>JerseyLoginServletContainer</servlet-name>
+		<url-pattern>login/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>JerseyTestServletContainer</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
@@ -67,7 +82,7 @@
 		<realm-name>auth</realm-name>
 		<form-login-config>
 			<form-login-page>/login</form-login-page>
-			<form-error-page>/login/error.html</form-error-page>
+			<form-error-page>/login/failed</form-error-page>
 		</form-login-config>
 	</login-config>
 </web-app>
