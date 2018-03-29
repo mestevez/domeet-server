@@ -36,13 +36,12 @@ dependencies {
     // FreeMaker
     compile "org.freemarker:freemarker:$freemaker_version"
 
+    // PosgreSQL Connector
+    compile "org.postgresql:postgresql:$postgresql_version"
+
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_version")
-
-//    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
-//    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
-//    compile group: 'org.apache.logging.log4j', name: 'log4j-jul', version: '2.10.0'
 }
 junitPlatform {
 
@@ -63,18 +62,28 @@ junitPlatform {
 }
 
 gretty {
-    httpPort = 8080
-
-    contextPath = '/'
 
     // supported values:
     // 'jetty7', 'jetty8', 'jetty9', 'jetty93', 'jetty94', 'tomcat7', 'tomcat8'
     servletContainer = 'jetty9'
+    serverConfigFile = 'conf/jetty/jetty.xml'
+    contextConfigFile  = 'src/main/webapp/WEB-INF/jetty-env.xml'
 
     realm 'auth'
-    realmConfigFile 'jetty-realm.properties'
+    realmConfigFile 'conf/security/jetty-realm-dbms.properties'
+
+    logbackConfigFile 'conf/logback.groovy'
 
     onStart {
-        println 'Enter user name "test" and password "test123" for logon.'
+        println 'Initialize gretty'
     }
+}
+
+task(ServerStartUp, dependsOn: 'classes', type: JavaExec) {
+    main = 'server.StartUp'
+    classpath = sourceSets.main.runtimeClasspath
+    //systemProperty 'JDBCConnectionFactory', 'getAppConnection'
+}
+project.afterEvaluate {
+    tasks.appRun.dependsOn ServerStartUp
 }
