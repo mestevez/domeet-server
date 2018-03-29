@@ -1,8 +1,12 @@
 package jdbc;
 
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.jdbc.PgConnection;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +25,7 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 	 * @throws ClassNotFoundException	if the class for forNameClass cannot be located
 	 * @throws SQLException if a database access error occurs or the url is
 	 */
-	JDBCPostgreSQLConnection(String host, String port, String databaseName, String encoding, String user, String password) throws ClassNotFoundException, SQLException {
+	JDBCPostgreSQLConnection(String host, int port, String databaseName, String encoding, String user, String password) throws ClassNotFoundException, SQLException {
 		super("org.postgresql.Driver", "postgresql", host, port, databaseName, encoding, user, password);
 	}
 
@@ -47,6 +51,16 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 
 		CallableStatement callableStatement = m_conn.prepareCall("DROP DATABASE " + databaseName +";");
 		callableStatement.execute();
+	}
+
+	@Override
+	public void executeDDLStatement(String sql) throws SQLException {
+		Statement statement = m_conn.createStatement();
+		try {
+			statement.execute(sql);
+		} finally {
+			statement.close();
+		}
 	}
 
 	/**
@@ -89,4 +103,19 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 //		}
 //		return databasesList;
 //	}
+
+	/**
+	 *
+	 * @param tableName The name (optionally schema-qualified) of an existing table.
+	 * @param loadFile File of the input
+	 * @param header Specifies that the file contains a header line with the names of each column in the file.
+	 *                  The first line is ignored. This option is allowed only when using CSV format.
+	 * @throws SQLException if the occurs an error on database while executing SQL operation
+	 * @throws IOException If an I/O error occurs
+	 */
+	@Override
+	public void tableLoad(String tableName, File loadFile, boolean header) throws SQLException, IOException {
+		CopyManager copyManager = new CopyManager(m_conn.unwrap(PgConnection.class));
+		copyManager.copyIn("COPY " + tableName + " FROM STDIN WITH DELIMITER '|'" + (header ? " CSV HEADER" : ""), new FileReader(loadFile));
+	}
 }

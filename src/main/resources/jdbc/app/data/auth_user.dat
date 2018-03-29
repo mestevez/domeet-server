@@ -1,3 +1,3 @@
 user_id|user_firstname|user_lastname|user_mail|user_passsalt|user_passhash
-|Test||testuser@domeet.cat|12345|12345
-|Admin||adminuser@domeet.cat|12345|12345
+1|Test||testuser@domeet.cat|12345|12345
+2|Admin||adminuser@domeet.cat|12345|12345

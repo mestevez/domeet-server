@@ -1,5 +1,7 @@
 package jdbc;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -7,7 +9,7 @@ import java.util.List;
 
 public abstract class JDBCConnection implements AutoCloseable {
 
-	protected Connection	m_conn;
+	Connection	m_conn;
 
 	/**
 	 *
@@ -22,7 +24,7 @@ public abstract class JDBCConnection implements AutoCloseable {
 	 * @throws ClassNotFoundException	if the class for forNameClass cannot be located
 	 * @throws SQLException if a database access error occurs or the url is
 	 */
-	JDBCConnection(String forNameClass, String engineName, String host, String port, String databaseName, String encoding, String user, String password)
+	JDBCConnection(String forNameClass, String engineName, String host, int port, String databaseName, String encoding, String user, String password)
 		throws ClassNotFoundException, SQLException
 	{
 		this(
@@ -86,6 +88,14 @@ public abstract class JDBCConnection implements AutoCloseable {
 	 * @throws SQLException if the occurs an error on database creation
 	 */
 	public abstract void dropDatabase(String databaseName) throws SQLException;
+	/**
+	 *
+	 * @param sql SQL Statement to be executed in the database.
+	 *               It could be any DDL statement such us CREATE TABLE,
+	 *               CREATE INDEX, DROP TABLE, etc.
+	 * @throws SQLException if the occurs an error on database creation
+	 */
+	public abstract void executeDDLStatement(String sql) throws SQLException;
 
 	/**
 	 *
@@ -93,4 +103,15 @@ public abstract class JDBCConnection implements AutoCloseable {
 	 * @throws SQLException if the occurs an error on database while obtaining database names list
 	 */
 	public abstract List<String> getDatabasesList() throws SQLException;
+
+	/**
+	 *
+	 * @param tableName The name (optionally schema-qualified) of an existing table.
+	 * @param loadFile File of the input
+	 * @param header Specifies that the file contains a header line with the names of each column in the file.
+	 *                  The first line is ignored. This option is allowed only when using CSV format.
+	 * @throws SQLException if the occurs an error on database while executing SQL operation
+	 * @throws IOException If an I/O error occurs
+	 */
+	public abstract void tableLoad(String tableName, File loadFile, boolean header) throws SQLException, IOException;
 }
