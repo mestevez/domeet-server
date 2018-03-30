@@ -1,4 +1,4 @@
-CREATE TABLE domeet.auth_user (
+CREATE TABLE app.auth_user (
   user_id         SERIAL,
   user_firstname  VARCHAR(80) NOT NULL,
   user_lastname   VARCHAR(160),
@@ -6,5 +6,5 @@ CREATE TABLE domeet.auth_user (
   user_passsalt   VARCHAR(254) NOT NULL,    -- !!!! Pending to define size
   user_passhash   VARCHAR(254) NOT NULL    -- !!!! Pending to define size
 );
-ALTER TABLE domeet.auth_user ADD CONSTRAINT p_auth_user_pk PRIMARY KEY (user_id);
-CREATE UNIQUE INDEX u_auth_user_mail ON domeet.auth_user(user_mail);
+ALTER TABLE app.auth_user ADD CONSTRAINT p_auth_user_pk PRIMARY KEY (user_id);
+CREATE UNIQUE INDEX u_auth_user_mail ON app.auth_user(user_mail);

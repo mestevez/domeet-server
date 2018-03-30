@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 @Tag("jdbc")
 class TestJDBCConnection {
 
@@ -17,7 +20,12 @@ class TestJDBCConnection {
 
 	@Test
 	void checkAppStatus() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
-		JDBCDatabaseStatus.checkDatabaseStatus("domeet_junit");
+		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus("domeet_junit");
+
+		assertNull(status.getFatalError(), "FATAL ERROR");
+		assertEquals(0, status.getErrorsList().size(), "UNEXPECTED ERRORS");
+		assertEquals(0, status.getInfoList().size(), "UNEXPECTED INFO");
+		assertEquals(0, status.getWarningsList().size(), "UNEXPECTED WARNINGS");
 	}
 
 	@Test

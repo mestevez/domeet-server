@@ -114,4 +114,21 @@ public abstract class JDBCConnection implements AutoCloseable {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public abstract void tableLoad(String tableName, File loadFile, boolean header) throws SQLException, IOException;
+
+	/**
+	 * Obtains the tables for the current database.
+	 *
+	 * @return An array containing all the tables available for the current <code>Connection</code>
+	 * @throws SQLException if the database query error occurs
+	 */
+	public abstract JDBCTable[] getTableList() throws SQLException;
+
+	/**
+	 * Obtains the tables for and specific scheme in the current database.
+	 *
+	 * @param scheme Table scheme
+	 * @return List of tables available for the current <code>Connection</code>
+	 * @throws SQLException if the database query error occurs
+	 */
+	public abstract List<JDBCTable> getTableList(String scheme) throws SQLException;
 }

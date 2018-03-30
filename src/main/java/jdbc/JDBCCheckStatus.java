@@ -21,17 +21,17 @@ public class JDBCCheckStatus {
 	}
 
 	public void addErrorMessage(String errormsg) {
-		logger.info("[ERROR] - %s", errormsg);
+		logger.error(errormsg);
 		errorsList.add(errormsg);
 	}
 
 	public void addInfoMessage(String infomsg) {
-		logger.info("[INFO] - %s", infomsg);
+		logger.info(infomsg);
 		infoList.add(infomsg);
 	}
 
 	public void addWarningMessage(String warningmsg) {
-		logger.info("[WARN] - %s", warningmsg);
+		logger.warn(warningmsg);
 		warningList.add(warningmsg);
 	}
 
@@ -39,8 +39,20 @@ public class JDBCCheckStatus {
 		return fatalError;
 	}
 
+	public List<String> getErrorsList() {
+		return errorsList;
+	}
+
+	public List<String> getInfoList() {
+		return infoList;
+	}
+
+	public List<String> getWarningsList() {
+		return warningList;
+	}
+
 	public void setFatalError(String fatalError) {
-		logger.info("[FATAL] - %s", fatalError);
+		logger.error("FatalError: " + fatalError);
 		this.fatalError = fatalError;
 	}
 }
