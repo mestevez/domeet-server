@@ -13,4 +13,12 @@
 			</New>
 		</Arg>
 	</Call>
+	<Call name="addBean">
+		<Arg>
+			<New class="org.eclipse.jetty.security.JDBCLoginService">
+				<Set name="name">auth</Set>
+				<Set name="config">conf/security/jetty-realm-dbms.properties</Set>
+			</New>
+		</Arg>
+	</Call>
 </Configure>

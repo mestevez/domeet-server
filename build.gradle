@@ -11,6 +11,7 @@ buildscript {
     dependencies {
         classpath "org.junit.platform:junit-platform-gradle-plugin:$junit_platform_version"
         classpath "gradle.plugin.org.akhikhl.gretty:gretty:$gretty_version"
+        classpath "org.postgresql:postgresql:$postgresql_version"
     }
 }
 
@@ -38,6 +39,7 @@ dependencies {
 
     // PosgreSQL Connector
     compile "org.postgresql:postgresql:$postgresql_version"
+    gretty "org.postgresql:postgresql:$postgresql_version"
 
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
@@ -69,8 +71,8 @@ gretty {
     serverConfigFile = 'conf/jetty/jetty.xml'
     contextConfigFile  = 'src/main/webapp/WEB-INF/jetty-env.xml'
 
-    realm 'auth'
-    realmConfigFile 'conf/security/jetty-realm-dbms.properties'
+//    realm 'auth'
+//    realmConfigFile 'conf/security/jetty-realm-dbms.properties'
 
     logbackConfigFile 'conf/logback.groovy'
 

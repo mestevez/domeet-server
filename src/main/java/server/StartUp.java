@@ -19,5 +19,7 @@ public class StartUp {
 		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(JDBCConnectionFactory.getAppDatabaseName());
 		if (status.getFatalError() != null || status.getErrorsList().size() > 0)
 			throw new ServerException("Main database has structural errors. Unable to start application server.");
+		else
+			logger.info("Application database OK");
 	}
 }
