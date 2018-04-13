@@ -41,6 +41,8 @@ dependencies {
     compile "org.postgresql:postgresql:$postgresql_version"
     gretty "org.postgresql:postgresql:$postgresql_version"
 
+    compile "org.hibernate:hibernate-core:$hibernate_version"
+
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_version")

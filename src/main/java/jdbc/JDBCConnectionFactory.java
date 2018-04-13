@@ -5,7 +5,11 @@ import java.sql.SQLException;
 public class JDBCConnectionFactory {
 
 	private final static String APP_HOSTNAME 		= "localhost";
+	private final static int 	APP_PORT 			= 5432;
 	private final static String APP_DATABASENAME	= "domeet";
+	private final static String APP_DRIVER			= "org.postgresql.Driver";
+	private final static String APP_USER			= "domeetadmin";
+	private final static String APP_USERPASS		= "12345";
 
 	private final static String APP_SCHEME			= "app";
 
@@ -18,7 +22,25 @@ public class JDBCConnectionFactory {
 	 * @throws SQLException if a database access error occurs or the url is
 	 */
 	public static JDBCConnection getAppConnection() throws SQLException, ClassNotFoundException {
-		return new JDBCPostgreSQLConnection("localhost", 5432, "", "UTF-8", "postgres", "12345");
+		return new JDBCPostgreSQLConnection(APP_HOSTNAME, APP_PORT, "", "UTF-8", APP_USER, APP_USERPASS);
+	}
+
+	/**
+	 * Get application main database JDBC connection User password
+	 *
+	 * @return database name
+	 */
+	public static String getAppConnectionPassword() {
+		return APP_USERPASS;
+	}
+
+	/**
+	 * Get application main database JDBC connection User
+	 *
+	 * @return database name
+	 */
+	public static String getAppConnectionUser() {
+		return APP_USER;
 	}
 
 	/**
@@ -42,7 +64,7 @@ public class JDBCConnectionFactory {
 	 * @throws SQLException if a database access error occurs or the url is
 	 */
 	public static JDBCConnection getAppDatabaseConnection(String databaseName) throws SQLException, ClassNotFoundException {
-		return new JDBCPostgreSQLConnection("localhost", 5432, databaseName, "UTF-8", "postgres", "12345");
+		return new JDBCPostgreSQLConnection(APP_HOSTNAME, APP_PORT, databaseName, "UTF-8", APP_USER, APP_USERPASS);
 	}
 
 	/**
@@ -52,6 +74,15 @@ public class JDBCConnectionFactory {
 	 */
 	public static String getAppDatabaseName() {
 		return APP_DATABASENAME;
+	}
+
+	/**
+	 * Get application main database JDBC Driver
+	 *
+	 * @return database name
+	 */
+	public static String getAppDriver() {
+		return APP_DRIVER;
 	}
 
 	/**
@@ -71,5 +102,14 @@ public class JDBCConnectionFactory {
 	 */
 	public static String getAppTableName(String tableName) {
 		return APP_SCHEME + "." + tableName;
+	}
+
+	/**
+	 * Get application main database JDBC connection URL
+	 *
+	 * @return database name
+	 */
+	public static String getAppURL() {
+		return String.format("jdbc:postgresql://%s:%d/%s", APP_HOSTNAME, APP_PORT, APP_DATABASENAME);
 	}
 }
