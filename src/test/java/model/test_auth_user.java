@@ -1,5 +1,6 @@
 package model;
 
+import conf.database.JUnitDatabaseProps;
 import hibernate.SessionFactoryProvider;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ class test_auth_user {
 
 	@Test
 	void checkTestUser() {
-		EntityManager entityManager = SessionFactoryProvider.getSessionFactory().createEntityManager();
+		EntityManager entityManager = SessionFactoryProvider.getSessionFactory(JUnitDatabaseProps.getDatabaseProps()).createEntityManager();
 		auth_user user = entityManager.find(auth_user.class, 1);
 
 		assertEquals("testuser@domeet.cat", user.getUserMail());
@@ -23,7 +24,7 @@ class test_auth_user {
 
 	@Test
 	void listUsers() {
-		List<auth_user> authUsers = auth_user.getUsersList();
+		List<auth_user> authUsers = auth_user.getUsersList(SessionFactoryProvider.getSessionFactory(JUnitDatabaseProps.getDatabaseProps()));
 
 		assertTrue(authUsers.size() > 1);
 		assertEquals("testuser@domeet.cat", authUsers.get(0).getUserMail());

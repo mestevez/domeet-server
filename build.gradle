@@ -41,7 +41,9 @@ dependencies {
     compile "org.postgresql:postgresql:$postgresql_version"
     gretty "org.postgresql:postgresql:$postgresql_version"
 
+    // Hibernate
     compile "org.hibernate:hibernate-core:$hibernate_version"
+    compile "org.hibernate:hibernate-search-orm:$hibernate_orm_version"
 
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
@@ -98,4 +100,38 @@ task(database, dependsOn: 'classes', type: JavaExec) {
     description = 'Database tasks. Allow parameteres: -create'
     main = 'gradle.Task'
     classpath = sourceSets.main.runtimeClasspath
+}
+
+// Get the path for the locally installed binaries
+import org.apache.tools.ant.taskdefs.condition.Os
+ext {
+    npmCommand = Os.isFamily(Os.FAMILY_WINDOWS) ? 'npm.cmd' : 'npm'
+    bowerCommand = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bower.cmd' : 'bower'
+}
+task(npm, type: Exec) {
+    doLast {
+        new ByteArrayOutputStream().withStream { os ->
+            try {
+                exec {
+                    executable = npmCommand
+                    args = ['bin']
+                    standardOutput = os
+                }
+
+                ext.binPath = os.toString().trim() + File.separator
+            } catch (Exception ex) {
+                println '---------------------------------\n' +
+                        '- NPM NOT FOUND. Task \'npm\'\n' +
+                        '- requires NPM to be executed\n' +
+                        '---------------------------------'
+            }
+        }
+    }
+
+    description = 'Internal task for compile Javascript application'
+
+    commandLine = [npmCommand, "install"]
+    workingDir = file("${project.projectDir}/src/main/webapp/static")
+    inputs.file "package.json"
+    outputs.dir "node_modules"
 }

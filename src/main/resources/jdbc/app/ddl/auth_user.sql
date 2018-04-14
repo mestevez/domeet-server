@@ -5,3 +5,4 @@ CREATE TABLE app.auth_user (
 );
 ALTER TABLE app.auth_user ADD CONSTRAINT pk_auth_user PRIMARY KEY (user_id);
 CREATE UNIQUE INDEX u_auth_user_mail ON app.auth_user(user_mail);
+CREATE SEQUENCE auth_user_seq START 101;

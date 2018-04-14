@@ -1,32 +1,32 @@
 package hibernate;
 
 import conf.database.DatabaseProps;
-import conf.database.MainDatabaseProps;
-import jdbc.JDBCConnection;
-import jdbc.JDBCConnectionFactory;
 import model.auth_user;
+import model.user;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SessionFactoryProvider {
 
-	private static SessionFactory sessionFactory;
+	private static Map<String, SessionFactory> sessionFactories = new HashMap<>();
 
 	/**
-	 * Obtain an unique instance of SessionFactory
+	 * Obtain an unique instance of SessionFactory per database configuration
 	 *
 	 * @return instance of  SessionFactory
 	 */
-	public static SessionFactory getSessionFactory() {
+	public static SessionFactory getSessionFactory(DatabaseProps databaseProps) {
+		SessionFactory sessionFactory = sessionFactories.get(databaseProps.getURL());
 		if (sessionFactory == null) {
 			Configuration configuration = new Configuration();
 
-			DatabaseProps mainDatabaseProps = MainDatabaseProps.getDatabaseProps();
-
-			configuration.setProperty("hibernate.connection.driver_class", 	mainDatabaseProps.getDriver());
-			configuration.setProperty("hibernate.connection.url", 			mainDatabaseProps.getURL());
-			configuration.setProperty("hibernate.connection.username", 		mainDatabaseProps.getUser());
-			configuration.setProperty("hibernate.connection.password", 		mainDatabaseProps.getUserpassword());
+			configuration.setProperty("hibernate.connection.driver_class", 	databaseProps.getDriver());
+			configuration.setProperty("hibernate.connection.url", 			databaseProps.getURL());
+			configuration.setProperty("hibernate.connection.username", 		databaseProps.getUser());
+			configuration.setProperty("hibernate.connection.password", 		databaseProps.getUserpassword());
 
 			// JDBC connection pool (use the built-in)
 			configuration.setProperty("hibernate.connection.pool_size", "1");
@@ -40,10 +40,17 @@ public class SessionFactoryProvider {
 			// Drop and re-create the database schema on startup
 			configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
 
+			// Lucene Text Search
+			configuration.setProperty("hibernate.search.default.directory_provider", "filesystem");
+			configuration.setProperty("hibernate.search.default.indexBase", "tmp/lucene/indexes");
+
 			// Class Mapping
 			configuration.addAnnotatedClass(auth_user.class);
+			configuration.addAnnotatedClass(user.class);
 
 			sessionFactory = configuration.buildSessionFactory();
+
+			sessionFactories.put(databaseProps.getURL(), sessionFactory);
 		}
 
 		return sessionFactory;
