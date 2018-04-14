@@ -31,7 +31,7 @@ public class LoginResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String login(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), _getLoginFTLDataModel(request), "login.ftlh");
+		return FTLParser.getParsedString(FTLConfiguration.getInstance(), _getLoginFTLDataModel(request), "webapp/login/login.ftlh");
 	}
 
 	@Path("failed")
@@ -41,6 +41,6 @@ public class LoginResource {
 		Map<String, Object> dataModel = _getLoginFTLDataModel(request);
 		dataModel.put("failedmsg", "Login failed");
 
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "login.ftlh");
+		return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/login/login.ftlh");
 	}
 }

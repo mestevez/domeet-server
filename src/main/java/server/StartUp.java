@@ -1,5 +1,6 @@
 package server;
 
+import conf.database.MainDatabaseProps;
 import jdbc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ public class StartUp {
 		logger.info("Application server starting up");
 
 		// Verify application database
-		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(JDBCConnectionFactory.getAppDatabaseName());
+		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(MainDatabaseProps.getDatabaseProps());
 		if (status.getFatalError() != null || status.getErrorsList().size() > 0)
 			throw new ServerException("Main database has structural errors. Unable to start application server.");
 		else

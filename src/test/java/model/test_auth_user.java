@@ -16,20 +16,16 @@ class test_auth_user {
 		EntityManager entityManager = SessionFactoryProvider.getSessionFactory().createEntityManager();
 		auth_user user = entityManager.find(auth_user.class, 1);
 
-		assertEquals("testuser@domeet.cat", user.getUser_mail());
+		assertEquals("testuser@domeet.cat", user.getUserMail());
 
 		entityManager.close();
 	}
 
 	@Test
 	void listUsers() {
-		EntityManager entityManager = SessionFactoryProvider.getSessionFactory().createEntityManager();
-
-		List<auth_user> authUsers = entityManager.createQuery("SELECT a FROM auth_user a").getResultList();
+		List<auth_user> authUsers = auth_user.getUsersList();
 
 		assertTrue(authUsers.size() > 1);
-		assertEquals("testuser@domeet.cat", authUsers.get(0).getUser_mail());
-
-		entityManager.close();
+		assertEquals("testuser@domeet.cat", authUsers.get(0).getUserMail());
 	}
 }

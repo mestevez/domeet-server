@@ -1,5 +1,7 @@
 package hibernate;
 
+import conf.database.DatabaseProps;
+import conf.database.MainDatabaseProps;
 import jdbc.JDBCConnection;
 import jdbc.JDBCConnectionFactory;
 import model.auth_user;
@@ -19,10 +21,12 @@ public class SessionFactoryProvider {
 		if (sessionFactory == null) {
 			Configuration configuration = new Configuration();
 
-			configuration.setProperty("hibernate.connection.driver_class", 	JDBCConnectionFactory.getAppDriver());
-			configuration.setProperty("hibernate.connection.url", 			JDBCConnectionFactory.getAppURL());
-			configuration.setProperty("hibernate.connection.username", 		JDBCConnectionFactory.getAppConnectionUser());
-			configuration.setProperty("hibernate.connection.password", 		JDBCConnectionFactory.getAppConnectionPassword());
+			DatabaseProps mainDatabaseProps = MainDatabaseProps.getDatabaseProps();
+
+			configuration.setProperty("hibernate.connection.driver_class", 	mainDatabaseProps.getDriver());
+			configuration.setProperty("hibernate.connection.url", 			mainDatabaseProps.getURL());
+			configuration.setProperty("hibernate.connection.username", 		mainDatabaseProps.getUser());
+			configuration.setProperty("hibernate.connection.password", 		mainDatabaseProps.getUserpassword());
 
 			// JDBC connection pool (use the built-in)
 			configuration.setProperty("hibernate.connection.pool_size", "1");
@@ -36,6 +40,7 @@ public class SessionFactoryProvider {
 			// Drop and re-create the database schema on startup
 			configuration.setProperty("hibernate.hbm2ddl.auto", "validate");
 
+			// Class Mapping
 			configuration.addAnnotatedClass(auth_user.class);
 
 			sessionFactory = configuration.buildSessionFactory();

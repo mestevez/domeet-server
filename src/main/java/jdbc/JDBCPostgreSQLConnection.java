@@ -40,6 +40,8 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 
 	/**
 	 *
+	 * Obtain database connection
+	 *
 	 * @param host			Database server IP or host name
 	 * @param port			Database server port
 	 * @param databaseName	Database physical name
@@ -51,6 +53,22 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 	 */
 	JDBCPostgreSQLConnection(String host, int port, String databaseName, String encoding, String user, String password) throws ClassNotFoundException, SQLException {
 		super("org.postgresql.Driver", "postgresql", host, port, databaseName, encoding, user, password);
+	}
+
+	/**
+	 *
+	 * Obtain server connection, without specifying database
+	 *
+	 * @param host			Database server IP or host name
+	 * @param port			Database server port
+	 * @param encoding		Database character encoding
+	 * @param user			Database connection user
+	 * @param password		Connection user password
+	 * @throws ClassNotFoundException	if the class for forNameClass cannot be located
+	 * @throws SQLException if a database access error occurs or the url is
+	 */
+	JDBCPostgreSQLConnection(String host, int port, String encoding, String user, String password) throws ClassNotFoundException, SQLException {
+		super("org.postgresql.Driver", "postgresql", host, port, "postgres", encoding, user, password);
 	}
 
 	@Override

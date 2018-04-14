@@ -12,6 +12,7 @@ public abstract class JDBCConnection implements AutoCloseable {
 	Connection	m_conn;
 
 	/**
+	 * Obtain database connection
 	 *
 	 * @param forNameClass	the fully qualified name of the desired class.
 	 * @param engineName	Database engine name (mysql|postgres|oracle, etc.)
@@ -46,6 +47,7 @@ public abstract class JDBCConnection implements AutoCloseable {
 		throws ClassNotFoundException, SQLException
 	{
 		Class.forName(forNameClass);
+		System.out.println(url);
 		m_conn = DriverManager.getConnection(url);
 	}
 

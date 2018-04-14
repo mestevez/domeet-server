@@ -30,6 +30,21 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>JerseyAdminServletContainer</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>rest.admin.JerseyAdminApp</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>JerseyAdminServletContainer</servlet-name>
+		<url-pattern>admin/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>JerseyTestServletContainer</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
@@ -50,7 +65,7 @@
 			<url-pattern>/test/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
-			<role-name>testuser</role-name>
+			<role-name>test</role-name>
 			<role-name>admin</role-name>
 		</auth-constraint>
 	</security-constraint>
@@ -62,13 +77,23 @@
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>regularuser</role-name>
-			<role-name>testuser</role-name>
+			<role-name>test</role-name>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Protected Area</web-resource-name>
+			<url-pattern>/admin/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
 			<role-name>admin</role-name>
 		</auth-constraint>
 	</security-constraint>
 
 	<security-role>
-		<role-name>testuser</role-name>
+		<role-name>test</role-name>
 	</security-role>
 	<security-role>
 		<role-name>regularuser</role-name>

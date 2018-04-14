@@ -1,5 +1,6 @@
 package jdbc;
 
+import conf.database.JUnitDatabaseProps;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +16,12 @@ class TestJDBCConnection {
 
 	@Test
 	void createApplicationDatabase() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
-		JDBCDatabaseStatus.createApplicationDatabase("domeet_junit", true);
+		JDBCDatabaseStatus.createApplicationDatabase(JUnitDatabaseProps.getDatabaseProps(), true);
 	}
 
 	@Test
 	void checkAppStatus() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
-		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus("domeet_junit");
+		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(JUnitDatabaseProps.getDatabaseProps());
 
 		assertNull(status.getFatalError(), "FATAL ERROR");
 		assertEquals(0, status.getErrorsList().size(), "UNEXPECTED ERRORS");
@@ -30,6 +31,6 @@ class TestJDBCConnection {
 
 	@Test
 	void initAppConnection() throws SQLException, ClassNotFoundException {
-		JDBCConnectionFactory.getAppDatabaseConnection("domeet_junit").close();
+		JDBCConnectionFactory.getAppDatabaseConnection(JUnitDatabaseProps.getDatabaseProps()).close();
 	}
 }

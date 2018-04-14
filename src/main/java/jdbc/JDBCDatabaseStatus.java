@@ -1,5 +1,7 @@
 package jdbc;
 
+import conf.database.DatabaseProps;
+import conf.database.StatusDatabaseProps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,9 +78,9 @@ public class JDBCDatabaseStatus {
 		}
 	}
 
-	private static void _checkTablesStatus(JDBCCheckStatus status, String databaseName)
+	private static void _checkTablesStatus(JDBCCheckStatus status, DatabaseProps checkDatabase)
 			throws SQLException, ClassNotFoundException {
-		JDBCConnection statusConnection = JDBCConnectionFactory.getAppDatabaseConnection("domeet_status");
+		JDBCConnection statusConnection = JDBCConnectionFactory.getAppDatabaseConnection(StatusDatabaseProps.getDatabaseProps());
 		List<JDBCTable> statusTableList;
 		try {
 			statusTableList = statusConnection.getTableList(JDBCConnectionFactory.getAppScheme());
@@ -86,7 +88,7 @@ public class JDBCDatabaseStatus {
 			statusConnection.close();
 		}
 
-		JDBCConnection appConnection = JDBCConnectionFactory.getAppDatabaseConnection(databaseName);
+		JDBCConnection appConnection = JDBCConnectionFactory.getAppDatabaseConnection(checkDatabase);
 		List<JDBCTable> evalTableList;
 		try {
 			evalTableList = appConnection.getTableList(JDBCConnectionFactory.getAppScheme());
@@ -182,10 +184,11 @@ public class JDBCDatabaseStatus {
 		return textBuilder.toString();
 	}
 
-	public static void createApplicationDatabase(String databaseName, boolean dropIfExist)
+	public static void createApplicationDatabase(DatabaseProps databaseProps, boolean dropIfExist)
 			throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
 
-		JDBCConnection appConnection = JDBCConnectionFactory.getAppConnection();
+		JDBCConnection appConnection = JDBCConnectionFactory.getServerConnection();
+		String databaseName = databaseProps.getDatabasename();
 		try {
 			if (appConnection.getDatabasesList().contains(databaseName)) {
 				logger.info("Database " + databaseName + " already exists");
@@ -202,7 +205,7 @@ public class JDBCDatabaseStatus {
 			appConnection.close();
 		}
 
-		appConnection = JDBCConnectionFactory.getAppDatabaseConnection(databaseName);
+		appConnection = JDBCConnectionFactory.getAppDatabaseConnection(databaseProps);
 		try {
 			appConnection.createSchema(JDBCConnectionFactory.getAppScheme());
 			for (String tableName : _getTableList(RESOURCES.appDir)) {
@@ -232,7 +235,7 @@ public class JDBCDatabaseStatus {
 			appConnection.close();
 
 			// If an error occur during database creation revert its creation
-			JDBCConnection revertConnection = JDBCConnectionFactory.getAppConnection();
+ 			JDBCConnection revertConnection = JDBCConnectionFactory.getServerConnection();
 			try {
 				revertConnection.dropDatabase(databaseName);
 			} finally {
@@ -245,21 +248,21 @@ public class JDBCDatabaseStatus {
 		appConnection.close();
 	}
 
-	public static JDBCCheckStatus checkDatabaseStatus(String databaseName)
+	public static JDBCCheckStatus checkDatabaseStatus(DatabaseProps checkDatabase)
 			throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
 		JDBCCheckStatus status = new JDBCCheckStatus();
 
-		JDBCConnection generalConnection = JDBCConnectionFactory.getAppConnection();
+		JDBCConnection generalConnection = JDBCConnectionFactory.getServerConnection();
 		try {
-			if (!generalConnection.getDatabasesList().contains(databaseName))
-				status.setFatalError(String.format("Database [%s] not exists", databaseName));
+			if (!generalConnection.getDatabasesList().contains(checkDatabase.getDatabasename()))
+				status.setFatalError(String.format("Database [%s] not exists", checkDatabase.getDatabasename()));
 		} finally {
 			generalConnection.close();
 		}
 
 		if (status.getFatalError() == null) {
-			createApplicationDatabase("domeet_status", true);
-			_checkTablesStatus(status, databaseName);
+			createApplicationDatabase(StatusDatabaseProps.getDatabaseProps(), true);
+			_checkTablesStatus(status, checkDatabase);
 		}
 
 		return status;

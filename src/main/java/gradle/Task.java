@@ -1,7 +1,7 @@
 package gradle;
 
 
-import jdbc.JDBCConnectionFactory;
+import conf.database.MainDatabaseProps;
 import jdbc.JDBCDatabaseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ public class Task {
 		logger.info("Executing gradle task. args: " + Arrays.toString(args));
 
 		if (args[0].equalsIgnoreCase("database")) {
-			JDBCDatabaseStatus.createApplicationDatabase(JDBCConnectionFactory.getAppDatabaseName(), false);
+			JDBCDatabaseStatus.createApplicationDatabase(MainDatabaseProps.getDatabaseProps(), false);
 		} else if (args[0].equalsIgnoreCase("start")) {
 			StartUp.init();
 		}
