@@ -22,6 +22,6 @@ public class SignUpResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String login(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "Sign Up"), "webapp/signup/signup.ftlh");
+		return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "Sign Up"), "webapp/login/signup.ftlh");
 	}
 }

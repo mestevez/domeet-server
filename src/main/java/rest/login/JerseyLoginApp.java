@@ -12,6 +12,7 @@ public class JerseyLoginApp extends Application {
 	public Set<Class<?>> getClasses() {
 		final Set<Class<?>> classes = new HashSet<>();
 		classes.add(LoginResource.class);
+		classes.add(SignUpResource.class);
 		return classes;
 	}
 }

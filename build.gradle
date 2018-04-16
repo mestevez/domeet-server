@@ -130,8 +130,8 @@ task(npm, type: Exec) {
 
     description = 'Internal task for compile Javascript application'
 
-    commandLine = [npmCommand, "install"]
-    workingDir = file("${project.projectDir}/src/main/webapp/static")
+    commandLine = [npmCommand, "run", "build"]
+    workingDir = file("${project.projectDir}/src/main/vue")
     inputs.file "package.json"
     outputs.dir "node_modules"
 }
