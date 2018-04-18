@@ -6,13 +6,13 @@
 
 	<title>${pagetitle}</title>
 
-	<link href=/static/dist/css/login.css rel=stylesheet>
+	<link href=/static/dist/css/signup.css rel=stylesheet>
 	<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
 </head>
 <body>
-<div id=login></div>
+<div id=signup></div>
 <script type=text/javascript src=/static/dist/js/manifest.js></script>
 <script type=text/javascript src=/static/dist/js/vendor.js></script>
-<script type=text/javascript src=/static/dist/js/login.js></script>
+<script type=text/javascript src=/static/dist/js/signup.js></script>
 </body>
 </html>

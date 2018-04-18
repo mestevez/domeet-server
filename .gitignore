@@ -1,4 +1,5 @@
 .gradle/
 .idea/
-build/
-out/
+/build
+/out
+/src/main/webapp/static/dist/
