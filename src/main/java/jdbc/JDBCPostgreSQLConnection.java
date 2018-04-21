@@ -16,6 +16,7 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 
 	private List<String> 	databasesList;
 	private List<JDBCTable> tablesList;
+	private List<String> 	sequenceList;
 
 	private static Map<String, Integer> typeConvertion;
 	static {
@@ -143,6 +144,34 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 			}
 		}
 		return databasesList;
+	}
+
+	/**
+	 * Obtains the sequences for the current database.
+	 *
+	 * @return List of sequences available for the current <code>Connection</code>
+	 * @throws SQLException if the database query error occurs
+	 */
+	@Override
+	public String[] getSequenceList() throws SQLException {
+		if (sequenceList == null) {
+			CallableStatement sequenceStatement = m_conn.prepareCall(
+				"SELECT relname FROM pg_class WHERE relkind = 'S';");
+
+			try {
+				if (sequenceStatement.execute()) {
+					ResultSet rs = sequenceStatement.getResultSet();
+					sequenceList = new ArrayList<>();
+					while (rs.next()) {
+						sequenceList.add(rs.getString(1));
+					}
+					rs.close();
+				}
+			} finally {
+				sequenceStatement.close();
+			}
+		}
+		return sequenceList.toArray(new String[sequenceList.size()]);
 	}
 
 	/**

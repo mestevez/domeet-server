@@ -7,7 +7,9 @@ compile webapp Javascript application
  - gradlew.bat npm
  
 create database
- - gradlew.bat database
+ - gradlew database -Pcreate
+check database status
+ - gradlew database -Pstatus
 
 run server
- - gradlew.bat appRun
+ - gradlew appRun

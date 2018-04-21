@@ -5,6 +5,7 @@ import hibernate.SessionFactoryProvider;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -52,6 +53,10 @@ class test_user {
 				"IBM",
 				"659565945",
 				decoded);
+
+		auth_user auth_userRecord = auth_user.getUser(sessionFactory, "john@smith.es");
+		Assertions.assertNotNull(auth_userRecord);
+		Assertions.assertTrue(auth_userRecord.hasRole("regularuser"));
 	}
 
 	@Test
@@ -64,6 +69,7 @@ class test_user {
 		user.deleteUser(sessionFactory, user_id);
 
 		assertNull(model.user.getUser(sessionFactory, user_id));
+
 	}
 
 	@Test

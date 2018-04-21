@@ -1,6 +1,7 @@
 package hibernate;
 
 import conf.database.DatabaseProps;
+import model.auth_role;
 import model.auth_user;
 import model.user;
 import org.hibernate.SessionFactory;
@@ -42,10 +43,11 @@ public class SessionFactoryProvider {
 
 			// Lucene Text Search
 			configuration.setProperty("hibernate.search.default.directory_provider", "filesystem");
-			configuration.setProperty("hibernate.search.default.indexBase", "tmp/lucene/indexes");
+			configuration.setProperty("hibernate.search.default.indexBase", "build/tmp/lucene/indexes");
 
 			// Class Mapping
 			configuration.addAnnotatedClass(auth_user.class);
+			configuration.addAnnotatedClass(auth_role.class);
 			configuration.addAnnotatedClass(user.class);
 
 			sessionFactory = configuration.buildSessionFactory();

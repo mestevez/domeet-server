@@ -45,6 +45,21 @@
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>JerseyErrorServletContainer</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>rest.error.JerseyErrorApp</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>JerseyErrorServletContainer</servlet-name>
+		<url-pattern>error/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
 		<servlet-name>JerseyTestServletContainer</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>

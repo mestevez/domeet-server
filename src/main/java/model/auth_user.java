@@ -1,12 +1,16 @@
 package model;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.Store;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table( schema="app", name="auth_user" )
@@ -22,6 +26,19 @@ public class auth_user implements Serializable {
 
 	private String user_passhash;
 
+	@ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+	@JoinTable(
+		schema="app",
+		name = "auth_user_role",
+		joinColumns = { @JoinColumn(name = "user_id") },
+		inverseJoinColumns = { @JoinColumn(name = "role_id") }
+	)
+	Set<auth_role> user_roles = new HashSet<>();
+
+	public void addRole(auth_role role) {
+		user_roles.add(role);
+	}
+
 	public int getUserID() {
 		return user_id;
 	}
@@ -31,13 +48,38 @@ public class auth_user implements Serializable {
 	}
 
 	public final static List<auth_user> getUsersList(SessionFactory hibernateSessionFactory) {
+		List<auth_user> authUsers;
+
 		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
-
-		List<auth_user> authUsers = entityManager.createQuery("SELECT a FROM auth_user a").getResultList();
-
-		entityManager.close();
+		try {
+			authUsers = entityManager.createQuery("SELECT a FROM auth_user a").getResultList();
+		} finally {
+			entityManager.close();
+		}
 
 		return authUsers;
+	}
+
+	public final static auth_user getUser(SessionFactory hibernateSessionFactory, String user_mail) {
+		auth_user user;
+		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
+		try {
+			user =  entityManager.createQuery("SELECT a FROM auth_user a WHERE user_mail = :user_mail", auth_user.class)
+					.setParameter("user_mail", user_mail)
+					.getSingleResult();
+		} finally {
+			entityManager.close();
+		}
+
+		return user;
+	}
+
+	public boolean hasRole(String role_code) {
+		for (auth_role user_role : user_roles) {
+			if (user_role.getRoleCode().equalsIgnoreCase(role_code))
+				return true;
+		}
+		return false;
 	}
 
 	public void setUserMail(String user_mail) {

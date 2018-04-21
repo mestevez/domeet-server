@@ -8,4 +8,14 @@
 			<Set name="directoriesListed">true</Set>
 		</New>
 	</Set>
+
+	<Get name="errorHandler">
+		<Call name="addErrorPage">
+			<Arg type="int">0</Arg>
+			<Arg type="int">9999</Arg>
+			<Arg type="String">/error</Arg>
+		</Call>
+
+		<Set name="showStacks">true</Set>
+	</Get>
 </Configure>

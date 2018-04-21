@@ -28,6 +28,10 @@ repositories {
 }
 
 dependencies {
+
+    // Jetty
+    //compile "org.eclipse.jetty:jetty-server:$jetty_version"
+
     // Jersey
     compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$jersey_version"
 
@@ -78,7 +82,11 @@ gretty {
 //    realm 'auth'
 //    realmConfigFile 'conf/security/jetty-realm-dbms.properties'
 
-    logbackConfigFile 'conf/logback.groovy'
+    loggingLevel 'WARN'
+    consoleLogEnabled true
+    fileLogEnabled true
+    logFileName 'doMeet'
+    logDir 'logs'
 
     onStart {
         println 'Initialize gretty'
@@ -96,7 +104,10 @@ project.afterEvaluate {
 }
 
 task(database, dependsOn: 'classes', type: JavaExec) {
-    args(['database'])
+    args(['database', project.hasProperty("create") ? 'create' : (
+                      project.hasProperty("drop")   ? 'drop' :
+                                                      'status')
+    ])
     description = 'Database tasks. Allow parameteres: -create'
     main = 'gradle.Task'
     classpath = sourceSets.main.runtimeClasspath

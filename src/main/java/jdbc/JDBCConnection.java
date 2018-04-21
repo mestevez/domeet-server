@@ -118,6 +118,14 @@ public abstract class JDBCConnection implements AutoCloseable {
 	public abstract void tableLoad(String tableName, File loadFile, boolean header) throws SQLException, IOException;
 
 	/**
+	 * Obtains the sequences for the current database.
+	 *
+	 * @return List of sequences available for the current <code>Connection</code>
+	 * @throws SQLException if the database query error occurs
+	 */
+	public abstract String[] getSequenceList() throws SQLException;
+
+	/**
 	 * Obtains the tables for the current database.
 	 *
 	 * @return An array containing all the tables available for the current <code>Connection</code>

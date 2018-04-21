@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JDBCDatabaseStatus {
@@ -135,6 +136,35 @@ public class JDBCDatabaseStatus {
 		}
 	}
 
+	private static void _checkSequenceStatus(JDBCCheckStatus status, DatabaseProps checkDatabase)
+			throws SQLException, ClassNotFoundException {
+		JDBCConnection statusConnection = JDBCConnectionFactory.getAppDatabaseConnection(StatusDatabaseProps.getDatabaseProps());
+		List<String> statusSequenceList;
+		try {
+			statusSequenceList = Arrays.asList(statusConnection.getSequenceList());
+		} finally {
+			statusConnection.close();
+		}
+
+		JDBCConnection appConnection = JDBCConnectionFactory.getAppDatabaseConnection(checkDatabase);
+		List<String> evalSequenceList;
+		try {
+			evalSequenceList = Arrays.asList(appConnection.getSequenceList());
+		} finally {
+			appConnection.close();
+		}
+
+		for (int ist = 0; ist < statusSequenceList.size() && status.getFatalError() == null; ist++) {
+			if (!evalSequenceList.contains(statusSequenceList.get(ist)))
+				status.addErrorMessage(String.format("Missing sequence %s.", statusSequenceList.get(ist)));
+		}
+
+		for (int ievl = 0; ievl < evalSequenceList.size() && status.getFatalError() == null; ievl++) {
+			if (!statusSequenceList.contains(evalSequenceList.get(ievl)))
+				status.addWarningMessage(String.format("Sequence %s is not defined in dictionary.", evalSequenceList.get(ievl)));
+		}
+	}
+
 	/**
 	 * Obtains the list of tables required for the received directory, defined by tablesort.properties file
 	 *
@@ -248,8 +278,20 @@ public class JDBCDatabaseStatus {
 		appConnection.close();
 	}
 
+	public static void dropApplicationDatabase(DatabaseProps databaseProps)
+			throws SQLException, ClassNotFoundException {
+
+		JDBCConnection appConnection = JDBCConnectionFactory.getServerConnection();
+		String databaseName = databaseProps.getDatabasename();
+		try {
+			appConnection.dropDatabase(databaseName);
+		} finally {
+			appConnection.close();
+		}
+	}
+
 	public static JDBCCheckStatus checkDatabaseStatus(DatabaseProps checkDatabase)
-			throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
+			throws SQLException, ClassNotFoundException {
 		JDBCCheckStatus status = new JDBCCheckStatus();
 
 		JDBCConnection generalConnection = JDBCConnectionFactory.getServerConnection();
@@ -260,10 +302,11 @@ public class JDBCDatabaseStatus {
 			generalConnection.close();
 		}
 
-		if (status.getFatalError() == null) {
-			createApplicationDatabase(StatusDatabaseProps.getDatabaseProps(), true);
+		if (status.getFatalError() == null)
 			_checkTablesStatus(status, checkDatabase);
-		}
+
+		if (status.getFatalError() == null)
+			_checkSequenceStatus(status, checkDatabase);
 
 		return status;
 	}

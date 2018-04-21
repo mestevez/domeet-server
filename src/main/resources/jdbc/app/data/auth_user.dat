@@ -1,3 +1,4 @@
 user_id|user_mail|user_passhash
 1|testuser@domeet.cat|12345
 2|adminuser@domeet.cat|12345
+3|appuser@domeet.cat|12345

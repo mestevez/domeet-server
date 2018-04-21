@@ -22,10 +22,10 @@
                   <v-toolbar-title>{{ i18n.title_login }}</v-toolbar-title>
                 </v-toolbar>
                 <v-card-text>
-                  <v-form method="POST" action="/signup" v-model="valid" ref="form" lazy-validation>
+                  <v-form method="POST" action="/login/signup" v-model="valid" ref="form" lazy-validation>
                     <v-text-field
                       prepend-icon="person"
-                      name="j_username"
+                      name="email"
                       :label="i18n.label_username"
                       type="text"
                       v-model="username"
@@ -34,7 +34,7 @@
                     ></v-text-field>
                     <v-text-field
                       prepend-icon="lock"
-                      name="j_password"
+                      name="password"
                       :label="i18n.label_password"
                       id="password"
                       type="password"

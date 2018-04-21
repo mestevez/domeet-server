@@ -142,7 +142,7 @@ const webpackConfig = merge(baseWebpackConfig, {
   // https://github.com/vuejs-templates/webpack/issues/378
   watchOptions: {
     aggregateTimeout: 300,
-    poll: 1000
+    poll: 400
   }
 })
 

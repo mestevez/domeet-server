@@ -1,7 +1,5 @@
 package model;
 
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -56,6 +54,7 @@ public class user implements Serializable {
 		auth_user newAuthUser = new auth_user();
 		newAuthUser.setUserMail(auth_mail);
 		newAuthUser.setUserPassword(auth_password);
+		newAuthUser.addRole(session.get(auth_role.class, auth_role.getRole(hibernateSessionFactory, "regularuser").getRoleID()));
 
 		user newUser = new user();
 		newUser.user_firstname = user_firstname;
