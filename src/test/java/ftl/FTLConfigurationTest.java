@@ -3,6 +3,7 @@ package ftl;
 import freemarker.template.TemplateException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import rest.util.PageCommons;
 
 import java.io.IOException;
 import java.util.HashMap;

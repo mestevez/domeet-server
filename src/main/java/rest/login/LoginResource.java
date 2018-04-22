@@ -20,16 +20,19 @@ public class LoginResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String login(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "Login page"), "webapp/login/login.ftlh");
+		return FTLParser.getParsedString(
+				FTLConfiguration.getInstance(),
+				PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/login"),
+				"webapp/login/login.ftlh");
 	}
 
 	@Path("failed")
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String failed(@Context HttpServletRequest request) throws IOException, TemplateException {
-		Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(request, "Login page");
-		dataModel.put("failedmsg", "Login failed");
-
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/login/login.ftlh");
+		return FTLParser.getParsedString(
+				FTLConfiguration.getInstance(),
+				PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/login"),
+				"webapp/login/login.ftlh");
 	}
 }

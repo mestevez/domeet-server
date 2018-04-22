@@ -11,6 +11,17 @@
 </head>
 <body>
 <div id=login></div>
+<script type=text/javascript>
+	var loginappData = {
+		app: {
+		},
+		i18n: {
+		<#list i18n?keys as key>
+			${key} : '${i18n[key]}',
+		</#list>
+		}
+	};
+</script>
 <script type=text/javascript src=/static/dist/js/manifest.js></script>
 <script type=text/javascript src=/static/dist/js/vendor.js></script>
 <script type=text/javascript src=/static/dist/js/login.js></script>

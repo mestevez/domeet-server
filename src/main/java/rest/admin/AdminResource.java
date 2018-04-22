@@ -1,6 +1,5 @@
 package rest.admin;
 
-import conf.database.DatabaseProps;
 import conf.database.MainDatabaseProps;
 import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
@@ -24,14 +23,14 @@ public class AdminResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String admin(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "Admin page"), "webapp/admin/index.ftlh");
+		return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "ftl/webapp/admin/admin"), "webapp/admin/index.ftlh");
 	}
 
 	@Path("userslist")
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String usersList(@Context HttpServletRequest request) throws IOException, TemplateException {
-		Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(request, "Admin page");
+		Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(request, "ftl/webapp/admin/admin");
 		dataModel.put("usersList", auth_user.getUsersList(SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps())));
 		return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/admin/userslist.ftlh");
 	}

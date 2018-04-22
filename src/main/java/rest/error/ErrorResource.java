@@ -27,7 +27,7 @@ public class ErrorResource {
 //			System.out.println(String.format("!! NAME=%s, VALUE=%s", attrname, httpRequest.getAttribute(attrname)));
 //		}
 
-		Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(httpRequest, "Error page");
+		Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(httpRequest, "ftl/webapp/error/error");
 		dataModel.put("status_code", httpRequest.getAttribute("javax.servlet.error.status_code"));
 		dataModel.put("error_message", httpRequest.getAttribute("javax.servlet.error.message"));
 		dataModel.put("error_trace", "");

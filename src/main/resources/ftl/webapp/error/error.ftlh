@@ -19,8 +19,9 @@
 			error_trace		: '${error_trace}'
 		},
 		i18n: {
-			btn_back: 'Back',
-			label_error: 'Error'
+		<#list i18n?keys as key>
+			${key} : '${i18n[key]}',
+		</#list>
 		}
 	};
 </script>

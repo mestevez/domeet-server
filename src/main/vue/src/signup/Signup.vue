@@ -71,6 +71,7 @@
 </template>
 
 <script>
+if (typeof signupappData == 'undefined') signupappData = {};
 export default {
   name: 'Signup',
 
@@ -83,7 +84,8 @@ export default {
         login: '/login'
       },
       valid: true,
-      i18n: {
+      app: Object.assign({ }, signupappData.app),
+      i18n: Object.assign({
         title_login: 'Sign Up',
         label_back: 'Back',
         label_username: 'Email',
@@ -94,7 +96,7 @@ export default {
         btn_signup: 'Sign up',
         rule_required: 'This field is required',
         rule_password_confirm: 'Passwords didn\'t match'
-      }
+      }, signupappData.i18n)
     }
   },
 

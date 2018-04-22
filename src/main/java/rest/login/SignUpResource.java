@@ -24,9 +24,11 @@ public class SignUpResource {
 	@Produces(MediaType.TEXT_HTML)
 	public Response form(@Context HttpServletRequest request) throws IOException, TemplateException {
 		return Response.accepted().entity(
-				FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "Sign Up"), "webapp/login/signup.ftlh")
+				FTLParser.getParsedString(
+						FTLConfiguration.getInstance(),
+						PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/signup"),
+						"webapp/login/signup.ftlh")
 		).build();
-		//return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "Sign Up"), "webapp/login/signup.ftlh");
 	}
 
 	@POST
