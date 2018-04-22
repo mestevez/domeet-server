@@ -1,6 +1,6 @@
 <template>
   <div id="login">
-    <v-app id="inspire">
+    <v-app>
       <v-content>
         <v-container fluid fill-height>
           <v-layout align-center justify-center>
@@ -17,7 +17,8 @@
                       :label="i18n.label_username"
                       type="text"
                       v-model="username"
-                      :rules="[() => username.length > 0 || i18n.rule_required]"
+                      :rules="emailRules"
+                      @keypress.enter.stop="submit"
                       required
                     ></v-text-field>
                     <v-text-field
@@ -28,6 +29,7 @@
                       type="password"
                       v-model="password"
                       :rules="[() => password.length > 0 || i18n.rule_required]"
+                      @keypress.enter.stop="submit"
                       required
                     ></v-text-field>
                   </v-form>
@@ -60,6 +62,12 @@ export default {
       username: '',
       password: '',
       valid: true,
+      emailRules: [
+        v => {
+          return !!v || this.i18n.rule_required
+        },
+        v => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || this.i18n.rule_invalid_mail
+      ],
       app: Object.assign({ }, loginappData.app),
       i18n: Object.assign({
         title_login: 'Login form',

@@ -24,6 +24,7 @@ module.exports = {
   entry: {
     app: './src/main.js',
     error: './src/error/main.js',
+    home: './src/home/main.js',
     login: './src/login/main.js',
     signup: './src/signup/main.js',
     terms: './src/terms/main.js'

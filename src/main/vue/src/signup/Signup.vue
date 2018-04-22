@@ -1,6 +1,6 @@
 <template>
   <div id="signup">
-    <v-app id="inspire">
+    <v-app>
       <v-content>
         <v-container fluid fill-height>
           <v-layout align-center justify-center>
@@ -28,7 +28,8 @@
                       :label="i18n.label_username"
                       type="text"
                       v-model="username"
-                      :rules="[() => username.length > 0 || i18n.rule_required]"
+                      :rules="emailRules"
+                      @keypress.enter.stop="submit"
                       required
                     ></v-text-field>
                     <v-text-field
@@ -39,6 +40,7 @@
                       type="password"
                       v-model="password"
                       :rules="[() => password.length > 0 || i18n.rule_required]"
+                      @keypress.enter.stop="submit"
                       required
                     ></v-text-field>
                     <v-text-field
@@ -48,6 +50,7 @@
                       type="password"
                       v-model="password_confirm"
                       :rules="[() => password.length > 0 || i18n.rule_required, () => password == password_confirm || i18n.rule_password_confirm]"
+                      @keypress.enter.stop="submit"
                       required
                     ></v-text-field>
                   </v-form>
@@ -84,6 +87,12 @@ export default {
         terms: '/login/signup/terms'
       },
       valid: true,
+      emailRules: [
+        v => {
+          return !!v || this.i18n.rule_required
+        },
+        v => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || this.i18n.rule_invalid_mail
+      ],
       app: Object.assign({ }, signupappData.app),
       i18n: Object.assign({
         title_login: 'Sign Up',
@@ -94,6 +103,7 @@ export default {
         label_termsandconds: 'By signing up you agree to the',
         btn_termsandconds: 'terms and conditions',
         btn_signup: 'Sign up',
+        rule_invalid_mail: 'E-mail must be valid',
         rule_required: 'This field is required',
         rule_password_confirm: 'Passwords didn\'t match'
       }, signupappData.i18n)
