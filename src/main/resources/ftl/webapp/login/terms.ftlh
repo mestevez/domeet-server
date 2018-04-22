@@ -6,22 +6,22 @@
 
 	<title>${pagetitle}</title>
 
-	<link href=/static/dist/css/signup.css rel=stylesheet>
+	<link href=/static/dist/css/terms.css rel=stylesheet>
 	<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
 </head>
 <body>
-<div id=signup></div>
+<div id=terms></div>
 <script type=text/javascript>
-	window.signupappData = {
+	window.termsappData = {
 		i18n: {
 		<#list i18n?keys as key>
-			${key} : "${i18n[key]}",
+			${key} : `${i18n[key]}`,
 		</#list>
 		}
 	};
 </script>
 <script type=text/javascript src=/static/dist/js/manifest.js></script>
 <script type=text/javascript src=/static/dist/js/vendor.js></script>
-<script type=text/javascript src=/static/dist/js/signup.js></script>
+<script type=text/javascript src=/static/dist/js/terms.js></script>
 </body>
 </html>

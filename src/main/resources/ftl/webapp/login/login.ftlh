@@ -12,12 +12,12 @@
 <body>
 <div id=login></div>
 <script type=text/javascript>
-	var loginappData = {
+	window.loginappData = {
 		app: {
 		},
 		i18n: {
 		<#list i18n?keys as key>
-			${key} : '${i18n[key]}',
+			${key} : "${i18n[key]}",
 		</#list>
 		}
 	};

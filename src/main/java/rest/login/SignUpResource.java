@@ -31,6 +31,18 @@ public class SignUpResource {
 		).build();
 	}
 
+	@Path("/terms")
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public Response termsAndConditions(@Context HttpServletRequest request) throws IOException, TemplateException {
+		return Response.accepted().entity(
+				FTLParser.getParsedString(
+						FTLConfiguration.getInstance(),
+						PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/terms"),
+						"webapp/login/terms.ftlh")
+		).build();
+	}
+
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public Response signUp(

@@ -25,7 +25,8 @@ module.exports = {
     app: './src/main.js',
     error: './src/error/main.js',
     login: './src/login/main.js',
-    signup: './src/signup/main.js'
+    signup: './src/signup/main.js',
+    terms: './src/terms/main.js'
   },
   output: {
     path: config.build.assetsRoot,

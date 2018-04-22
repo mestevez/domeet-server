@@ -12,7 +12,7 @@
 <body>
 <div id=errapp></div>
 <script type=text/javascript>
-	var errappData = {
+	window.errappData = {
 	    app: {
 			status_code		: ${status_code},
 			error_message	: '${error_message}',
@@ -20,7 +20,7 @@
 		},
 		i18n: {
 		<#list i18n?keys as key>
-			${key} : '${i18n[key]}',
+			${key} : "${i18n[key]}",
 		</#list>
 		}
 	};

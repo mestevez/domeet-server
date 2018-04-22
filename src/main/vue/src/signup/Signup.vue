@@ -12,7 +12,6 @@
                       icon
                       large
                       :href="navigate.login"
-                      target="_blank"
                       slot="activator"
                     >
                       <v-icon large>keyboard_arrow_left</v-icon>
@@ -59,7 +58,7 @@
                   <v-spacer></v-spacer>
                 </v-card-actions>
                 <v-card-text>
-                  {{ i18n.label_termsandconds }} <a href="/login/signup">{{ i18n.btn_termsandconds }}</a>
+                  {{ i18n.label_termsandconds }} <a :href="navigate.terms">{{ i18n.btn_termsandconds }}</a>
                 </v-card-text>
               </v-card>
             </v-flex>
@@ -71,7 +70,7 @@
 </template>
 
 <script>
-if (typeof signupappData == 'undefined') signupappData = {};
+const signupappData = window.signupappData || {}
 export default {
   name: 'Signup',
 
@@ -81,7 +80,8 @@ export default {
       password: '',
       password_confirm: '',
       navigate: {
-        login: '/login'
+        login: '/login',
+        terms: '/login/signup/terms'
       },
       valid: true,
       app: Object.assign({ }, signupappData.app),

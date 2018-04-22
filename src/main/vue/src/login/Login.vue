@@ -51,8 +51,7 @@
 </template>
 
 <script>
-if (typeof loginappData == 'undefined') loginappData = {};
-
+const loginappData = window.loginappData || {}
 export default {
   name: 'Login',
 
