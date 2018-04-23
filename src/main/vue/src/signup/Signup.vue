@@ -73,7 +73,7 @@
 </template>
 
 <script>
-const signupappData = window.signupappData || {}
+const appData = window.appData || {}
 export default {
   name: 'Signup',
 
@@ -93,7 +93,7 @@ export default {
         },
         v => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || this.i18n.rule_invalid_mail
       ],
-      app: Object.assign({ }, signupappData.app),
+      app: Object.assign({ }, appData.app),
       i18n: Object.assign({
         title_login: 'Sign Up',
         label_back: 'Back',
@@ -106,7 +106,7 @@ export default {
         rule_invalid_mail: 'E-mail must be valid',
         rule_required: 'This field is required',
         rule_password_confirm: 'Passwords didn\'t match'
-      }, signupappData.i18n)
+      }, appData.i18n)
     }
   },
 

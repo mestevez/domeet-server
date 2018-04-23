@@ -12,12 +12,16 @@
 <body>
 <div id=home></div>
 <script type=text/javascript>
-	window.homeappData = {
+	window.appData = {
 		app: {
 		},
-		i18n: {
-		<#list i18n?keys as key>
-			${key} : "${i18n[key]}",
+		user: {
+		<#list user?keys as ukey>
+			${ukey} : <#if user[ukey]??>"${user[ukey]}"<#else>null</#if>,
+		</#list>
+		}, i18n: {
+		<#list i18n?keys as ikey>
+			${ikey} : "${i18n[ikey]}",
 		</#list>
 	}
 	};

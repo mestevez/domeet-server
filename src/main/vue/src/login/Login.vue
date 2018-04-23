@@ -53,7 +53,7 @@
 </template>
 
 <script>
-const loginappData = window.loginappData || {}
+const appData = window.appData || {}
 export default {
   name: 'Login',
 
@@ -68,7 +68,7 @@ export default {
         },
         v => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || this.i18n.rule_invalid_mail
       ],
-      app: Object.assign({ }, loginappData.app),
+      app: Object.assign({ }, appData.app),
       i18n: Object.assign({
         title_login: 'Login form',
         label_username: 'Email',
@@ -77,7 +77,7 @@ export default {
         btn_login: 'Login',
         btn_signup: 'Sign up',
         rule_required: 'This field is required'
-      }, loginappData.i18n)
+      }, appData.i18n)
     }
   },
 

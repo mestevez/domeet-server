@@ -49,7 +49,7 @@
 </template>
 
 <script>
-const termsappData = window.termsappData || {}
+const appData = window.appData || {}
 export default {
   name: 'Terms',
 
@@ -58,12 +58,12 @@ export default {
       navigate: {
         submit: '/login/signup'
       },
-      app: Object.assign({ }, termsappData.app),
+      app: Object.assign({ }, appData.app),
       i18n: Object.assign({
         btn_readit: 'I have read it',
         label_back: 'Back',
         title_terms: 'Terms and conditions'
-      }, termsappData.i18n)
+      }, appData.i18n)
     }
   }
 }

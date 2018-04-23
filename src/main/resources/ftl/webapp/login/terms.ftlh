@@ -12,7 +12,7 @@
 <body>
 <div id=terms></div>
 <script type=text/javascript>
-	window.termsappData = {
+	window.appData = {
 		i18n: {
 		<#list i18n?keys as key>
 			${key} : `${i18n[key]}`,

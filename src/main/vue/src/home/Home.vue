@@ -1,12 +1,23 @@
 <template>
-  <div id="home">
-    Hello World Home Context!
-  </div>
+  <v-app id="home">
+    <apptoolbar></apptoolbar>
+    <v-content>
+      Hello
+    </v-content>
+    <v-footer dark color="primary" app>
+      <span>&copy; 2018</span>
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
+import AppToolbar from '@/components/AppToolbar'
+
 export default {
-  name: 'Home'
+  name: 'Home',
+  components: {
+    'apptoolbar': AppToolbar
+  }
 }
 </script>
 

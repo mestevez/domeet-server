@@ -12,7 +12,7 @@
 <body>
 <div id=errapp></div>
 <script type=text/javascript>
-	window.errappData = {
+	window.appData = {
 	    app: {
 			status_code		: ${status_code},
 			error_message	: '${error_message}',

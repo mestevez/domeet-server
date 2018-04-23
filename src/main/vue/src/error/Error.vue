@@ -34,7 +34,7 @@
 </template>
 
 <script>
-const errappData = window.errappData || {}
+const appData = window.appData || {}
 export default {
   name: 'Error',
 
@@ -45,11 +45,11 @@ export default {
         status_code: 404,
         error_message: 'Oops! You have come to the wrong link',
         error_trace: ''
-      }, errappData.app),
+      }, appData.app),
       i18n: Object.assign({
         btn_back: 'Back',
         label_error: 'Error'
-      }, errappData.i18n)
+      }, appData.i18n)
     }
   },
 
