@@ -1,6 +1,6 @@
 package model;
 
-import org.hibernate.SessionFactory;
+import org.hibernate.Session;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Index;
@@ -26,7 +26,7 @@ public class auth_user implements Serializable {
 
 	private String user_passhash;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(
 		schema="app",
 		name = "auth_user_role",
@@ -47,10 +47,10 @@ public class auth_user implements Serializable {
 		return user_mail;
 	}
 
-	public final static List<auth_user> getUsersList(SessionFactory hibernateSessionFactory) {
+	public final static List<auth_user> getUsersList(Session session) {
 		List<auth_user> authUsers;
 
-		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
+		EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
 		try {
 			authUsers = entityManager.createQuery("SELECT a FROM auth_user a").getResultList();
 		} finally {
@@ -60,9 +60,9 @@ public class auth_user implements Serializable {
 		return authUsers;
 	}
 
-	public final static auth_user getUser(SessionFactory hibernateSessionFactory, String user_mail) {
+	public final static auth_user getUser(Session session, String user_mail) {
 		auth_user user;
-		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
+		EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
 		try {
 			user =  entityManager.createQuery("SELECT a FROM auth_user a WHERE user_mail = :user_mail", auth_user.class)
 					.setParameter("user_mail", user_mail)

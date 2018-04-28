@@ -1,17 +1,19 @@
 package rest.error;
 
+import conf.database.MainDatabaseProps;
 import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
-import org.glassfish.jersey.message.internal.TracingLogger;
+import hibernate.SessionFactoryProvider;
+import org.hibernate.Session;
 import rest.util.PageCommons;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 
 @Path("/")
@@ -27,12 +29,17 @@ public class ErrorResource {
 //			System.out.println(String.format("!! NAME=%s, VALUE=%s", attrname, httpRequest.getAttribute(attrname)));
 //		}
 
-		Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(httpRequest, "ftl/webapp/error/error");
-		dataModel.put("status_code", httpRequest.getAttribute("javax.servlet.error.status_code"));
-		dataModel.put("error_message", httpRequest.getAttribute("javax.servlet.error.message"));
-		dataModel.put("error_trace", "");
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(httpRequest, session, "ftl/webapp/error/error");
+			dataModel.put("status_code", httpRequest.getAttribute("javax.servlet.error.status_code"));
+			dataModel.put("error_message", httpRequest.getAttribute("javax.servlet.error.message"));
+			dataModel.put("error_trace", "");
 
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/error/error.ftlh");
+			return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/error/error.ftlh");
+		} finally {
+			session.close();
+		}
 	}
 
 	@GET

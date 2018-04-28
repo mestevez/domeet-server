@@ -8,6 +8,10 @@ compile webapp Javascript application
  
 create database
  - gradlew database -Pcreate
+drop database
+ - gradlew database -Pdrop
+load database data
+ - gradlew database -Pload
 check database status
  - gradlew database -Pstatus
 

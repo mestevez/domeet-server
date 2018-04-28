@@ -1,8 +1,10 @@
 package model;
 
+import org.apache.lucene.queryparser.flexible.core.util.StringUtils;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
 import org.hibernate.search.jpa.FullTextEntityManager;
@@ -34,37 +36,45 @@ public class user implements Serializable {
 	private String user_phone;
 	private byte[] user_photo;
 
+	@ManyToOne
+	@JoinColumn(name="user_schedule")
+	private schedule user_schedule;
+
 	@IndexedEmbedded
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@PrimaryKeyJoinColumn
 	private auth_user auth_user;
 
+
+
 	public static user addUser(
-			SessionFactory hibernateSessionFactory,
+			Session session,
 			String auth_mail,
 			String auth_password,
 			String user_firstname,
 			String user_lastname,
 			String user_company,
 			String user_phone,
-			byte[] user_photo
+			byte[] user_photo,
+			String user_schedule
 	) {
-		Session session = hibernateSessionFactory.openSession();
-
-		auth_user newAuthUser = new auth_user();
-		newAuthUser.setUserMail(auth_mail);
-		newAuthUser.setUserPassword(auth_password);
-		newAuthUser.addRole(session.get(auth_role.class, auth_role.getRole(hibernateSessionFactory, "regularuser").getRoleID()));
-
-		user newUser = new user();
-		newUser.user_firstname = user_firstname;
-		newUser.user_lastname = user_lastname;
-		newUser.user_company = user_company;
-		newUser.user_phone = user_phone;
-		newUser.user_photo = user_photo;
-		newUser.auth_user = newAuthUser;
+		user newUser;
 
 		try {
+			auth_user newAuthUser = new auth_user();
+			newAuthUser.setUserMail(auth_mail);
+			newAuthUser.setUserPassword(auth_password);
+			newAuthUser.addRole(session.get(auth_role.class, auth_role.getRole(session, "regularuser").getRoleID()));
+
+			newUser = new user();
+			newUser.user_firstname = user_firstname;
+			newUser.user_lastname = user_lastname;
+			newUser.user_company = user_company;
+			newUser.user_phone = user_phone;
+			newUser.user_photo = user_photo;
+			newUser.user_schedule = user_schedule == null ? null : schedule.getSchedule(session, user_schedule);
+			newUser.auth_user = newAuthUser;
+
 			session.beginTransaction();
 
 			session.persist(newAuthUser);
@@ -77,20 +87,17 @@ public class user implements Serializable {
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
-		} finally {
-			session.close();
 		}
 
 		return newUser;
 	}
 
-	public static boolean deleteUser(SessionFactory hibernateSessionFactory, Integer user_id) {
-		user user = getUser(hibernateSessionFactory, user_id);
+	public static boolean deleteUser(Session session, Integer user_id) {
+		user user = getUser(session, user_id);
 
 		if (user == null) {
 			return false;
 		} else {
-			Session session = hibernateSessionFactory.openSession();
 			try {
 				session.beginTransaction();
 
@@ -102,20 +109,16 @@ public class user implements Serializable {
 			} catch (HibernateException ex){
 				session.getTransaction().rollback();
 				throw ex;
-			} finally {
-				session.close();
 			}
 		}
 	}
 
-	public static user getUser(SessionFactory hibernateSessionFactory, Integer user_id) {
-		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
+	public static user getUser(Session session, Integer user_id) {
+		return session.get(user.class, user_id);
+	}
 
-		try {
-			return entityManager.find(user.class, user_id);
-		} finally {
-			entityManager.close();
-		}
+	public auth_user getUserAuth() {
+		return auth_user;
 	}
 
 	public String getUserFirstname() {
@@ -130,8 +133,8 @@ public class user implements Serializable {
 		return user_lastname;
 	}
 
-	public static List<user> getUsersList(SessionFactory hibernateSessionFactory) {
-		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
+	public static List<user> getUsersList(Session session) {
+		EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
 
 		try {
 			return entityManager.createQuery("SELECT a FROM user a").getResultList();
@@ -148,14 +151,18 @@ public class user implements Serializable {
 		return user_phone;
 	}
 
-	public static List<user> searchUsers(SessionFactory hibernateSessionFactory, String query) {
-		EntityManager em = hibernateSessionFactory.createEntityManager();
+	public byte[] getUserPhoto() {
+		return user_photo;
+	}
+
+	public schedule getUserSchedule() {
+		return user_schedule;
+	}
+
+	public static List<user> searchUsers(Session session, String query) {
+		EntityManager em = session.getEntityManagerFactory().createEntityManager();
 
 		FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
-
-//		fullTextEntityManager
-//				.createIndexer(user.class)
-//				.startAndWait();
 
 		em.getTransaction().begin();
 
@@ -176,8 +183,8 @@ public class user implements Serializable {
 		FullTextQuery jpaQuery =
 				fullTextEntityManager.createFullTextQuery(luceneQuery, user.class);
 
-//		org.apache.lucene.search.Sort sort = new Sort(SortField.FIELD_SCORE);
-//		jpaQuery.setSort(sort);
+		org.apache.lucene.search.Sort sort = new Sort(SortField.FIELD_SCORE);
+		jpaQuery.setSort(sort);
 
 		// execute search
 		List result = jpaQuery.getResultList();
@@ -191,16 +198,16 @@ public class user implements Serializable {
 	/**
 	 * Modify user personal data
 	 *
-	 * @param hibernateSessionFactory	Hibernate database configuration
-	 * @param user_id					Id of the user to be updated
-	 * @param user_firstname			New user first name
-	 * @param user_lastname				New user last name
-	 * @param user_company				New user company
-	 * @param user_phone				New user phone
-	 * @param user_photo				New user photo
+	 * @param session			Hibernate database configuration
+	 * @param user_id			Id of the user to be updated
+	 * @param user_firstname	New user first name
+	 * @param user_lastname		New user last name
+	 * @param user_company		New user company
+	 * @param user_phone		New user phone
+	 * @param user_photo		New user photo
 	 */
 	public static void updateUser(
-			SessionFactory hibernateSessionFactory,
+			Session session,
 			Integer user_id,
 			String 	user_firstname,
 			String 	user_lastname,
@@ -208,14 +215,13 @@ public class user implements Serializable {
 			String 	user_phone,
 			byte[] 	user_photo
 	) {
-		user updUser = getUser(hibernateSessionFactory, user_id);
+		user updUser = getUser(session, user_id);
 		updUser.user_firstname = user_firstname;
 		updUser.user_lastname = user_lastname;
 		updUser.user_company = user_company;
 		updUser.user_phone = user_phone;
 		updUser.user_photo = user_photo;
 
-		Session session = hibernateSessionFactory.openSession();
 		try {
 			session.beginTransaction();
 
@@ -225,8 +231,6 @@ public class user implements Serializable {
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
-		} finally {
-			session.close();
 		}
 	}
 

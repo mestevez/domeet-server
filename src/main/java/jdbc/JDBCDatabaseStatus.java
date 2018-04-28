@@ -166,6 +166,31 @@ public class JDBCDatabaseStatus {
 	}
 
 	/**
+	 * Load table data from {tableName}.dat resources files
+	 *
+	 * @param appConnection Database connection
+	 * @param tableName Table name
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	public static void _doTableLoad(JDBCConnection appConnection, String tableName)
+			throws SQLException, IOException, URISyntaxException {
+		if (appConnection.getTableCount(JDBCConnectionFactory.getAppTableName(tableName)) == 0) {
+			URL loadData = JDBCDatabaseStatus.class.getResource(Paths.get(RESOURCES.appDir, RESOURCES.dataDir, tableName + ".dat").toString());
+			File loadDataFile = loadData != null ? new File(loadData.toURI()) : null;
+			if (loadDataFile != null && loadDataFile.exists()) {
+				appConnection.tableLoad(JDBCConnectionFactory.getAppTableName(tableName), loadDataFile, true);
+			} else {
+				InputStream loadSQL = JDBCDatabaseStatus.class.getResourceAsStream(Paths.get(RESOURCES.appDir, RESOURCES.dataDir, tableName + ".sql").toString());
+				if (loadSQL != null) {
+					appConnection.executeDDLStatement(_inputStreamToString(loadSQL));
+				}
+			}
+		}
+	}
+
+	/**
 	 * Obtains the list of tables required for the received directory, defined by tablesort.properties file
 	 *
 	 * @param appDir Directory which holds the database structures and data
@@ -250,16 +275,7 @@ public class JDBCDatabaseStatus {
 				);
 
 				// Execute initially table load
-				URL loadData = JDBCDatabaseStatus.class.getResource(Paths.get(RESOURCES.appDir, RESOURCES.dataDir, tableName + ".dat").toString());
-				File loadDataFile = loadData != null ? new File(loadData.toURI()) : null;
-				if (loadDataFile != null && loadDataFile.exists()) {
-					appConnection.tableLoad(JDBCConnectionFactory.getAppTableName(tableName), loadDataFile, true);
-				} else {
-					InputStream loadSQL = JDBCDatabaseStatus.class.getResourceAsStream(Paths.get(RESOURCES.appDir, RESOURCES.dataDir, tableName + ".sql").toString());
-					if (loadSQL != null) {
-						appConnection.executeDDLStatement(_inputStreamToString(loadSQL));
-					}
-				}
+				_doTableLoad(appConnection, tableName);
 			}
 		} catch (Exception ex){
 			appConnection.close();
@@ -271,6 +287,25 @@ public class JDBCDatabaseStatus {
 			} finally {
 				revertConnection.close();
 			}
+
+			throw ex;
+		}
+
+		appConnection.close();
+	}
+
+	public static void loadApplicationDatabaseData(DatabaseProps databaseProps)
+			throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
+
+		JDBCConnection appConnection = JDBCConnectionFactory.getAppDatabaseConnection(databaseProps);
+		try {
+			appConnection.createSchema(JDBCConnectionFactory.getAppScheme());
+			for (String tableName : _getTableList(RESOURCES.appDir)) {
+				// Execute initially table load
+				_doTableLoad(appConnection, tableName);
+			}
+		} catch (Exception ex){
+			appConnection.close();
 
 			throw ex;
 		}

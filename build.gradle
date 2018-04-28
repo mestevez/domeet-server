@@ -52,6 +52,8 @@ dependencies {
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_version")
+    testRuntime("org.junit.jupiter:junit-jupiter-params:$junit_version")
+
 }
 junitPlatform {
 
@@ -105,8 +107,9 @@ project.afterEvaluate {
 
 task(database, dependsOn: 'classes', type: JavaExec) {
     args(['database', project.hasProperty("create") ? 'create' : (
-                      project.hasProperty("drop")   ? 'drop' :
-                                                      'status')
+                      project.hasProperty("drop")   ? 'drop' :(
+                      project.hasProperty("load")   ? 'load' :
+                                                      'status'))
     ])
     description = 'Database tasks. Allow parameteres: -create'
     main = 'gradle.Task'

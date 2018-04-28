@@ -6,6 +6,7 @@ import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
 import model.auth_user;
+import org.hibernate.Session;
 import rest.util.PageCommons;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,15 +24,25 @@ public class AdminResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String admin(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, "ftl/webapp/admin/admin"), "webapp/admin/index.ftlh");
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/admin/admin"), "webapp/admin/index.ftlh");
+		} finally {
+			session.close();
+		}
 	}
 
 	@Path("userslist")
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String usersList(@Context HttpServletRequest request) throws IOException, TemplateException {
-		Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(request, "ftl/webapp/admin/admin");
-		dataModel.put("usersList", auth_user.getUsersList(SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps())));
-		return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/admin/userslist.ftlh");
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/admin/admin");
+			dataModel.put("usersList", auth_user.getUsersList(session));
+			return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/admin/userslist.ftlh");
+		} finally {
+			session.close();
+		}
 	}
 }

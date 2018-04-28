@@ -1,9 +1,7 @@
 package hibernate;
 
 import conf.database.DatabaseProps;
-import model.auth_role;
-import model.auth_user;
-import model.user;
+import model.*;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
@@ -49,6 +47,8 @@ public class SessionFactoryProvider {
 			configuration.addAnnotatedClass(auth_user.class);
 			configuration.addAnnotatedClass(auth_role.class);
 			configuration.addAnnotatedClass(user.class);
+			configuration.addAnnotatedClass(schedule.class);
+			configuration.addAnnotatedClass(schedule_time.class);
 
 			sessionFactory = configuration.buildSessionFactory();
 

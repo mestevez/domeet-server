@@ -126,6 +126,14 @@ public abstract class JDBCConnection implements AutoCloseable {
 	public abstract String[] getSequenceList() throws SQLException;
 
 	/**
+	 * Obtains the total number of rows in a table
+	 *
+	 * @return Number of rows
+	 * @throws SQLException if the database query error occurs
+	 */
+	public abstract int getTableCount(String tableName) throws SQLException;
+
+	/**
 	 * Obtains the tables for the current database.
 	 *
 	 * @return An array containing all the tables available for the current <code>Connection</code>

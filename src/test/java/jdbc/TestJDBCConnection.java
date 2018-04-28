@@ -33,4 +33,9 @@ class TestJDBCConnection {
 	void initAppConnection() throws SQLException, ClassNotFoundException {
 		JDBCConnectionFactory.getAppDatabaseConnection(JUnitDatabaseProps.getDatabaseProps()).close();
 	}
+
+	@Test
+	void appDataLoad() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
+		JDBCDatabaseStatus.loadApplicationDatabaseData(JUnitDatabaseProps.getDatabaseProps());
+	}
 }

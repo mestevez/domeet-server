@@ -14,6 +14,18 @@
 <script type=text/javascript>
 	window.appData = {
 		app: {
+			user_email: '${user_email}',
+			user_firstname: '${user_firstname}',
+			user_lastname: <#if user_lastname??>"${user_lastname}"<#else>null</#if>,
+			user_company: <#if user_company??>"${user_company}"<#else>null</#if>,
+			user_phone: <#if user_phone??>"${user_phone}"<#else>null</#if>,
+			user_photo: <#if user_photo??>"${user_photo}"<#else>null</#if>,
+			user_schedule: <#if user_schedule??>"${user_schedule}"<#else>null</#if>,
+			working_hours: [
+				<#list working_hours as working_item>
+					{ text: ${working_item.text}, value: ${working_item.value} },
+				</#list>
+			],
 			navigation : {
 			    back: '/'
 			}
@@ -27,7 +39,7 @@
 		<#list i18n?keys as key>
 			${key} : "${i18n[key]}",
 		</#list>
-	}
+		}
 	};
 </script>
 <script type=text/javascript src=/static/dist/js/manifest.js></script>

@@ -4,26 +4,28 @@ import conf.database.JUnitDatabaseProps;
 import hibernate.SessionFactoryProvider;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class test_user {
 
-	private static SessionFactory sessionFactory;
+	private static Session session;
 
 	@BeforeAll
 	static void beforeAll() {
-		sessionFactory = SessionFactoryProvider.getSessionFactory(JUnitDatabaseProps.getDatabaseProps());
+		session = SessionFactoryProvider.getSessionFactory(JUnitDatabaseProps.getDatabaseProps()).openSession();
+	}
 
-		Session session = sessionFactory.openSession();
+	@AfterAll
+	static void afterAll() {
+		session.close();
+	}
+
+	@BeforeEach
+	void beforeEach() {
 		try {
 			session.beginTransaction();
 
@@ -33,8 +35,6 @@ class test_user {
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
-		} finally {
-			session.close();
 		}
 	}
 
@@ -45,37 +45,38 @@ class test_user {
 		byte[] decoded = org.apache.commons.codec.binary.Base64.decodeBase64(example.getBytes());
 
 		user.addUser(
-				sessionFactory,
+				session,
 				"john@smith.es",
 				"12345",
 				"John",
 				"Smith",
 				"IBM",
 				"659565945",
-				decoded);
+				decoded,
+				null);
 
-		auth_user auth_userRecord = auth_user.getUser(sessionFactory, "john@smith.es");
+		auth_user auth_userRecord = auth_user.getUser(session, "john@smith.es");
 		Assertions.assertNotNull(auth_userRecord);
 		Assertions.assertTrue(auth_userRecord.hasRole("regularuser"));
 	}
 
 	@Test
 	void deleteUser() {
-		Integer user_id = user.addUser(sessionFactory, "deluser@test.es", "12345", "John", "Smith", null, null, null)
+		Integer user_id = user.addUser(session, "deluser@test.es", "12345", "John", "Smith", null, null, null, null)
 				.getUserId();
 
-		assertNotNull(model.user.getUser(sessionFactory, user_id));
+		assertNotNull(model.user.getUser(session, user_id));
 
-		user.deleteUser(sessionFactory, user_id);
+		user.deleteUser(session, user_id);
 
-		assertNull(model.user.getUser(sessionFactory, user_id));
+		assertNull(model.user.getUser(session, user_id));
 
 	}
 
 	@Test
 	void getUser() {
-		user adduser = user.addUser(sessionFactory, "getuser@test.es", "12345", "John", "Smith", null, null, null);
-		user getuser = model.user.getUser(sessionFactory, adduser.getUserId());
+		user adduser = user.addUser(session, "getuser@test.es", "12345", "John", "Smith", null, null, null, null);
+		user getuser = model.user.getUser(session, adduser.getUserId());
 
 		assertNotNull(getuser);
 		assertEquals(adduser.getUserId(), getuser.getUserId());
@@ -83,17 +84,18 @@ class test_user {
 
 	@Test
 	void listUsers() {
-		user.getUsersList(sessionFactory);
+		user.getUsersList(session);
 	}
 
 	@Test
 	void searchUsers() {
-		user.addUser(sessionFactory, "searchuser1@test.es", "12345", "Mary", "Walker", "Know Industry", null, null);
-		user.addUser(sessionFactory, "searchuser2@test.es", "12345", "Tony", "Darma", "Bluestone Industry", null, null);
-		user.addUser(sessionFactory, "searchuser3@test.es", "12345", "Elliese", "Indy", "Dharma Indstry", null, null);
-		user.addUser(sessionFactory, "searchuser4@test.es", "12345", "Paul", "Berry", "Challenger", null, null);
+		user.addUser(session, "searchuser1@test.es", "12345", "Mary", "Walker", "Know Industry", null, null, null);
+		user.addUser(session, "searchuser2@test.es", "12345", "Tony", "Darma", "Bluestone Industry", null, null, null);
+		user.addUser(session, "searchuser3@test.es", "12345", "Elliese", "Indy", "Dharma Indstry", null, null, null);
+		user.addUser(session, "searchuser4@test.es", "12345", "Paul", "Berry", "Challenger", null, null, null);
 
-		List<user> listUsers = user.searchUsers(sessionFactory, "Indstry");
+		List<user> listUsers = user.searchUsers(session, "Indstry");
+
 		assertEquals(3, listUsers.size());
 		assertEquals("Know Industry", listUsers.get(0).getUserCompany());
 		assertEquals("Bluestone Industry", listUsers.get(1).getUserCompany());
@@ -103,19 +105,13 @@ class test_user {
 
 	@Test
 	void updateUser() {
-		user upduser = user.addUser(sessionFactory, "upduser@test.es", "12345", "John", "Smith", null, null, null);
-		user.updateUser(sessionFactory, upduser.getUserId(), "Mark", "Brown", "IBM", "12345678", null);
+		user upduser = user.addUser(session, "upduser@test.es", "12345", "John", "Smith", null, null, null, null);
+		user.updateUser(session, upduser.getUserId(), "Mark", "Brown", "IBM", "12345678", null);
 
-
-		Session session = sessionFactory.openSession();
-		try {
-			session.refresh(upduser);
-			assertEquals("Mark", upduser.getUserFirstname());
-			assertEquals("Brown", upduser.getUserLastname());
-			assertEquals("IBM", upduser.getUserCompany());
-			assertEquals("12345678", upduser.getUserPhone());
-		} finally {
-			session.close();
-		}
+		session.refresh(upduser);
+		assertEquals("Mark", upduser.getUserFirstname());
+		assertEquals("Brown", upduser.getUserLastname());
+		assertEquals("IBM", upduser.getUserCompany());
+		assertEquals("12345678", upduser.getUserPhone());
 	}
 }

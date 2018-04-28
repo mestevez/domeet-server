@@ -1,16 +1,17 @@
 package rest.util;
 
-import conf.database.MainDatabaseProps;
-import hibernate.SessionFactoryProvider;
-import model.auth_user;
 import model.user;
+import org.hibernate.Session;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 public class PageCommons {
 
-	public static Map<String, Object> getFTLHeaderInfo(HttpServletRequest request, String bundlepath) {
+	public static Map<String, Object> getFTLHeaderInfo(HttpServletRequest request, Session session, String bundlepath) {
 		Locale locale = request.getLocale();
 		Map<String, Object> dataModel = new HashMap<>();
 		ResourceBundle bundle = ResourceBundle.getBundle(bundlepath, locale);
@@ -21,16 +22,12 @@ public class PageCommons {
 		dataModel.put("pagetitle", bundle != null ? bundle.getString("pagetitle") : "Undefined");
 
 		Map<String, String> sessUser = new HashMap<>();
-		auth_user auth_user = Session.getUser(request);
-		if (auth_user != null) {
-			sessUser.put("user_email", auth_user.getUserMail());
-
-			user user = model.user.getUser(SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()), auth_user.getUserID());
-			if (user != null) {
-				sessUser.put("user_first_name", user.getUserFirstname());
-				sessUser.put("user_last_name", user.getUserLastname());
-				sessUser.put("user_photo", null);
-			}
+		user user = RestSessionUtils.getUserApp(request, session);
+		if (user != null) {
+			sessUser.put("user_email", user.getUserAuth().getUserMail());
+			sessUser.put("user_first_name", user.getUserFirstname());
+			sessUser.put("user_last_name", user.getUserLastname());
+			sessUser.put("user_photo", null);
 		}
 		dataModel.put("user", sessUser);
 

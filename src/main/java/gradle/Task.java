@@ -23,6 +23,8 @@ public class Task {
 				JDBCDatabaseStatus.createApplicationDatabase(MainDatabaseProps.getDatabaseProps(), false);
 			} else if (args[1].equalsIgnoreCase("drop")) {
 				JDBCDatabaseStatus.dropApplicationDatabase(MainDatabaseProps.getDatabaseProps());
+			} else if (args[1].equalsIgnoreCase("load")) {
+				JDBCDatabaseStatus.loadApplicationDatabaseData(MainDatabaseProps.getDatabaseProps());
 			} else if (args[1].equalsIgnoreCase("status")) {
 				JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(MainDatabaseProps.getDatabaseProps());
 				if (status.getFatalError() != null)

@@ -174,6 +174,25 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 		return sequenceList.toArray(new String[sequenceList.size()]);
 	}
 
+	@Override
+	public int getTableCount(String tableName) throws SQLException {
+		int tableCount = 0;
+
+		CallableStatement stmt = m_conn.prepareCall("SELECT COUNT(*) FROM " + tableName + ";");
+		try {
+			if (stmt.execute()) {
+				ResultSet rs = stmt.getResultSet();
+				if (rs.next())
+					tableCount = rs.getInt(1);
+				rs.close();
+			}
+		} finally {
+			stmt.close();
+		}
+
+		return tableCount;
+	}
+
 	/**
 	 * Obtains the tables for the current database.
 	 *

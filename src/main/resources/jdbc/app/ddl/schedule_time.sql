@@ -7,7 +7,7 @@ CREATE TABLE app.schedule_time (
 );
 ALTER TABLE app.schedule_time ADD CONSTRAINT f_schedule_time_code FOREIGN KEY (sch_code) REFERENCES app.schedule(sch_code);
 ALTER TABLE app.schedule_time ADD CONSTRAINT c_schedule_time_dayofweek_range CHECK (
-  sch_dayofweek >= 0 AND sch_dayofweek <= 6
+  sch_dayofweek >= 1 AND sch_dayofweek <= 7
 );
 ALTER TABLE app.schedule_time ADD CONSTRAINT c_schedule_time_allday CHECK (
   (sch_allday = FALSE AND sch_hourbegin IS NOT NULL AND sch_hourend IS NOT NULL) OR

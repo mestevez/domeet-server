@@ -1,8 +1,11 @@
 package rest.login;
 
+import conf.database.MainDatabaseProps;
 import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
+import hibernate.SessionFactoryProvider;
+import org.hibernate.Session;
 import rest.util.PageCommons;
 
 import javax.servlet.ServletException;
@@ -23,24 +26,34 @@ public class LoginResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public Response login(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return Response.accepted().entity(
-				FTLParser.getParsedString(
-						FTLConfiguration.getInstance(),
-						PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/login"),
-						"webapp/login/login.ftlh")
-		).build();
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return Response.accepted().entity(
+					FTLParser.getParsedString(
+							FTLConfiguration.getInstance(),
+							PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/login"),
+							"webapp/login/login.ftlh")
+			).build();
+		} finally {
+			session.close();
+		}
 	}
 
 	@Path("failed")
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public Response failed(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return Response.accepted().entity(
-				FTLParser.getParsedString(
-					FTLConfiguration.getInstance(),
-					PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/login"),
-					"webapp/login/login.ftlh")
-		).build();
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return Response.accepted().entity(
+					FTLParser.getParsedString(
+						FTLConfiguration.getInstance(),
+						PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/login"),
+						"webapp/login/login.ftlh")
+			).build();
+		} finally {
+			session.close();
+		}
 	}
 
 	@Path("/logout")

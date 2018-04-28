@@ -6,7 +6,7 @@ import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
 import model.user;
-import org.hibernate.SessionFactory;
+import org.hibernate.Session;
 import rest.util.PageCommons;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,24 +23,34 @@ public class SignUpResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public Response form(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return Response.accepted().entity(
-				FTLParser.getParsedString(
-						FTLConfiguration.getInstance(),
-						PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/signup"),
-						"webapp/login/signup.ftlh")
-		).build();
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return Response.accepted().entity(
+					FTLParser.getParsedString(
+							FTLConfiguration.getInstance(),
+							PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/signup"),
+							"webapp/login/signup.ftlh")
+			).build();
+		} finally {
+			session.close();
+		}
 	}
 
 	@Path("/terms")
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public Response termsAndConditions(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return Response.accepted().entity(
-				FTLParser.getParsedString(
-						FTLConfiguration.getInstance(),
-						PageCommons.getFTLHeaderInfo(request, "ftl/webapp/login/terms"),
-						"webapp/login/terms.ftlh")
-		).build();
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return Response.accepted().entity(
+					FTLParser.getParsedString(
+							FTLConfiguration.getInstance(),
+							PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/terms"),
+							"webapp/login/terms.ftlh")
+			).build();
+		} finally {
+			session.close();
+		}
 	}
 
 	@POST
@@ -50,18 +60,22 @@ public class SignUpResource {
 			@FormParam("email") String email,
 			@FormParam("password") String password
 	) {
-		SessionFactory sessionFactory = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps());
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			user.addUser(
+					session,
+					email,
+					password,
+					email,
+					null,
+					null,
+					null,
+					null,
+					null);
 
-		user.addUser(
-				sessionFactory,
-				email,
-				password,
-				email,
-				null,
-				null,
-				null,
-				null);
-
-		return Response.seeOther(URI.create("/login")).build();
+			return Response.seeOther(URI.create("/login")).build();
+		} finally {
+			session.close();
+		}
 	}
 }

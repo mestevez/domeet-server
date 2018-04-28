@@ -1,8 +1,11 @@
 package rest.app;
 
+import conf.database.MainDatabaseProps;
 import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
+import hibernate.SessionFactoryProvider;
+import org.hibernate.Session;
 import rest.util.PageCommons;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,9 +22,14 @@ public class HomeResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String home(@Context HttpServletRequest request) throws IOException, TemplateException {
-		return FTLParser.getParsedString(
-				FTLConfiguration.getInstance(),
-				PageCommons.getFTLHeaderInfo(request, "ftl/webapp/home/home"),
-				"webapp/home/home.ftlh");
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return FTLParser.getParsedString(
+					FTLConfiguration.getInstance(),
+					PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/home/home"),
+					"webapp/home/home.ftlh");
+		} finally {
+			session.close();
+		}
 	}
 }

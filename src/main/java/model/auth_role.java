@@ -1,7 +1,6 @@
 package model;
 
-import org.hibernate.SessionFactory;
-
+import org.hibernate.Session;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -21,9 +20,10 @@ public class auth_role implements Serializable {
 	@ManyToMany(mappedBy = "user_roles")
 	private Set<auth_user> users = new HashSet<>();
 
-	public static auth_role getRole(SessionFactory hibernateSessionFactory, String role_code) {
+	public static auth_role getRole(Session session, String role_code) {
 		auth_role role;
-		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
+
+		EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
 		try {
 			role =  entityManager.createQuery("SELECT a FROM auth_role a WHERE role_code = :role_code", auth_role.class)
 					.setParameter("role_code", role_code)
