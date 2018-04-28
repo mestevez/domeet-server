@@ -22,7 +22,12 @@
       >
         <v-btn icon flat slot="activator">
           <v-avatar secondary size="40">
-            <v-icon>account_circle</v-icon>
+            <img
+              v-if="user.user_photo != null"
+              :src="user.user_photo"
+              alt=""
+            >
+            <v-icon v-else>account_circle</v-icon>
           </v-avatar>
         </v-btn>
         <v-card>
@@ -30,13 +35,12 @@
             <v-layout row>
               <v-flex xs4>
                 <v-container align-center>
-                  <v-avatar size="48">
-                    <v-card-media
+                  <v-avatar size="64">
+                    <img
                       v-if="user.user_photo != null"
-                      src="https://vuetifyjs.com/static/doc-images/cards/foster.jpg"
-                      height="48px"
-                      contain
-                    ></v-card-media>
+                      :src="user.user_photo"
+                      alt=""
+                    >
                     <v-icon v-else x-large>account_circle</v-icon>
                   </v-avatar>
                 </v-container>

@@ -199,33 +199,33 @@ public class user implements Serializable {
 	 * Modify user personal data
 	 *
 	 * @param session			Hibernate database configuration
-	 * @param user_id			Id of the user to be updated
 	 * @param user_firstname	New user first name
 	 * @param user_lastname		New user last name
 	 * @param user_company		New user company
 	 * @param user_phone		New user phone
 	 * @param user_photo		New user photo
+	 * @param user_schedule		New user schedule
 	 */
-	public static void updateUser(
-			Session session,
-			Integer user_id,
-			String 	user_firstname,
-			String 	user_lastname,
-			String 	user_company,
-			String 	user_phone,
-			byte[] 	user_photo
+	public void updateUser(
+		Session session,
+		String 	user_firstname,
+		String 	user_lastname,
+		String 	user_company,
+		String 	user_phone,
+		byte[] 	user_photo,
+		String 	user_schedule
 	) {
-		user updUser = getUser(session, user_id);
-		updUser.user_firstname = user_firstname;
-		updUser.user_lastname = user_lastname;
-		updUser.user_company = user_company;
-		updUser.user_phone = user_phone;
-		updUser.user_photo = user_photo;
+		this.user_firstname = user_firstname;
+		this.user_lastname = user_lastname;
+		this.user_company = user_company;
+		this.user_phone = user_phone;
+		this.user_photo = user_photo;
+		this.user_schedule = user_schedule == null ? null : schedule.getSchedule(session, user_schedule);
 
 		try {
 			session.beginTransaction();
 
-			session.merge(updUser);
+			session.merge(this);
 
 			session.getTransaction().commit();
 		} catch (HibernateException ex){

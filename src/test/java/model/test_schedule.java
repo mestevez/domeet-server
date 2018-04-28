@@ -15,13 +15,11 @@ import java.util.List;
 
 class test_schedule {
 
-	private static SessionFactory sessionFactory;
 	private static Session session;
 
 	@BeforeAll
 	static void beforeAll() {
-		sessionFactory = SessionFactoryProvider.getSessionFactory(JUnitDatabaseProps.getDatabaseProps());
-		session = sessionFactory.openSession();
+		session = SessionFactoryProvider.getSessionFactory(JUnitDatabaseProps.getDatabaseProps()).openSession();
 	}
 
 	@AfterAll
@@ -49,7 +47,7 @@ class test_schedule {
 
 	@Test
 	void listSchedules() {
-		List<schedule> schedules = schedule.getSchedulesList(sessionFactory);
+		List<schedule> schedules = schedule.getSchedulesList(session);
 
 		Assertions.assertNotEquals(0, schedules.size());
 		Assertions.assertEquals("OFFICE", schedules.get(0).getScheduleCode());

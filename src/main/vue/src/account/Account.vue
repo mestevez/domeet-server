@@ -2,58 +2,72 @@
   <v-app id="account">
     <apptoolbar></apptoolbar>
     <v-content style="max-width: 600px" class="px-2">
-      <v-form v-model="valid">
+      <v-form method="POST" v-model="valid" ref="form" :enctype="formEnctype">
         <v-subheader>{{ i18n.head_account_info }}</v-subheader>
         <v-layout row wrap>
-          <v-flex sm8 xs12>
+          <v-flex sm7 xs12>
             <v-text-field
               :label="i18n.label_email"
               v-model="app.user_email"
               :rules="emailRules"
               required
+              :readonly="true"
               style="min-height: 96px;"
             ></v-text-field>
             <v-btn color="primary">{{ i18n.btn_change_password }}</v-btn>
           </v-flex>
-          <v-flex sm4 xs12 class="text-xs-left text-sm-center">
+          <v-flex sm5 xs12 class="text-xs-left text-sm-center">
             <v-avatar size="96">
-              <v-card-media
+              <img
                 v-if="app.user_photo != null"
-                src="https://vuetifyjs.com/static/doc-images/cards/foster.jpg"
-                height="96px"
-                contain
-              ></v-card-media>
-              <v-icon v-else size="96px">account_circle</v-icon>
+                :src="user_photo_src"
+                alt=""
+              >
+              <v-icon v-else size="96">account_circle</v-icon>
             </v-avatar>
-            <div><v-btn color="primary">{{ i18n.btn_change_photo }}</v-btn></div>
+            <div>
+              <input type="file" name="user_photo" accept="image/*" @change="onFileChange" style="display: none">
+              <v-btn color="primary"  @click="$refs.form.$el.elements['user_photo'].click()">{{ i18n.btn_change_photo }}</v-btn>
+              <v-tooltip bottom lazy>
+                <v-btn v-if="app.user_photo != null" slot="activator" fab small dark color="error" @click="removeFile">
+                  <v-icon dark>delete_forever</v-icon>
+                </v-btn>
+                <span>{{ i18n.btn_remove_photo }}</span>
+              </v-tooltip>
+            </div>
           </v-flex>
         </v-layout>
         <v-subheader>{{ i18n.head_personal_data }}</v-subheader>
         <v-text-field
           :label="i18n.label_first_name"
           v-model="app.user_firstname"
+          name="user_firstname"
           :rules="[v => v.length > 0 || i18n.rule_required]"
           required
         ></v-text-field>
         <v-text-field
           :label="i18n.label_last_name"
           v-model="app.user_lastname"
+          name="user_lastname"
         ></v-text-field>
         <v-text-field
           :label="i18n.label_phonenum"
           v-model="app.user_phone"
+          name="user_phone"
         ></v-text-field>
         <v-subheader>{{ i18n.head_workinfo }}</v-subheader>
         <v-text-field
           :label="i18n.label_company"
           v-model="app.user_company"
+          name="user_company"
         ></v-text-field>
         <v-select
           :items="app.working_hours"
           :label="i18n.label_workinghours"
           v-model="app.user_schedule"
         ></v-select>
-        <v-btn color="success">{{ i18n.btn_save }}</v-btn>
+        <input type="hidden" name="user_schedule" :value="app.user_schedule">
+        <v-btn color="success" @click="submit">{{ i18n.btn_save }}</v-btn>
       </v-form>
     </v-content>
     <v-footer dark color="primary" app>
@@ -74,6 +88,7 @@ export default {
   data () {
     return {
       valid: true,
+      user_photo_src: appData.app.user_photo,
       emailRules: [
         v => {
           return !!v || this.i18n.rule_required
@@ -92,6 +107,7 @@ export default {
       }, appData.app),
       i18n: Object.assign({
         btn_change_photo: 'Change picture',
+        btn_remove_photo: 'Remove picture',
         btn_change_password: 'Change password',
         btn_save: 'Save',
         label_email: 'Email',
@@ -106,6 +122,36 @@ export default {
         rule_invalid_mail: 'E-mail must be valid',
         rule_required: 'This field is required'
       }, appData.i18n)
+    }
+  },
+
+  computed: {
+    formEnctype () {
+      return this.app.user_photo == null ? undefined : 'multipart/form-data'
+    }
+  },
+
+  methods: {
+    submit () {
+      if (this.$refs.form.validate()) {
+        this.$refs.form.$el.submit()
+      }
+    },
+    onFileChange (file) {
+      let me = this
+      me.app.user_photo = file
+
+      if (typeof photosrc !== 'string') {
+        var reader = new FileReader()
+        reader.readAsDataURL(file.target.files[0])
+        reader.onload = function () {
+          me.user_photo_src = reader.result
+        }
+      }
+    },
+    removeFile () {
+      this.app.user_photo = null
+      this.$refs.form.$el.elements['user_photo'].value = ''
     }
   }
 }

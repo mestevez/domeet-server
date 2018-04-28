@@ -106,9 +106,9 @@ class test_user {
 	@Test
 	void updateUser() {
 		user upduser = user.addUser(session, "upduser@test.es", "12345", "John", "Smith", null, null, null, null);
-		user.updateUser(session, upduser.getUserId(), "Mark", "Brown", "IBM", "12345678", null);
+		upduser.updateUser(session,"Mark", "Brown", "IBM", "12345678", null, null);
 
-		session.refresh(upduser);
+		upduser = user.getUser(session, upduser.getUserId());
 		assertEquals("Mark", upduser.getUserFirstname());
 		assertEquals("Brown", upduser.getUserLastname());
 		assertEquals("IBM", upduser.getUserCompany());

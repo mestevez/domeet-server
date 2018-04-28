@@ -23,7 +23,7 @@
 			user_schedule: <#if user_schedule??>"${user_schedule}"<#else>null</#if>,
 			working_hours: [
 				<#list working_hours as working_item>
-					{ text: ${working_item.text}, value: ${working_item.value} },
+					{ text: "${working_item.text}", value: "${working_item.value}" },
 				</#list>
 			],
 			navigation : {

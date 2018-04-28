@@ -1,7 +1,6 @@
 package model;
 
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -20,8 +19,8 @@ public class schedule implements Serializable {
 	@OneToMany(targetEntity=schedule_time.class, mappedBy="sch_code", fetch=FetchType.EAGER)
 	private Set<schedule_time> schedule_times;
 
-	public static List<schedule> getSchedulesList(SessionFactory hibernateSessionFactory) {
-		EntityManager entityManager = hibernateSessionFactory.createEntityManager();
+	public static List<schedule> getSchedulesList(Session session) {
+		EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
 
 		try {
 			return entityManager.createQuery("SELECT a FROM schedule a").getResultList();

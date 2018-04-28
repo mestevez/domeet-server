@@ -27,7 +27,7 @@ public class PageCommons {
 			sessUser.put("user_email", user.getUserAuth().getUserMail());
 			sessUser.put("user_first_name", user.getUserFirstname());
 			sessUser.put("user_last_name", user.getUserLastname());
-			sessUser.put("user_photo", null);
+			sessUser.put("user_photo", user.getUserPhoto() != null ? "/app/account/photo" : null);
 		}
 		dataModel.put("user", sessUser);
 
