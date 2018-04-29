@@ -21,6 +21,7 @@
         right
         fab
         style="bottom: 60px"
+        :href="app.navigation.meetentry"
       >
         <v-icon>add</v-icon>
       </v-btn>

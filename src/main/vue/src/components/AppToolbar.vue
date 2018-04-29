@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-toolbar dark color="primary" fixed app>
+    <v-toolbar dark color="primary" fixed app clipped-right>
       <v-tooltip
         v-if="app.navigation != null && app.navigation.back != null"
         bottom>

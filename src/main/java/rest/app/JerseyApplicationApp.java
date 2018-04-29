@@ -14,6 +14,7 @@ public class JerseyApplicationApp extends Application {
 		final Set<Class<?>> classes = new HashSet<>();
 		classes.add(HomeResource.class);
 		classes.add(AccountResource.class);
+		classes.add(MeetEntryResource.class);
 
 		// Enable multipart
 		classes.add(MultiPartFeature.class);
