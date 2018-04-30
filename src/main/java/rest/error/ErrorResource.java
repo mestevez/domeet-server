@@ -14,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Path("/")
@@ -31,12 +32,22 @@ public class ErrorResource {
 
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(httpRequest, session, "ftl/webapp/error/error");
-			dataModel.put("status_code", httpRequest.getAttribute("javax.servlet.error.status_code"));
-			dataModel.put("error_message", httpRequest.getAttribute("javax.servlet.error.message"));
-			dataModel.put("error_trace", "");
+			Map<String, Object> appData = new HashMap<>();
+			appData.put("status_code", httpRequest.getAttribute("javax.servlet.error.status_code"));
+			appData.put("error_message", httpRequest.getAttribute("javax.servlet.error.message"));
+			appData.put("error_trace", "");
 
-			return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/error/error.ftlh");
+			return FTLParser.getParsedString(
+					FTLConfiguration.getInstance(),
+					PageCommons.getFTLHeaderInfo(
+							httpRequest,
+							session,
+							"i18n/error",
+							"errorapp",
+							"error.js",
+							"error.css",
+							appData),
+					"webapp/vueapp.ftlh");
 		} finally {
 			session.close();
 		}

@@ -27,7 +27,7 @@ module.exports = {
     error: './src/error/main.js',
     home: './src/home/main.js',
     login: './src/login/main.js',
-    meetentry: './src/meet/meetentry.js',
+    meetedit: './src/meet/meetedit.js',
     signup: './src/signup/main.js',
     terms: './src/terms/main.js'
   },

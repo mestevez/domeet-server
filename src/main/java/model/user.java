@@ -1,6 +1,5 @@
 package model;
 
-import org.apache.lucene.queryparser.flexible.core.util.StringUtils;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.hibernate.HibernateException;
@@ -44,8 +43,6 @@ public class user implements Serializable {
 	@OneToOne
 	@PrimaryKeyJoinColumn
 	private auth_user auth_user;
-
-
 
 	public static user addUser(
 			Session session,

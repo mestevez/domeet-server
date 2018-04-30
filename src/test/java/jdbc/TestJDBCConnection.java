@@ -20,7 +20,7 @@ class TestJDBCConnection {
 	}
 
 	@Test
-	void checkAppStatus() throws SQLException, ClassNotFoundException {
+	void checkAppStatus() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
 		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(JUnitDatabaseProps.getDatabaseProps());
 
 		assertNull(status.getFatalError(), "FATAL ERROR");

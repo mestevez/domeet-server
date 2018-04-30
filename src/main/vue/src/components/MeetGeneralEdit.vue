@@ -14,16 +14,16 @@
               required
             ></v-text-field>
           </v-flex>
-          <v-flex xs12 sm3>
+          <v-flex xs12 sm5>
             <v-select
-              :items="app.meeting_types"
+              :items="app.meet_types"
               :label="i18n.label_type"
               v-model="app.meet_type"
               required
             ></v-select>
             <input type="hidden" name="meet_type" :value="app.meet_type">
           </v-flex>
-          <v-flex xs12 sm7>
+          <v-flex xs12 sm6>
             <v-menu
               ref="datepicker"
               lazy
@@ -34,20 +34,19 @@
               full-width
               :nudge-right="40"
               min-width="290px"
-              :return-value.sync="app.meeting_date"
+              :return-value.sync="meeting_date_data"
             >
               <v-text-field
                 slot="activator"
                 :label="i18n.label_date"
-                v-model="input_meeting_date"
-                prepend-icon="event"
+                v-model="meeting_date_input"
                 readonly
-                :rules="[() => app.meeting_date.length > 0 || i18n.rule_required]"
+                :rules="[() => meeting_date_input.length > 0 || i18n.rule_required]"
                 required
               ></v-text-field>
-              <input type="hidden" name="meeting_date" :value="app.meeting_date">
+              <input type="hidden" name="meet_date" :value="meeting_date_data">
               <v-date-picker
-                v-model="app.meeting_date"
+                v-model="meeting_date_data"
                 no-title
                 scrollable
                 :first-day-of-week="user.locale.firstdayofweek"
@@ -55,11 +54,43 @@
               >
                 <v-spacer></v-spacer>
                 <v-btn flat color="primary" @click="datepicker = false">{{ i18n.btn_cancel }}</v-btn>
-                <v-btn flat color="primary" @click="$refs.datepicker.save(app.meeting_date)">{{ i18n.btn_ok }}</v-btn>
+                <v-btn flat color="primary" @click="$refs.datepicker.save(meeting_date_data)">{{ i18n.btn_ok }}</v-btn>
               </v-date-picker>
             </v-menu>
           </v-flex>
-          <v-flex xs12 sm3>
+          <v-flex xs12 sm4>
+            <v-menu
+              ref="timepicker"
+              lazy
+              :close-on-content-click="false"
+              v-model="timepicker"
+              transition="scale-transition"
+              offset-y
+              full-width
+              :nudge-right="40"
+              min-width="290px"
+              :return-value.sync="meeting_time_data"
+            >
+              <v-text-field
+                slot="activator"
+                :label="i18n.label_time"
+                v-model="meeting_time_data"
+                readonly
+                :rules="[() => meeting_time_data.length > 0 || i18n.rule_required]"
+                required
+              ></v-text-field>
+              <v-time-picker
+                v-model="meeting_time_data"
+                format="24hr"
+                scrollable
+              >
+                <v-spacer></v-spacer>
+                <v-btn flat color="primary" @click="timepicker = false">{{ i18n.btn_cancel }}</v-btn>
+                <v-btn flat color="primary" @click="$refs.timepicker.save(meeting_time_data)">{{ i18n.btn_ok }}</v-btn>
+              </v-time-picker>
+            </v-menu>
+          </v-flex>
+          <v-flex xs12 sm2>
             <v-text-field
               name="meet_duration"
               :label="i18n.label_duration"
@@ -93,14 +124,17 @@ export default {
   data () {
     return {
       datepicker: false,
-      input_meeting_date: '', // Date in ISO format for date picker
+      timepicker: false,
+      meeting_date_data: appData.app.meet_date,
+      meeting_date_input: this.parseDate(appData.app.meet_date, appData.user.locale.dateformat), // Date in ISO format for date picker
+      meeting_time_data: this.parseTime(appData.app.meet_date),
       app: Object.assign({
-        meeting_date: '',
+        meet_date: '',
         meet_description: '',
         meet_duration: 30,
         meet_title: '',
         meet_type: null,
-        meeting_types: []
+        meet_types: []
       }, appData.app),
       user: Object.assign({
         locale: {
@@ -114,6 +148,7 @@ export default {
         label_title: 'Title',
         label_type: 'Type',
         label_date: 'Date',
+        label_time: 'Time',
         label_duration: 'Duration',
         label_description: 'Description',
         btn_cancel: 'Cancel',
@@ -122,20 +157,39 @@ export default {
       }, appData.i18n)
     }
   },
-  computed: {
-    // Allow wathing app.meeting_date
-    meeting_date () {
-      return this.app.meeting_date
-    }
-  },
   watch: {
-    meeting_date: function (isodate) {
-      this.input_meeting_date = this.parseDate(isodate)
+    meeting_date_data: function (isodate) {
+      if (isodate) {
+        this.meeting_date_input = this.parseDate(isodate)
+      } else {
+        this.meeting_date_input = ''
+      }
+      this.buildDate()
+
+      console.log(this.app.meet_date)
+    },
+    meeting_time_data: function () {
+      this.buildDate()
+
+      console.log(this.app.meet_date)
     }
   },
   methods: {
-    parseDate: function (isodate) {
-      return moment(isodate).format(this.user.locale.dateformat)
+    parseDate: function (isodate, format) {
+      return moment(isodate).format(format || this.user.locale.dateformat)
+    },
+    parseTime: function (isodate) {
+      return moment(isodate).format('HH:mm')
+    },
+    buildDate: function () {
+      let meetDate = ''
+      if (this.meeting_date_input) {
+        let timestr = this.meeting_time_data ? this.meeting_time_data : '00:00'
+
+        meetDate = moment(`${this.meeting_date_input} ${timestr}`, this.user.locale.timestampformat).toISOString()
+      }
+
+      this.app.meet_date = meetDate
     }
   }
 }

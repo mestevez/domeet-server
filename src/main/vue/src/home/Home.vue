@@ -12,19 +12,21 @@
           </div>
         </v-card-title>
       </v-card>
-      <v-btn
-        color="pink"
-        dark
-        small
-        absolute
-        bottom
-        right
-        fab
-        style="bottom: 60px"
-        :href="app.navigation.meetentry"
-      >
-        <v-icon>add</v-icon>
-      </v-btn>
+      <form method="post" :action="app.navigation.meetentry">
+        <v-btn
+          color="pink"
+          dark
+          small
+          absolute
+          bottom
+          right
+          fab
+          style="bottom: 60px"
+          type="submit"
+        >
+          <v-icon>add</v-icon>
+        </v-btn>
+      </form>
     </v-content>
     <v-footer dark color="primary" app>
       <span>&copy; 2018</span>

@@ -15,6 +15,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Path("/")
 public class HomeResource {
@@ -23,11 +25,24 @@ public class HomeResource {
 	@Produces(MediaType.TEXT_HTML)
 	public String home(@Context HttpServletRequest request) throws IOException, TemplateException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+
+		Map<String, Object> appData = new HashMap<>();
+		Map<String, Object> navigationMap = new HashMap<>();
+		navigationMap.put("meetentry", "/app/meet/entry");
+		appData.put("navigation", navigationMap);
+
 		try {
 			return FTLParser.getParsedString(
 					FTLConfiguration.getInstance(),
-					PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/home/home"),
-					"webapp/home/home.ftlh");
+					PageCommons.getFTLHeaderInfo(
+							request,
+							session,
+							"i18n/home",
+							"home",
+							"home.js",
+							"home.css",
+							appData),
+					"webapp/vueapp.ftlh");
 		} finally {
 			session.close();
 		}

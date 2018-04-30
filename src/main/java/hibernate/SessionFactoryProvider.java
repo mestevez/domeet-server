@@ -49,6 +49,8 @@ public class SessionFactoryProvider {
 			configuration.addAnnotatedClass(user.class);
 			configuration.addAnnotatedClass(schedule.class);
 			configuration.addAnnotatedClass(schedule_time.class);
+			configuration.addAnnotatedClass(meeting.class);
+			configuration.addAnnotatedClass(meeting_date.class);
 
 			sessionFactory = configuration.buildSessionFactory();
 

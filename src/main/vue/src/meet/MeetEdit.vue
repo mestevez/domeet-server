@@ -1,5 +1,5 @@
 <template>
-  <v-app id="meetentry">
+  <v-app id="meetedit">
     <v-navigation-drawer
       fixed
       v-model="notificationsPanel"
@@ -19,13 +19,7 @@
               <generaledit></generaledit>
             </v-flex>
             <v-flex xs12>
-              <v-card>
-                <v-card-title primary-title>
-                  <v-container flex xs12>
-                    <div class="headline">{{ i18n.title_subjects }}</div>
-                  </v-container>
-                </v-card-title>
-              </v-card>
+              <subjectslist></subjectslist>
             </v-flex>
             <v-flex xs12>
               <v-card>
@@ -58,34 +52,30 @@
 <script>
 import AppToolbar from '@/components/AppToolbar'
 import MeetGeneralEdit from '@/components/MeetGeneralEdit'
+import MeetSubjectsEdit from '@/components/MeetSubjectsEdit'
 const appData = window.appData || {}
 export default {
-  name: 'MeetEntry',
+  name: 'MeetEdit',
   components: {
     'apptoolbar': AppToolbar,
-    'generaledit': MeetGeneralEdit
+    'generaledit': MeetGeneralEdit,
+    'subjectslist': MeetSubjectsEdit
   },
 
   data () {
     return {
-
       notificationsPanel: true,
       validForm: true,
       app: Object.assign({
       }, appData.app),
       user: Object.assign({
-
       }, appData.user),
       i18n: Object.assign({
-
-        title_subjects: 'Subjects',
         title_attendants: 'Attendants',
         title_files: 'Files',
         label_search_user: 'Search user',
-        btn_addsubject: 'Add subject',
         btn_addfile: 'Add file',
         btn_delfile: 'Remove file',
-        btn_delsubject: 'Remove subject',
         btn_delattendant: 'Remove attendant'
       }, appData.i18n)
     }

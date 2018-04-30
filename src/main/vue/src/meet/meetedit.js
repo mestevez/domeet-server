@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import MeetEntry from './MeetEntry.vue'
+import MeetEdit from './MeetEdit.vue'
 import 'vuetify/dist/vuetify.min.css'
 
 Vue.config.productionTip = false
@@ -10,7 +10,7 @@ Vue.use(Vuetify)
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#meetentry',
-  components: { MeetEntry },
-  template: '<MeetEntry/>'
+  el: '#meetedit',
+  components: { MeetEdit },
+  template: '<MeetEdit/>'
 })

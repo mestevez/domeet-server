@@ -26,7 +26,10 @@ public class AdminResource {
 	public String admin(@Context HttpServletRequest request) throws IOException, TemplateException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			return FTLParser.getParsedString(FTLConfiguration.getInstance(), PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/admin/admin"), "webapp/admin/index.ftlh");
+			return FTLParser.getParsedString(
+					FTLConfiguration.getInstance(),
+					PageCommons.getFTLHeaderInfo(request, session, "i18n/admin", null, null, null, null),
+					"webapp/admin/index.ftlh");
 		} finally {
 			session.close();
 		}
@@ -38,7 +41,14 @@ public class AdminResource {
 	public String usersList(@Context HttpServletRequest request) throws IOException, TemplateException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/admin/admin");
+			Map<String, Object> dataModel = PageCommons.getFTLHeaderInfo(
+					request,
+					session,
+					"i18n/admin",
+					null,
+					null,
+					null,
+					null);
 			dataModel.put("usersList", auth_user.getUsersList(session));
 			return FTLParser.getParsedString(FTLConfiguration.getInstance(), dataModel, "webapp/admin/userslist.ftlh");
 		} finally {

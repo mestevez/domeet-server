@@ -8,7 +8,6 @@ import hibernate.SessionFactoryProvider;
 import org.hibernate.Session;
 import rest.util.PageCommons;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,7 +17,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Map;
 
 @Path("/")
 public class LoginResource {
@@ -31,8 +29,15 @@ public class LoginResource {
 			return Response.accepted().entity(
 					FTLParser.getParsedString(
 							FTLConfiguration.getInstance(),
-							PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/login"),
-							"webapp/login/login.ftlh")
+							PageCommons.getFTLHeaderInfo(
+									request,
+									session,
+									"i18n/login",
+									"login",
+									"login.js",
+									"login.css",
+									null),
+							"webapp/vueapp.ftlh")
 			).build();
 		} finally {
 			session.close();
@@ -48,8 +53,15 @@ public class LoginResource {
 			return Response.accepted().entity(
 					FTLParser.getParsedString(
 						FTLConfiguration.getInstance(),
-						PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/login"),
-						"webapp/login/login.ftlh")
+						PageCommons.getFTLHeaderInfo(
+								request,
+								session,
+								"i18n/login",
+								"login",
+								"login.js",
+								"login.css",
+								null),
+							"webapp/vueapp.ftlh")
 			).build();
 		} finally {
 			session.close();

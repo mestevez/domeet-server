@@ -36,7 +36,7 @@ public class AccountResource {
 	public Response userAccount(@Context HttpServletRequest request) throws IOException, TemplateException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			Map<String, Object> ftlHeaderInfo = PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/account/account");
+			Map<String, Object> appData = new HashMap<>();
 			user app_user = RestSessionUtils.getUserApp(request, session);
 
 			List<Map<String, String>> workingHours = new ArrayList<>();
@@ -47,20 +47,31 @@ public class AccountResource {
 				workingHours.add(scheduleValues);
 			}
 
-			ftlHeaderInfo.put("user_email", app_user.getUserAuth().getUserMail());
-			ftlHeaderInfo.put("user_firstname", app_user.getUserFirstname());
-			ftlHeaderInfo.put("user_lastname", app_user.getUserLastname());
-			ftlHeaderInfo.put("user_company", app_user.getUserCompany());
-			ftlHeaderInfo.put("user_phone", app_user.getUserPhone());
-			ftlHeaderInfo.put("user_photo", app_user.getUserPhoto() != null ? "/app/account/photo" : null);
-			ftlHeaderInfo.put("user_schedule", app_user.getUserSchedule() != null ? app_user.getUserSchedule().getScheduleCode() : null);
-			ftlHeaderInfo.put("working_hours", workingHours);
+			appData.put("user_email", app_user.getUserAuth().getUserMail());
+			appData.put("user_firstname", app_user.getUserFirstname());
+			appData.put("user_lastname", app_user.getUserLastname());
+			appData.put("user_company", app_user.getUserCompany());
+			appData.put("user_phone", app_user.getUserPhone());
+			appData.put("user_photo", app_user.getUserPhoto() != null ? "/app/account/photo" : null);
+			appData.put("user_schedule", app_user.getUserSchedule() != null ? app_user.getUserSchedule().getScheduleCode() : null);
+			appData.put("working_hours", workingHours);
+
+			Map<String, String> navigation = new HashMap<>();
+			navigation.put("back", "/");
+			appData.put("navigation", navigation);
 
 			return Response.accepted().entity(
 					FTLParser.getParsedString(
 							FTLConfiguration.getInstance(),
-							ftlHeaderInfo,
-							"webapp/account/account.ftlh")
+							PageCommons.getFTLHeaderInfo(
+									request,
+									session,
+									"i18n/account",
+									"account",
+									"account.js",
+									"account.css",
+									appData),
+							"webapp/vueapp.ftlh")
 			).build();
 		} finally {
 			session.close();

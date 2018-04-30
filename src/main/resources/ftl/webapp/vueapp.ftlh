@@ -6,24 +6,18 @@
 
 	<title>${pagetitle}</title>
 
-	<link href=/static/dist/css/login.css rel=stylesheet>
+	<link href=/static/dist/css/${appcss} rel=stylesheet>
 	<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
 </head>
 <body>
-<div id=login></div>
+<div id=${appid}></div>
 <script type=text/javascript>
-	window.appData = {
-		app: {
-		},
-		i18n: {
-		<#list i18n?keys as key>
-			${key} : "${i18n[key]}",
-		</#list>
-		}
-	};
+<#outputformat "JSON">
+window.appData = ${appData};
+</#outputformat>
 </script>
 <script type=text/javascript src=/static/dist/js/manifest.js></script>
 <script type=text/javascript src=/static/dist/js/vendor.js></script>
-<script type=text/javascript src=/static/dist/js/login.js></script>
+<script type=text/javascript src=/static/dist/js/${appjs}></script>
 </body>
 </html>

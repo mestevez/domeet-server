@@ -28,8 +28,15 @@ public class SignUpResource {
 			return Response.accepted().entity(
 					FTLParser.getParsedString(
 							FTLConfiguration.getInstance(),
-							PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/signup"),
-							"webapp/login/signup.ftlh")
+							PageCommons.getFTLHeaderInfo(
+									request,
+									session,
+									"i18n/signup",
+									"signup",
+									"signup.js",
+									"signup.css",
+									null),
+							"webapp/vueapp.ftlh")
 			).build();
 		} finally {
 			session.close();
@@ -45,8 +52,15 @@ public class SignUpResource {
 			return Response.accepted().entity(
 					FTLParser.getParsedString(
 							FTLConfiguration.getInstance(),
-							PageCommons.getFTLHeaderInfo(request, session, "ftl/webapp/login/terms"),
-							"webapp/login/terms.ftlh")
+							PageCommons.getFTLHeaderInfo(
+									request,
+									session,
+									"i18n/terms",
+									"terms",
+									"terms.js",
+									"terms.css",
+									null),
+							"webapp/vueapp.ftlh")
 			).build();
 		} finally {
 			session.close();

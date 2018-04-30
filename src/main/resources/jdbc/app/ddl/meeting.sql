@@ -32,3 +32,4 @@ ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_info_end CHECK (
 ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_info_mom CHECK (
   meet_mom IS NULL OR meet_state >= 4
 );
+CREATE SEQUENCE meeting_seq START 101;

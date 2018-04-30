@@ -326,8 +326,10 @@ public class JDBCDatabaseStatus {
 	}
 
 	public static JDBCCheckStatus checkDatabaseStatus(DatabaseProps checkDatabase)
-			throws SQLException, ClassNotFoundException {
+			throws SQLException, ClassNotFoundException, URISyntaxException, IOException, JDBCException {
 		JDBCCheckStatus status = new JDBCCheckStatus();
+
+		createApplicationDatabase(StatusDatabaseProps.getDatabaseProps(), true);
 
 		JDBCConnection generalConnection = JDBCConnectionFactory.getServerConnection();
 		try {

@@ -5,6 +5,7 @@ import freemarker.template.TemplateExceptionHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.TimeZone;
 
 /**
  * A Configuration instance is the central place to store the application level settings of FreeMarker.
@@ -19,7 +20,8 @@ public class FTLConfiguration {
 	private static FTLConfiguration FTLConfigurationMainInstance;
 	private static FTLConfiguration FTLConfigurationTestInstance;
 	private static String 			FTLTemplateMainDirectory = "src/main/resources/ftl/";
-	private static String 			FTLTemplateTestDirectory = "src/test/resources/ftl/";
+//	private static String 			FTLTemplateTestDirectory = "src/test/resources/ftl/";
+	private static String 			FTLTemplateTestDirectory = "D:\\workspace\\UOC\\Projecte final\\domeet.project\\src\\test\\resources\\ftl";
 
 	private Configuration configuration;
 
@@ -42,6 +44,11 @@ public class FTLConfiguration {
 
 		// Don't log exceptions inside FreeMarker that it will thrown at you anyway:
 		configuration.setLogTemplateExceptions(false);
+
+		// Locate config
+		configuration.setDateFormat("yyyy-MM-dd");
+		configuration.setDateTimeFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		configuration.setTimeZone(TimeZone.getTimeZone("UTC"));
 
 		// Wrap unchecked exceptions thrown during template processing into TemplateException-s.
 		configuration.setWrapUncheckedExceptions(true);
