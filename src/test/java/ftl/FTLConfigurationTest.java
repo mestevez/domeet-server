@@ -104,7 +104,7 @@ class FTLConfigurationTest {
 		appData.put("list", listValues);
 
 		Map<String, Object> root = new HashMap<>();
-		root.put("app", GSONConfiguration.getTestInstance().getConfiguration().toJson(appData));
+		root.put("app", GSONConfiguration.getInstance().getConfiguration().toJson(appData));
 
 		String templateOutput = FTLParser.getParsedString(FTLConfiguration.getTestInstance(), root, "objects2JSON.ftlh");
 		assertEquals("<html>\n" +

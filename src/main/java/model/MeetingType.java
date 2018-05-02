@@ -1,6 +1,8 @@
 package model;
 
-public enum MeetingType {
+import util.SerializableOrdinalEnumeration;
+
+public enum MeetingType implements SerializableOrdinalEnumeration {
 	UNDETERMINED((short)0),
 	INFORM((short)1),
 	CONSULT((short)2),
@@ -11,5 +13,19 @@ public enum MeetingType {
 
 	MeetingType (short val) {
 		enumvar = val;
+	}
+
+	@Override
+	public short getKey() {
+		return enumvar;
+	}
+
+	static MeetingType fromKey(short key) {
+		for(MeetingType type : values()) {
+			if(type.getKey() == key) {
+				return type;
+			}
+		}
+		return null;
 	}
 }

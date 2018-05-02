@@ -1,6 +1,8 @@
 package rest.app;
 
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import rest.conf.providers.MapMessageBodyWriter;
+import rest.conf.providers.MeetingMessageBodyReader;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -18,6 +20,10 @@ public class JerseyApplicationApp extends Application {
 
 		// Enable multipart
 		classes.add(MultiPartFeature.class);
+
+		// Jersey Readers & Writters
+		classes.add(MeetingMessageBodyReader.class);
+		classes.add(MapMessageBodyWriter.class);
 
 		return classes;
 	}

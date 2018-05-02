@@ -9,21 +9,23 @@
               name="meet_title"
               :label="i18n.label_title"
               type="text"
-              v-model="app.meet_title"
-              :rules="[() => app.meet_title.length > 0 || i18n.rule_required]"
+              v-model="meetData.meet_title"
+              :rules="[() => meetData.meet_title.length > 0 || i18n.rule_required]"
               required
+              @change="updateMeet"
             ></v-text-field>
           </v-flex>
           <v-flex xs12 sm5>
             <v-select
-              :items="app.meet_types"
+              :items="meetTypes"
               :label="i18n.label_type"
-              v-model="app.meet_type"
+              v-model="meetData.meet_type"
               required
+              @change="updateMeet"
             ></v-select>
-            <input type="hidden" name="meet_type" :value="app.meet_type">
+            <input type="hidden" name="meet_type" :value="meetData.meet_type">
           </v-flex>
-          <v-flex xs12 sm6>
+          <v-flex xs12 sm5>
             <v-menu
               ref="datepicker"
               lazy
@@ -44,13 +46,13 @@
                 :rules="[() => meeting_date_input.length > 0 || i18n.rule_required]"
                 required
               ></v-text-field>
-              <input type="hidden" name="meet_date" :value="meeting_date_data">
+              <input type="hidden" name="meet_date" :value="this.meetData.meet_dates[0].meet_date">
               <v-date-picker
                 v-model="meeting_date_data"
                 no-title
                 scrollable
-                :first-day-of-week="user.locale.firstdayofweek"
-                :locale="user.locale.code"
+                :first-day-of-week="locale.firstdayofweek"
+                :locale="locale.code"
               >
                 <v-spacer></v-spacer>
                 <v-btn flat color="primary" @click="datepicker = false">{{ i18n.btn_cancel }}</v-btn>
@@ -90,15 +92,16 @@
               </v-time-picker>
             </v-menu>
           </v-flex>
-          <v-flex xs12 sm2>
+          <v-flex xs12 sm3>
             <v-text-field
               name="meet_duration"
               :label="i18n.label_duration"
-              v-model="app.meet_duration"
+              v-model="meetData.meet_duration"
               type="number"
               suffix="min"
               step="5"
               min="0"
+              @change="updateMeet"
             ></v-text-field>
           </v-flex>
           <v-flex xs12 sm12>
@@ -106,8 +109,9 @@
               name="meet_description"
               :label="i18n.label_description"
               type="text"
-              v-model="app.meet_description"
+              v-model="meetData.meet_description"
               multi-line
+              @change="updateMeet"
             ></v-text-field>
           </v-flex>
         </v-layout>
@@ -118,31 +122,18 @@
 
 <script>
 import moment from 'moment'
-const appData = window.appData || {}
+
 export default {
   name: 'MeetGeneralEdit',
+  props: ['meetData', 'meetTypes', 'i18nData', 'locale'],
   data () {
     return {
       datepicker: false,
       timepicker: false,
-      meeting_date_data: appData.app.meet_date,
-      meeting_date_input: this.parseDate(appData.app.meet_date, appData.user.locale.dateformat), // Date in ISO format for date picker
-      meeting_time_data: this.parseTime(appData.app.meet_date),
-      app: Object.assign({
-        meet_date: '',
-        meet_description: '',
-        meet_duration: 30,
-        meet_title: '',
-        meet_type: null,
-        meet_types: []
-      }, appData.app),
-      user: Object.assign({
-        locale: {
-          dateformat: 'MM-DD-YYYY',
-          code: 'en-en',
-          firstdayofweek: 0
-        }
-      }, appData.user),
+      meeting_date_data: this.meetData.meet_dates[0].meet_date,
+      meeting_date_input: this.parseDate(this.meetData.meet_dates[0].meet_date, this.locale.dateformat), // Date in ISO format for date picker
+      meeting_time_data: this.parseTime(this.meetData.meet_dates[0].meet_date),
+
       i18n: Object.assign({
         title_general: 'General description',
         label_title: 'Title',
@@ -154,7 +145,7 @@ export default {
         btn_cancel: 'Cancel',
         btn_ok: 'Ok',
         rule_required: 'This field is required'
-      }, appData.i18n)
+      }, this.i18nData)
     }
   },
   watch: {
@@ -165,18 +156,14 @@ export default {
         this.meeting_date_input = ''
       }
       this.buildDate()
-
-      console.log(this.app.meet_date)
     },
     meeting_time_data: function () {
       this.buildDate()
-
-      console.log(this.app.meet_date)
     }
   },
   methods: {
     parseDate: function (isodate, format) {
-      return moment(isodate).format(format || this.user.locale.dateformat)
+      return moment(isodate).format(format || this.locale.dateformat)
     },
     parseTime: function (isodate) {
       return moment(isodate).format('HH:mm')
@@ -186,10 +173,14 @@ export default {
       if (this.meeting_date_input) {
         let timestr = this.meeting_time_data ? this.meeting_time_data : '00:00'
 
-        meetDate = moment(`${this.meeting_date_input} ${timestr}`, this.user.locale.timestampformat).toISOString()
+        meetDate = moment(`${this.meeting_date_input} ${timestr}`, this.locale.timestampformat).toISOString()
       }
 
-      this.app.meet_date = meetDate
+      this.meetData.meet_dates[0].meet_date = meetDate
+      this.updateMeet()
+    },
+    updateMeet: function () {
+      this.meetData.save()
     }
   }
 }

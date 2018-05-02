@@ -23,57 +23,71 @@ public class ErrorResource {
 	@Context
 	private HttpServletRequest httpRequest;
 
-	private static String _getErrorPage(HttpServletRequest httpRequest) throws IOException, TemplateException {
+	private static Map<String, Object> _getErrorData(HttpServletRequest httpRequest)  {
 //		Enumeration<String> attributeNames = httpRequest.getAttributeNames();
+//		System.out.println("!! ATTRIBUTES:");
 //		while(attributeNames.hasMoreElements()) {
 //			String attrname = attributeNames.nextElement();
-//			System.out.println(String.format("!! NAME=%s, VALUE=%s", attrname, httpRequest.getAttribute(attrname)));
+//			System.out.println(String.format("!! . NAME=%s, VALUE=%s", attrname, httpRequest.getAttribute(attrname)));
 //		}
 
+		Map<String, Object> errData = new HashMap<>();
+		errData.put("status_code", httpRequest.getAttribute("javax.servlet.error.status_code"));
+		errData.put("error_message", httpRequest.getAttribute("javax.servlet.error.message"));
+		errData.put("error_trace", "");
+
+		return errData;
+	}
+
+	private static String _getErrorPage(HttpServletRequest httpRequest) throws IOException, TemplateException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			Map<String, Object> appData = new HashMap<>();
-			appData.put("status_code", httpRequest.getAttribute("javax.servlet.error.status_code"));
-			appData.put("error_message", httpRequest.getAttribute("javax.servlet.error.message"));
-			appData.put("error_trace", "");
-
 			return FTLParser.getParsedString(
 					FTLConfiguration.getInstance(),
 					PageCommons.getFTLHeaderInfo(
 							httpRequest,
 							session,
 							"i18n/error",
-							"errorapp",
+							"errapp",
 							"error.js",
 							"error.css",
-							appData),
+							_getErrorData(httpRequest)),
 					"webapp/vueapp.ftlh");
 		} finally {
 			session.close();
 		}
 	}
 
+	private static Map<String, Object> _getErrorMessage(HttpServletRequest httpRequest) throws IOException, TemplateException {
+		Map<String, Object> result = new HashMap<>();
+		result.put("srverr", _getErrorData(httpRequest));
+		return result;
+	}
+
 	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public Response errorpage() throws IOException, TemplateException {
+	public Response errorpageHTML() throws IOException, TemplateException {
 		return Response.accepted().entity(_getErrorPage(httpRequest)).build();
 	}
 
 	@POST
 	@Produces(MediaType.TEXT_HTML)
-	public Response errorpageFromPost() throws IOException, TemplateException {
+	public Response errorpageHTMLFromPost() throws IOException, TemplateException {
 		return Response.accepted().entity(_getErrorPage(httpRequest)).build();
 	}
 
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response errorpageJSONFromPost() throws IOException, TemplateException {
+		return Response.serverError().entity(_getErrorMessage(httpRequest)).build();
+	}
+
 	@PUT
-	@Produces(MediaType.TEXT_HTML)
-	public Response errorpageFromPut() throws IOException, TemplateException {
+	public Response errorpageHTMLFromPut() throws IOException, TemplateException {
 		return Response.accepted().entity(_getErrorPage(httpRequest)).build();
 	}
 
 	@DELETE
-	@Produces(MediaType.TEXT_HTML)
-	public Response errorpageFromDelete() throws IOException, TemplateException {
+	public Response errorpageHTMLFromDelete() throws IOException, TemplateException {
 		return Response.accepted().entity(_getErrorPage(httpRequest)).build();
 	}
 }

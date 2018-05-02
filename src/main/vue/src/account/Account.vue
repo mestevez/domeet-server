@@ -70,19 +70,19 @@
         <v-btn color="success" @click="submit">{{ i18n.btn_save }}</v-btn>
       </v-form>
     </v-content>
-    <v-footer dark color="primary" app>
-      <span>&copy; 2018</span>
-    </v-footer>
+    <appfooter></appfooter>
   </v-app>
 </template>
 
 <script>
 import AppToolbar from '@/components/AppToolbar'
+import AppFooter from '@/components/AppFooter'
 const appData = window.appData || {}
 export default {
   name: 'Account',
   components: {
-    'apptoolbar': AppToolbar
+    'apptoolbar': AppToolbar,
+    'appfooter': AppFooter
   },
 
   data () {

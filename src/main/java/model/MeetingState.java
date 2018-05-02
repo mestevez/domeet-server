@@ -1,6 +1,8 @@
 package model;
 
-public enum MeetingState {
+import util.SerializableOrdinalEnumeration;
+
+public enum MeetingState implements SerializableOrdinalEnumeration {
 	EDIT((short)0),
 	READY((short)1),
 	CANCELLED((short)2),
@@ -13,5 +15,19 @@ public enum MeetingState {
 
 	MeetingState(short val) {
 		enumvar = val;
+	}
+
+	@Override
+	public short getKey() {
+		return enumvar;
+	}
+
+	static MeetingState fromKey(short key) {
+		for(MeetingState type : values()) {
+			if(type.getKey() == key) {
+				return type;
+			}
+		}
+		return null;
 	}
 }

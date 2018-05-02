@@ -1,5 +1,7 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.gson.annotations.Expose;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.hibernate.HibernateException;
@@ -21,22 +23,30 @@ import java.util.List;
 public class user implements Serializable {
 
 	@Id
+	@Expose
 	private Integer user_id;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
+	@Expose
 	private String user_firstname;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
+	@Expose
 	private String user_lastname;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
+	@Expose
 	private String user_company;
 
+	@Expose
 	private String user_phone;
+
+	@Expose
 	private byte[] user_photo;
 
 	@ManyToOne
 	@JoinColumn(name="user_schedule")
+	@Expose
 	private schedule user_schedule;
 
 	@IndexedEmbedded

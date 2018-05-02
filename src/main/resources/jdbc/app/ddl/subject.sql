@@ -10,7 +10,8 @@ CREATE TABLE app.subject (
 );
 CREATE UNIQUE INDEX u_subject ON app.subject(subject_id, subject_order);
 ALTER TABLE app.subject ADD CONSTRAINT pk_subject PRIMARY KEY (subject_id);
-ALTER TABLE app.subject ADD CONSTRAINT f_subject_meeting FOREIGN KEY (meet_id) REFERENCES app.meeting(meet_id);
+ALTER TABLE app.subject ADD CONSTRAINT f_subject_meeting FOREIGN KEY (meet_id) REFERENCES app.meeting(meet_id) ON DELETE CASCADE ;
 ALTER TABLE app.subject ADD CONSTRAINT c_subject_info_end CHECK (
   subject_time_end IS NULL OR subject_time_start IS NOT NULL
 );
+CREATE SEQUENCE subject_seq START 101;

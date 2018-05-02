@@ -40,9 +40,9 @@ public class PageCommons {
 			sessUser.put("user_photo", user.getUserPhoto() != null ? "/app/account/photo" : null);
 
 			Map<String, Object> userLocale = new HashMap<>();
-			userLocale.put("code", String.format("%s-%s", locale.getLanguage(), locale.getCountry()));
+			userLocale.put("code", locale.toLanguageTag());
 			userLocale.put("dateformat", DateUtils.getDateFormatFromLocale(locale));
-			userLocale.put("firstdayofweek", Calendar.getInstance(locale).getFirstDayOfWeek());
+			userLocale.put("firstdayofweek", Calendar.getInstance(locale).getFirstDayOfWeek()-1); // -1: Change to base zero
 			userLocale.put("timestampformat", DateUtils.getDateTimeFormatFromLocale(locale));
 			sessUser.put("locale", userLocale);
 		}
@@ -61,7 +61,7 @@ public class PageCommons {
 		}
 		appData.put("i18n", i18n);
 
-		dataModel.put("appData", GSONConfiguration.getTestInstance().getConfiguration().toJson(appData));
+		dataModel.put("appData", GSONConfiguration.getInstance().getConfiguration().toJson(appData));
 		dataModel.put("appcss", appcss);
 		dataModel.put("appid", appid);
 		dataModel.put("appjs", appjs);

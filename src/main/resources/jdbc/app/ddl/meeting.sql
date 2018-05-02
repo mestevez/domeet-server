@@ -16,20 +16,20 @@ ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_type_range CHECK (
   meet_type IN (0, 1, 2, 3, 4)
 );
 ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_state_range CHECK (
-  meet_state IN (0, 1, 2, 3, 4, 5)
+  meet_state IN (0, 1, 2, 3, 4, 5, 6)
 );
 -- Start time must be defined when the meeting starts
 ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_info_start CHECK (
-  (meet_state < 2 AND meet_time_start IS NULL) OR
-  (meet_state >= 2 AND meet_time_start IS NOT NULL)
+  (meet_state < 3 AND meet_time_start IS NULL) OR
+  (meet_state >= 3 AND meet_time_start IS NOT NULL)
 );
 -- End time must be defined when the meeting ends
 ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_info_end CHECK (
-  (meet_state < 3 AND meet_time_end IS NULL) OR
-  (meet_state >= 3 AND meet_time_end IS NOT NULL)
+  (meet_state < 4 AND meet_time_end IS NULL) OR
+  (meet_state >= 4 AND meet_time_end IS NOT NULL)
 );
 -- Minutes of the meeting can only be defined if the meeting has been concluded
 ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_info_mom CHECK (
-  meet_mom IS NULL OR meet_state >= 4
+  meet_mom IS NULL OR meet_state >= 5
 );
 CREATE SEQUENCE meeting_seq START 101;

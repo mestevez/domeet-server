@@ -1,8 +1,8 @@
 package model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.google.gson.annotations.Expose;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
@@ -10,11 +10,14 @@ import java.sql.Timestamp;
 @Table( schema="app", name="meeting_date" )
 public class meeting_date implements Serializable {
 	@Id
+	@SequenceGenerator(name="meeting_date_generator", sequenceName="meeting_date_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="meeting_date_generator")
+	private Integer meet_date_id;
+
 	private Integer meet_id;
 
-	@Id
+	@Expose
 	private Timestamp meet_date;
-
 
 	public Timestamp getMeetDate() {
 		return meet_date;
@@ -26,5 +29,9 @@ public class meeting_date implements Serializable {
 
 	public void setMeetId(Integer meet_id) {
 		this.meet_id = meet_id;
+	}
+
+	public Integer getMeetId() {
+		return meet_id;
 	}
 }

@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class GsonUTCDateAdapter  implements JsonSerializer<Date>,JsonDeserializer<Date> {
+public class GsonUTCDateAdapter  implements JsonSerializer<Date>, JsonDeserializer<Date> {
 	private final DateFormat dateFormat;
 
 	public GsonUTCDateAdapter() {
