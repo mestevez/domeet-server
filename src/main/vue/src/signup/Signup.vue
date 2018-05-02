@@ -31,6 +31,7 @@
                       :rules="emailRules"
                       @keypress.enter.stop="submit"
                       required
+                      autofocus
                     ></v-text-field>
                     <v-text-field
                       prepend-icon="lock"

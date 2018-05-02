@@ -16,16 +16,22 @@
         :meetingsList="app.meetingsonedit"
         :cardTitle="i18n.title_meetingsonedit"
         :navURL="app.navigation.meetedit"
+        :dateFormat="user.locale.timestampformat"
+        :i18nData="i18n"
       ></meetingslist>
       <meetingslist
         :meetingsList="app.meetingsforthcomming"
         :cardTitle="i18n.title_meetingsforthcomming"
         :navURL="app.navigation.meetedit"
+        :dateFormat="user.locale.timestampformat"
+        :i18nData="i18n"
       ></meetingslist>
       <meetingslist
         :meetingsList="app.meetingsforegoing"
         :cardTitle="i18n.title_meetingsforegoing"
         :navURL="app.navigation.meetedit"
+        :dateFormat="user.locale.timestampformat"
+        :i18nData="i18n"
       ></meetingslist>
       <form method="post" :action="app.navigation.meetentry">
         <v-btn

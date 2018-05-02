@@ -19,8 +19,8 @@ export default class Meeting extends Model {
 
   routes () {
     return {
-      save: '/app/meet/edit/{meet_id}',
-      delete: '/app/meet/edit/{meet_id}'
+      save: '/app/meet/{meet_id}',
+      delete: '/app/meet/{meet_id}'
     }
   }
 }

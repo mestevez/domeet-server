@@ -38,7 +38,7 @@ public class HomeResource {
 
 		Map<String, Object> navigationMap = new HashMap<>();
 		navigationMap.put("meetentry", "/app/meet/entry");
-		navigationMap.put("meetedit", "/app/meet/edit/{meet_id}");
+		navigationMap.put("meetedit", "/app/meet/{meet_id}");
 		appData.put("navigation", navigationMap);
 
 		try {

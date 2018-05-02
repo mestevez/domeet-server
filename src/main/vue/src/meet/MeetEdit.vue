@@ -146,7 +146,7 @@ export default {
     },
     execCancel: function () {
       this.app.meet.getRequest({
-        url: this.app.meet.getURL('/app/meet/cancel/{meet_id}', this.app.meet),
+        url: this.app.meet.getURL('/app/meet/{meet_id}/cancel', this.app.meet),
         method: 'POST'
       }).send().then((response) => {
         if (response.response.data.redirect) {
@@ -158,7 +158,7 @@ export default {
     },
     execCreate: function () {
       this.app.meet.getRequest({
-        url: this.app.meet.getURL('/app/meet/create/{meet_id}', this.app.meet),
+        url: this.app.meet.getURL('/app/meet/{meet_id}/create', this.app.meet),
         method: 'POST'
       }).send().then((response) => {
         if (response.response.data.redirect) {
@@ -170,7 +170,7 @@ export default {
     },
     execStart: function () {
       this.app.meet.getRequest({
-        url: this.app.meet.getURL('/app/meet/start/{meet_id}', this.app.meet),
+        url: this.app.meet.getURL('/app/meet/{meet_id}/start', this.app.meet),
         method: 'POST'
       }).send().then((response) => {
         if (response.response.data.redirect) {

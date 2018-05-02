@@ -23,6 +23,109 @@ import java.util.*;
 @Path("/meet")
 public class MeetEntryResource {
 
+	private static String _getMeetEditPage(HttpServletRequest request, Session session, meeting meet) throws IOException, TemplateException {
+		String bundlepath = "i18n/meetedit";
+		Map<String, Object> appData = new HashMap<>();
+
+		ResourceBundle bundle = ResourceBundle.getBundle(bundlepath, request.getLocale());
+		List<Map<String, Object>> meetingTypes = new ArrayList<>();
+		for (MeetingType meetingTypeValue : MeetingType.values()) {
+			Map<String, Object> meetingType = new HashMap<>();
+			meetingType.put("value", meetingTypeValue.ordinal());
+			meetingType.put("text", bundle != null ? bundle.getString("meet_type." + meetingTypeValue.name()) : meetingTypeValue.name());
+			meetingTypes.add(meetingType);
+		}
+		appData.put("meet_types", meetingTypes);
+
+		appData.put("meet", meet);
+
+		Map<String, String> navigation = new HashMap<>();
+		navigation.put("meetedit", "/app/meet/{meet_id}");
+		navigation.put("back", "/");
+		appData.put("navigation", navigation);
+
+		return FTLParser.getParsedString(
+				FTLConfiguration.getInstance(),
+				PageCommons.getFTLHeaderInfo(
+						request,
+						session,
+						bundlepath,
+						"meetedit",
+						"meetedit.js",
+						"meetedit.css",
+						appData),
+				"webapp/vueapp.ftlh");
+	}
+
+	private static String _getMeetExecutionPage(HttpServletRequest request, Session session, meeting meet) throws IOException, TemplateException {
+		String bundlepath = "i18n/meetexec";
+		Map<String, Object> appData = new HashMap<>();
+
+		appData.put("meet", meet);
+
+		Map<String, String> navigation = new HashMap<>();
+		navigation.put("back", "/");
+		appData.put("navigation", navigation);
+
+		return FTLParser.getParsedString(
+				FTLConfiguration.getInstance(),
+				PageCommons.getFTLHeaderInfo(
+						request,
+						session,
+						bundlepath,
+						"meetexec",
+						"meetexec.js",
+						"meetexec.css",
+						appData),
+				"webapp/vueapp.ftlh");
+	}
+
+	private static String _getMeetConcludingPage(HttpServletRequest request, Session session, meeting meet) throws IOException, TemplateException {
+		String bundlepath = "i18n/meetconclude";
+		Map<String, Object> appData = new HashMap<>();
+
+		appData.put("meet", meet);
+
+		Map<String, String> navigation = new HashMap<>();
+		navigation.put("back", "/");
+		appData.put("navigation", navigation);
+
+		return FTLParser.getParsedString(
+				FTLConfiguration.getInstance(),
+				PageCommons.getFTLHeaderInfo(
+						request,
+						session,
+						bundlepath,
+						"meetconclude",
+						"meetconclude.js",
+						"meetconclude.css",
+						appData),
+				"webapp/vueapp.ftlh");
+	}
+
+	private static String _getMeetInfoPage(HttpServletRequest request, Session session, meeting meet) throws IOException, TemplateException {
+		String bundlepath = "i18n/meetinfo";
+		Map<String, Object> appData = new HashMap<>();
+
+		appData.put("meet", meet);
+
+		Map<String, String> navigation = new HashMap<>();
+		navigation.put("back", "/");
+		appData.put("navigation", navigation);
+
+		return FTLParser.getParsedString(
+				FTLConfiguration.getInstance(),
+				PageCommons.getFTLHeaderInfo(
+						request,
+						session,
+						bundlepath,
+						"meetinfo",
+						"meetinfo.js",
+						"meetinfo.css",
+						appData),
+				"webapp/vueapp.ftlh");
+	}
+
 	@Path("/entry")
 	@POST
 	@Produces(MediaType.TEXT_HTML)
@@ -38,62 +141,40 @@ public class MeetEntryResource {
 					MeetingType.UNDETERMINED
 			).getMeetId();
 
-			return Response.seeOther(UriBuilder.fromPath("/app/meet/edit/{meet_id}").build(meet_id)).build();
+			return Response.seeOther(UriBuilder.fromPath("/app/meet/{meet_id}").build(meet_id)).build();
 		} finally {
 			session.close();
 		}
 	}
 
-	@Path("/edit/{meet_id}")
+	@Path("/{meet_id}")
 	@GET
 	@Produces(MediaType.TEXT_HTML)
-	public Response meetingEditPage(
+	public Response meetingDispatcher(
 		@Context HttpServletRequest request,
 		@PathParam("meet_id") int meet_id
 	) throws IOException, TemplateException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			String bundlepath = "i18n/meetedit";
-			Map<String, Object> appData = new HashMap<>();
+			String ftl;
+			meeting meet = session.get(meeting.class, meet_id);
 
-			ResourceBundle bundle = ResourceBundle.getBundle(bundlepath, request.getLocale());
-			List<Map<String, Object>> meetingTypes = new ArrayList<>();
-			for (MeetingType meetingTypeValue : MeetingType.values()) {
-				Map<String, Object> meetingType = new HashMap<>();
-				meetingType.put("value", meetingTypeValue.ordinal());
-				meetingType.put("text", bundle != null ? bundle.getString("meet_type." + meetingTypeValue.name()) : meetingTypeValue.name());
-				meetingTypes.add(meetingType);
-			}
-			appData.put("meet_types", meetingTypes);
+			if (meet.getMeetState() == MeetingState.STARTED)
+				ftl = _getMeetExecutionPage(request, session, meet);
+			else if (meet.getMeetState() == MeetingState.ENDED)
+				ftl = _getMeetConcludingPage(request, session, meet);
+			else if (meet.getMeetState() == MeetingState.CONCLUDED || meet.getMeetState() == MeetingState.MAIL_SENT)
+				ftl = _getMeetInfoPage(request, session, meet);
+			else
+				ftl = _getMeetEditPage(request, session, meet);
 
-			appData.put("meet", session.get(meeting.class, meet_id));
-
-			Map<String, String> navigation = new HashMap<>();
-			navigation.put("meetedit", "/app/meet/edit/{meet_id}");
-			navigation.put("meetcreate", "/app/meet/edit/{meet_id}");
-			navigation.put("meetdelete", "/app/meet/edit/{meet_id}");
-			navigation.put("back", "/");
-			appData.put("navigation", navigation);
-
-			return Response.accepted().entity(
-					FTLParser.getParsedString(
-							FTLConfiguration.getInstance(),
-							PageCommons.getFTLHeaderInfo(
-									request,
-									session,
-									bundlepath,
-									"meetedit",
-									"meetedit.js",
-									"meetedit.css",
-									appData),
-							"webapp/vueapp.ftlh")
-			).build();
+			return Response.accepted().entity(ftl).build();
 		} finally {
 			session.close();
 		}
 	}
 
-	@Path("/edit/{meet_id}")
+	@Path("/{meet_id}")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -116,7 +197,31 @@ public class MeetEntryResource {
 		}
 	}
 
-	@Path("/create/{meet_id}")
+	@Path("/{meet_id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response meetingDelete(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			try {
+				session.beginTransaction();
+				session.remove(session.get(meeting.class, meet_id));
+				session.getTransaction().commit();
+			} catch (HibernateException ex){
+				session.getTransaction().rollback();
+				throw ex;
+			}
+
+			Map<String, Object> responseData = new HashMap<>();
+			responseData.put("redirect", "/");
+			return Response.ok().entity(responseData).build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/create")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -133,7 +238,7 @@ public class MeetEntryResource {
 		}
 	}
 
-	@Path("/start/{meet_id}")
+	@Path("/{meet_id}/start")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -143,14 +248,48 @@ public class MeetEntryResource {
 			session.get(meeting.class, meet_id).startMeeting(session);
 
 			Map<String, Object> responseData = new HashMap<>();
-			responseData.put("redirect", "/");
+			responseData.put("redirect", UriBuilder.fromPath("/app/meet/{meet_id}").build(meet_id));
 			return Response.ok().entity(responseData).build();
 		} finally {
 			session.close();
 		}
 	}
 
-	@Path("/cancel/{meet_id}")
+	@Path("/{meet_id}/end")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response meetingEnd(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			session.get(meeting.class, meet_id).endMeeting(session);
+
+			Map<String, Object> responseData = new HashMap<>();
+			responseData.put("redirect", UriBuilder.fromPath("/app/meet/{meet_id}").build(meet_id));
+			return Response.ok().entity(responseData).build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/conclude")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response meetingConclude(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			session.get(meeting.class, meet_id).setMeetState(session, MeetingState.CONCLUDED);
+
+			Map<String, Object> responseData = new HashMap<>();
+			responseData.put("redirect", UriBuilder.fromPath("/app/meet/{meet_id}").build(meet_id));
+			return Response.ok().entity(responseData).build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/cancel")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -158,30 +297,6 @@ public class MeetEntryResource {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
 			session.get(meeting.class, meet_id).setMeetState(session, MeetingState.CANCELLED);
-
-			Map<String, Object> responseData = new HashMap<>();
-			responseData.put("redirect", "/");
-			return Response.ok().entity(responseData).build();
-		} finally {
-			session.close();
-		}
-	}
-
-	@Path("/edit/{meet_id}")
-	@DELETE
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response meetingDelete(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
-		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
-		try {
-			try {
-				session.beginTransaction();
-				session.remove(session.get(meeting.class, meet_id));
-				session.getTransaction().commit();
-			} catch (HibernateException ex){
-				session.getTransaction().rollback();
-				throw ex;
-			}
 
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("redirect", "/");

@@ -78,18 +78,37 @@ class test_meeting {
 	}
 
 	@Test
-	void getForegoingMeetingsList() {
+	void getForegoingMeetingsList() throws ParseException {
 		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
 		int meetUser2Id = auth_user.getUser(session, "meetinguser2@test.es").getUserID();
 
-		meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED );
-		meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED );
-		meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
+		meeting meet1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
 				.setMeetState(session, MeetingState.READY);
+		meeting meet2 = meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED )
+				.startMeeting(session);
+		meeting meet3 = meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
+				.setMeetState(session, MeetingState.READY);
+
 		meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED );
 		meeting.addMeeting(session, meetUser2Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED );
 		meeting.addMeeting(session, meetUser2Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
 				.setMeetState(session, MeetingState.READY);
+
+		session.beginTransaction();
+
+		meeting_date meetDate1 = meet1.getMeetDates().iterator().next();
+		meetDate1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate1);
+
+		meeting_date meetDate2 = meet2.getMeetDates().iterator().next();
+		meetDate1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate2);
+
+		meeting_date meetDate3 = meet3.getMeetDates().iterator().next();
+		meetDate3.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+		session.persist(meetDate3);
+
+		session.getTransaction().commit();
 
 		List<meeting> onEditMeetings = meeting.getForegoingMeetings(session, meetUser1Id);
 
@@ -101,15 +120,27 @@ class test_meeting {
 		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
 		int meetUser2Id = auth_user.getUser(session, "meetinguser2@test.es").getUserID();
 
-		meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED );
-		meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED );
+		meeting meet1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
+				.setMeetState(session, MeetingState.READY);
+		meeting meet2 = model.meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED)
+				.startMeeting(session);
+		meeting meet3 = model.meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED)
+				.setMeetState(session, MeetingState.READY);
 
-		meeting testMeeting = model.meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED);
-		testMeeting.setMeetState(session, MeetingState.READY);
-		meeting_date meetDate = testMeeting.getMeetDates().iterator().next();
-		meetDate.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
 		session.beginTransaction();
-		session.persist(meetDate);
+
+		meeting_date meetDate1 = meet1.getMeetDates().iterator().next();
+		meetDate1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate1);
+
+		meeting_date meetDate2 = meet2.getMeetDates().iterator().next();
+		meetDate2.setMeetDate(DateUtils.parseISOTimestampString2Java("2016-07-04T12:08:56.235Z"));
+		session.persist(meetDate2);
+
+		meeting_date meetDate3 = meet3.getMeetDates().iterator().next();
+		meetDate3.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+		session.persist(meetDate3);
+
 		session.getTransaction().commit();
 
 		meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED );
@@ -119,7 +150,7 @@ class test_meeting {
 
 		List<meeting> onEditMeetings = meeting.getForthcommingMeetings(session, meetUser1Id);
 
-		Assertions.assertEquals(1, onEditMeetings.size());
+		Assertions.assertEquals(2, onEditMeetings.size());
 	}
 
 	@Test

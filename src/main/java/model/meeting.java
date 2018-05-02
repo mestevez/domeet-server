@@ -123,7 +123,7 @@ public class meeting implements Serializable {
 		return meet;
 	}
 
-	public void setMeetState(Session session, MeetingState state) {
+	public meeting setMeetState(Session session, MeetingState state) {
 		try {
 			this.meet_state = state;
 
@@ -132,13 +132,15 @@ public class meeting implements Serializable {
 			session.persist(this);
 
 			session.getTransaction().commit();
+
+			return this;
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
 		}
 	}
 
-	public void startMeeting(Session session) {
+	public meeting startMeeting(Session session) {
 		try {
 			this.meet_state = MeetingState.STARTED;
 			this.meet_time_start = new Timestamp(System.currentTimeMillis());
@@ -148,6 +150,26 @@ public class meeting implements Serializable {
 			session.persist(this);
 
 			session.getTransaction().commit();
+
+			return this;
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
+	}
+
+	public meeting endMeeting(Session session) {
+		try {
+			this.meet_state = MeetingState.ENDED;
+			this.meet_time_end = new Timestamp(System.currentTimeMillis());
+
+			session.beginTransaction();
+
+			session.persist(this);
+
+			session.getTransaction().commit();
+
+			return this;
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
@@ -221,8 +243,11 @@ public class meeting implements Serializable {
 
 			query.where(
 				criteriaBuilder.equal(from.get("meet_leader"), user_id),
-				criteriaBuilder.notEqual(from.get("meet_state"), MeetingState.EDIT),
-				criteriaBuilder.lessThanOrEqualTo(meet_dates.get("meet_date"), criteriaBuilder.currentTimestamp())
+				criteriaBuilder.notEqual(from.get("meet_state"), MeetingState.STARTED),
+				criteriaBuilder.or(
+					criteriaBuilder.greaterThanOrEqualTo(from.get("meet_state"), MeetingState.CANCELLED),
+					criteriaBuilder.lessThanOrEqualTo(meet_dates.get("meet_date"), criteriaBuilder.currentTimestamp())
+				)
 			);
 
 			TypedQuery<meeting> query1 = entityManager.createQuery(select);
@@ -249,8 +274,13 @@ public class meeting implements Serializable {
 
 			query.where(
 				criteriaBuilder.equal(from.get("meet_leader"), user_id),
-				criteriaBuilder.notEqual(from.get("meet_state"), MeetingState.EDIT),
-				criteriaBuilder.greaterThan(meet_dates.get("meet_date"), criteriaBuilder.currentTimestamp())
+				criteriaBuilder.or(
+						criteriaBuilder.equal(from.get("meet_state"), MeetingState.STARTED),
+						criteriaBuilder.and(
+								criteriaBuilder.lessThan(from.get("meet_state"), MeetingState.CANCELLED),
+								criteriaBuilder.greaterThan(meet_dates.get("meet_date"), criteriaBuilder.currentTimestamp())
+						)
+				)
 			);
 
 			TypedQuery<meeting> query1 = entityManager.createQuery(select);
@@ -283,5 +313,9 @@ public class meeting implements Serializable {
 
 	public List<subject> getMeetSubjects() {
 		return subjects;
+	}
+
+	public MeetingState getMeetState() {
+		return meet_state;
 	}
 }
