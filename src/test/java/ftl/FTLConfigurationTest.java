@@ -1,15 +1,11 @@
 package ftl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import freemarker.template.TemplateException;
 import gson.GSONConfiguration;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import rest.util.PageCommons;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,7 +18,7 @@ class FTLConfigurationTest {
 
 	@Test
 	void executeTemplate() throws IOException, TemplateException {
-		String templateOutput = FTLParser.getParsedString(FTLConfiguration.getTestInstance(), null, "simple.ftlh");
+		String templateOutput = FTLParser.getParsedStringFromFile(FTLConfiguration.getTestInstance(), null, "simple.ftlh");
 		assertEquals("<html>\n" +
 				"<head>\n" +
 				"\t<title>Welcome!</title>\n" +
@@ -44,7 +40,7 @@ class FTLConfigurationTest {
 		latest.setName("green mouse");
 		root.put("latestProduct", latest);
 
-		String templateOutput = FTLParser.getParsedString(FTLConfiguration.getTestInstance(), root, "model.ftlh");
+		String templateOutput = FTLParser.getParsedStringFromFile(FTLConfiguration.getTestInstance(), root, "model.ftlh");
 		assertEquals("<html>\n" +
 				"<head>\n" +
 				"\t<title>Welcome!</title>\n" +
@@ -65,7 +61,7 @@ class FTLConfigurationTest {
 		Map<String, Object> root = new HashMap<>();
 		root.put("vartimestamp", 	formatterUTC.parse("2001-07-04T12:08:56.235Z"));
 
-		String templateOutput = FTLParser.getParsedString(FTLConfiguration.getTestInstance(), root, "datatypes.ftlh");
+		String templateOutput = FTLParser.getParsedStringFromFile(FTLConfiguration.getTestInstance(), root, "datatypes.ftlh");
 		assertEquals("<html>\n" +
 				"<head>\n" +
 				"\t<title>Welcome!</title>\n" +
@@ -106,7 +102,7 @@ class FTLConfigurationTest {
 		Map<String, Object> root = new HashMap<>();
 		root.put("app", GSONConfiguration.getInstance().getConfiguration().toJson(appData));
 
-		String templateOutput = FTLParser.getParsedString(FTLConfiguration.getTestInstance(), root, "objects2JSON.ftlh");
+		String templateOutput = FTLParser.getParsedStringFromFile(FTLConfiguration.getTestInstance(), root, "objects2JSON.ftlh");
 		assertEquals("<html>\n" +
 				"<head>\n" +
 				"\t<title>Welcome!</title>\n" +

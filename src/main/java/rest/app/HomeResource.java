@@ -42,7 +42,7 @@ public class HomeResource {
 		appData.put("navigation", navigationMap);
 
 		try {
-			return FTLParser.getParsedString(
+			return FTLParser.getParsedStringFromFile(
 					FTLConfiguration.getInstance(),
 					PageCommons.getFTLHeaderInfo(
 							request,

@@ -20,7 +20,7 @@ public class FTLConfiguration {
 	private static FTLConfiguration FTLConfigurationMainInstance;
 	private static FTLConfiguration FTLConfigurationTestInstance;
 	private static String 			FTLTemplateMainDirectory = "src/main/resources/ftl/";
-//	private static String 			FTLTemplateTestDirectory = "src/test/resources/ftl/";
+	//private static String 			FTLTemplateTestDirectory = "src/test/resources/ftl/";
 	private static String 			FTLTemplateTestDirectory = "D:\\workspace\\UOC\\Projecte final\\domeet.project\\src\\test\\resources\\ftl";
 
 	private Configuration configuration;

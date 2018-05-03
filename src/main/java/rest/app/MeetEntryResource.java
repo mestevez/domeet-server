@@ -44,7 +44,7 @@ public class MeetEntryResource {
 		navigation.put("back", "/");
 		appData.put("navigation", navigation);
 
-		return FTLParser.getParsedString(
+		return FTLParser.getParsedStringFromFile(
 				FTLConfiguration.getInstance(),
 				PageCommons.getFTLHeaderInfo(
 						request,
@@ -67,7 +67,7 @@ public class MeetEntryResource {
 		navigation.put("back", "/");
 		appData.put("navigation", navigation);
 
-		return FTLParser.getParsedString(
+		return FTLParser.getParsedStringFromFile(
 				FTLConfiguration.getInstance(),
 				PageCommons.getFTLHeaderInfo(
 						request,
@@ -90,7 +90,7 @@ public class MeetEntryResource {
 		navigation.put("back", "/");
 		appData.put("navigation", navigation);
 
-		return FTLParser.getParsedString(
+		return FTLParser.getParsedStringFromFile(
 				FTLConfiguration.getInstance(),
 				PageCommons.getFTLHeaderInfo(
 						request,
@@ -113,7 +113,7 @@ public class MeetEntryResource {
 		navigation.put("back", "/");
 		appData.put("navigation", navigation);
 
-		return FTLParser.getParsedString(
+		return FTLParser.getParsedStringFromFile(
 				FTLConfiguration.getInstance(),
 				PageCommons.getFTLHeaderInfo(
 						request,

@@ -4,7 +4,6 @@ import conf.database.JUnitDatabaseProps;
 import hibernate.SessionFactoryProvider;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -75,6 +74,6 @@ class test_schedule {
 		schedule	userSchedule	= appuser.getUserSchedule();
 
 		Assertions.assertNotNull(userSchedule);
-		Assertions.assertEquals(result, userSchedule.isOnWorkTime(DatatypeConverter.parseDateTime(testdate).getTime()));
+		Assertions.assertEquals(result, schedule_time.isOnWorkTime(session, userSchedule.getScheduleCode(), DatatypeConverter.parseDateTime(testdate).getTime()));
 	}
 }

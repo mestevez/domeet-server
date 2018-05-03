@@ -154,7 +154,7 @@ class test_meeting {
 	}
 
 	@Test
-	void addSubject() {
+	void addSubject()  {
 		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
 
 		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);

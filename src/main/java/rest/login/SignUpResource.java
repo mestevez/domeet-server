@@ -26,7 +26,7 @@ public class SignUpResource {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
 			return Response.accepted().entity(
-					FTLParser.getParsedString(
+					FTLParser.getParsedStringFromFile(
 							FTLConfiguration.getInstance(),
 							PageCommons.getFTLHeaderInfo(
 									request,
@@ -50,7 +50,7 @@ public class SignUpResource {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
 			return Response.accepted().entity(
-					FTLParser.getParsedString(
+					FTLParser.getParsedStringFromFile(
 							FTLConfiguration.getInstance(),
 							PageCommons.getFTLHeaderInfo(
 									request,

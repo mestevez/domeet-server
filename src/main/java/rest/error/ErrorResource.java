@@ -42,7 +42,7 @@ public class ErrorResource {
 	private static String _getErrorPage(HttpServletRequest httpRequest) throws IOException, TemplateException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			return FTLParser.getParsedString(
+			return FTLParser.getParsedStringFromFile(
 					FTLConfiguration.getInstance(),
 					PageCommons.getFTLHeaderInfo(
 							httpRequest,

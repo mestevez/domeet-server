@@ -61,7 +61,7 @@ public class AccountResource {
 			appData.put("navigation", navigation);
 
 			return Response.accepted().entity(
-					FTLParser.getParsedString(
+					FTLParser.getParsedStringFromFile(
 							FTLConfiguration.getInstance(),
 							PageCommons.getFTLHeaderInfo(
 									request,
