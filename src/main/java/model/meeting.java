@@ -1,8 +1,15 @@
 package model;
 
 import com.google.gson.annotations.Expose;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.jpa.FullTextQuery;
+import org.hibernate.search.jpa.Search;
+import org.hibernate.search.query.dsl.BooleanJunction;
+import org.hibernate.search.query.dsl.QueryBuilder;
 import util.DateUtils;
 
 import javax.persistence.*;
@@ -61,6 +68,14 @@ public class meeting implements Serializable {
 	@Expose
 	private List<subject> subjects = new ArrayList<>();
 
+	@OneToMany(targetEntity=attend.class, mappedBy="meet_id", fetch=FetchType.EAGER)
+	@Expose
+	Set<attend> attendants = new HashSet<>();
+
+	public void addAttendant(attend atobj) {
+		attendants.add(atobj);
+	}
+
 	public static meeting addMeeting(
 			Session session,
 			int meet_leader,
@@ -102,6 +117,22 @@ public class meeting implements Serializable {
 		return newMeeting;
 	}
 
+	public void addSubject(subject subject) {
+		subjects.add(subject);
+	}
+
+	public int getMaxOrder() {
+		return subjects.size() <= 0 ? -1 : subjects.get(subjects.size()-1).getSubjectOrder();
+	}
+
+	public void removeSubject(subject subject) {
+		subjects.remove(subject);
+	}
+
+	public void removeAttendant(attend attdobj) {
+		attendants.remove(attdobj);
+	}
+
 	public static meeting fromMap(Session session, Map<String, Object> map) throws ParseException {
 		meeting meet = session.get(meeting.class, ((Double)map.get("meet_id")).intValue());
 		Map meetLeader = (Map) map.get("meet_leader");
@@ -121,6 +152,54 @@ public class meeting implements Serializable {
 		}
 
 		return meet;
+	}
+
+	public List<user> searchPendingAttendants(Session session, String query) throws InterruptedException {
+		EntityManager em = session.getEntityManagerFactory().createEntityManager();
+
+		try {
+			FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
+			fullTextEntityManager.createIndexer().startAndWait();
+
+			// create native Lucene query unsing the query DSL
+			// alternatively you can write the Lucene query using the Lucene query parser
+			// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
+			QueryBuilder qb = fullTextEntityManager
+					.getSearchFactory()
+					.buildQueryBuilder()
+					.forEntity(user.class)
+					.get();
+
+			BooleanJunction whereClause = qb
+					.bool()
+					.must(
+							qb.keyword()
+									.fuzzy()
+									.onFields("user_firstname", "user_lastname", "user_company", "auth_user.user_mail")
+									.matching(query)
+									.createQuery()
+					).must(
+							qb.simpleQueryString().onField("user_id").matching(Integer.toString(meet_leader.getUserId())).createQuery()
+					).not();
+
+			Iterator<attend> iterator = attendants.iterator();
+			while (iterator.hasNext()) {
+				whereClause.must(
+						qb.simpleQueryString().onField("user_id").matching(Integer.toString(iterator.next().getUser().getUserId())).createQuery()
+				).not();
+			}
+
+			// wrap Lucene query in a javax.persistence.Query
+			FullTextQuery jpaQuery = fullTextEntityManager.createFullTextQuery(whereClause.createQuery(), user.class);
+
+			org.apache.lucene.search.Sort sort = new Sort(SortField.FIELD_SCORE);
+			jpaQuery.setSort(sort);
+
+			// execute search
+			return jpaQuery.getResultList();
+		} finally {
+			em.close();
+		}
 	}
 
 	public meeting setMeetState(Session session, MeetingState state) {
@@ -305,6 +384,23 @@ public class meeting implements Serializable {
 			session.getTransaction().rollback();
 			throw ex;
 		}
+	}
+
+	public Set<attend> getMeetAttendants() {
+		return attendants;
+	}
+
+	public attend getMeetAttendant(int user_id) {
+		attend attd = null;
+
+		Iterator<attend> iterator = attendants.iterator();
+		while (attd == null && iterator.hasNext()) {
+			attend attd_tmp = iterator.next();
+			if (attd_tmp.getUser().getUserId() == user_id)
+				attd = attd_tmp;
+		}
+
+		return attd;
 	}
 
 	public user getMeetLeader() {

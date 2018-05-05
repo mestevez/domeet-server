@@ -137,13 +137,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     ])
   ],
   // EDIT: enable watch
-  watch: true,
-  // EDIT: enable watch for modules
-  // https://github.com/vuejs-templates/webpack/issues/378
-  watchOptions: {
-    aggregateTimeout: 300,
-    poll: 400
-  }
+  watch: true
 })
 
 if (config.build.productionGzip) {

@@ -8,8 +8,8 @@ CREATE TABLE app.attend (
   attd_comment    TEXT
 );
 ALTER TABLE app.attend ADD CONSTRAINT pk_attend PRIMARY KEY (user_id, meet_id);
-ALTER TABLE app.attend ADD CONSTRAINT f_attend_user FOREIGN KEY (user_id) REFERENCES app.user(user_id);
-ALTER TABLE app.attend ADD CONSTRAINT f_attend_meeting FOREIGN KEY (meet_id) REFERENCES app.meeting(meet_id);
+ALTER TABLE app.attend ADD CONSTRAINT f_attend_user FOREIGN KEY (user_id) REFERENCES app.user(user_id) ON DELETE CASCADE;
+ALTER TABLE app.attend ADD CONSTRAINT f_attend_meeting FOREIGN KEY (meet_id) REFERENCES app.meeting(meet_id) ON DELETE CASCADE;
 ALTER TABLE app.attend ADD CONSTRAINT c_attend_status_range CHECK (
   attd_status IN (0, 1, 2, 3, 4)
 );

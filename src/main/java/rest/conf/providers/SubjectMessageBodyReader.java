@@ -4,7 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import conf.database.MainDatabaseProps;
 import gson.GSONConfiguration;
 import hibernate.SessionFactoryProvider;
-import model.meeting;
+import model.subject;
 import org.hibernate.Session;
 
 import javax.ws.rs.Consumes;
@@ -18,29 +18,26 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.text.ParseException;
 import java.util.Map;
 
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
-public class MeetingMessageBodyReader implements MessageBodyReader<meeting> {
+public class SubjectMessageBodyReader implements MessageBodyReader<subject> {
 	@Override
 	public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-		return type.isAssignableFrom(meeting.class);
+		return type.isAssignableFrom(subject.class);
 	}
 
 	@Override
-	public meeting readFrom(Class<meeting> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws WebApplicationException {
+	public subject readFrom(Class<subject> type, Type genericType, Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws WebApplicationException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
 			Type gsonType = new TypeToken<Map<String, Object>>(){}.getType();
-			return meeting.fromMap(
+			return subject.fromMap(
 					session,
 					GSONConfiguration.getInstance().getConfiguration()
 							.fromJson(new InputStreamReader(entityStream, "UTF-8"), gsonType)
 			);
-		} catch (ParseException e) {
-			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} finally {

@@ -12,7 +12,7 @@
               v-model="meetData.meet_title"
               :rules="[() => meetData.meet_title.length > 0 || i18n.rule_required]"
               required
-              @change="updateMeet"
+              @input="updateMeet"
             ></v-text-field>
           </v-flex>
           <v-flex xs12 sm5>
@@ -101,7 +101,7 @@
               suffix="min"
               step="5"
               min="0"
-              @change="updateMeet"
+              @input="updateMeet"
             ></v-text-field>
           </v-flex>
           <v-flex xs12 sm12>
@@ -111,7 +111,7 @@
               type="text"
               v-model="meetData.meet_description"
               multi-line
-              @change="updateMeet"
+              @input="updateMeet"
             ></v-text-field>
           </v-flex>
         </v-layout>
@@ -133,6 +133,8 @@ export default {
       meeting_date_data: this.meetData.meet_dates[0].meet_date,
       meeting_date_input: this.parseDate(this.meetData.meet_dates[0].meet_date, this.locale.dateformat), // Date in ISO format for date picker
       meeting_time_data: this.parseTime(this.meetData.meet_dates[0].meet_date),
+      updateTimeout: null,
+      onUpdate: false,
 
       i18n: Object.assign({
         title_general: 'General description',
@@ -180,7 +182,19 @@ export default {
       this.updateMeet()
     },
     updateMeet: function () {
-      this.meetData.save()
+      if (this.updateTimeout != null) {
+        clearTimeout(this.updateTimeout)
+      }
+
+      this.updateTimeout = setTimeout(() => {
+        this.updateTimeout = null
+        this.onUpdate = true
+        this.meetData.save().then(() => {
+          this.onUpdate = false
+        }).catch(() => {
+          this.onUpdate = false
+        })
+      }, 500)
     }
   }
 }

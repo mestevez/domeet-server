@@ -9,8 +9,12 @@ import org.junit.jupiter.api.*;
 import util.DateUtils;
 
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@Tag("model")
 class test_meeting {
 	private static Session session;
 
@@ -36,6 +40,10 @@ class test_meeting {
 			// Insert test data
 			user.addUser(session, "meetinguser1@test.es", "12345", "John", "Smith", null, null, null, "OFFICE");
 			user.addUser(session, "meetinguser2@test.es", "12345", "Mary", "Wilson", null, null, null, "OFFICE");
+			user.addUser(session, "meetinguser3@test.es", "12345", "Wilson", "Mars", null, null, null, "OFFICE");
+			user.addUser(session, "meetinguser4@test.es", "12345", "Jessica", "Donald", null, null, null, "OFFICE");
+			user.addUser(session, "meetinguser5@test.es", "12345", "Peter", "Machine", null, null, null, "OFFICE");
+			user.addUser(session, "meetinguser6@test.es", "12345", "Olivia", "Maxwell", null, null, null, "OFFICE");
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
@@ -167,5 +175,69 @@ class test_meeting {
 		Assertions.assertEquals("First subject", meet.getMeetSubjects().get(0).getTitle());
 		Assertions.assertEquals("Third subject", meet.getMeetSubjects().get(1).getTitle());
 		Assertions.assertEquals("Second subject", meet.getMeetSubjects().get(2).getTitle());
+	}
+
+	@Test
+	void getMaxSubjectOrder()  {
+		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
+
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);
+
+		subject first_subject = subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "First subject", new Short("10"), SubjectPriority.NORMAL);
+		subject second_subject = subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "Second subject", new Short("10"), SubjectPriority.NORMAL);
+		subject third_subject = subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "Third subject", new Short("10"), SubjectPriority.NORMAL);
+
+		Assertions.assertEquals(0, first_subject.getSubjectOrder());
+		Assertions.assertEquals(5, second_subject.getSubjectOrder());
+		Assertions.assertEquals(10, third_subject.getSubjectOrder());
+	}
+
+	@Test
+	void addAttendant() {
+		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
+		user user1 = user.getUser(session, auth_user.getUser(session, "meetinguser2@test.es").getUserID());
+		user user2 = user.getUser(session, auth_user.getUser(session, "meetinguser3@test.es").getUserID());
+
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);
+
+		attend.addAttendant(session, meet, user1);
+		attend.addAttendant(session, meet, user2);
+
+		Assertions.assertEquals(2, meet.getMeetAttendants().size());
+	}
+
+	@Test
+	void removeAttendant() {
+		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
+		user user1 = user.getUser(session, auth_user.getUser(session, "meetinguser2@test.es").getUserID());
+		user user2 = user.getUser(session, auth_user.getUser(session, "meetinguser3@test.es").getUserID());
+
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);
+
+		attend attdobj = attend.addAttendant(session, meet, user1);
+		attend.addAttendant(session, meet, user2);
+		attdobj.deleteAttendant(session);
+
+		Assertions.assertEquals(1, meet.getMeetAttendants().size());
+		Iterator<attend> iterator = meet.getMeetAttendants().iterator();
+		Assertions.assertEquals("meetinguser3@test.es", iterator.next().getUser().getUserAuth().getUserMail());
+	}
+
+	@Test
+	void searchAttendants() throws InterruptedException {
+		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
+		user user1 = user.getUser(session, auth_user.getUser(session, "meetinguser2@test.es").getUserID());
+
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);
+
+		attend.addAttendant(session, meet, user1);
+
+		meet.searchPendingAttendants(session, "M");
+		meet.searchPendingAttendants(session, "Ma");
+		meet.searchPendingAttendants(session, "Mar");
+		List<user> listUsers = meet.searchPendingAttendants(session, "mary");
+
+		assertEquals(1, listUsers.size());
+		assertEquals("meetinguser3@test.es", listUsers.get(0).getUserAuth().getUserMail());
 	}
 }

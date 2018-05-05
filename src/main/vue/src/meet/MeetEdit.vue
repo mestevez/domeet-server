@@ -22,13 +22,7 @@
               <subjectslist :meetData="app.meet" :i18nData="i18n"></subjectslist>
             </v-flex>
             <v-flex xs12>
-              <v-card>
-                <v-card-title primary-title>
-                  <v-container flex xs12>
-                    <div class="headline">{{ i18n.title_attendants }}</div>
-                  </v-container>
-                </v-card-title>
-              </v-card>
+              <attendantslist :meetData="app.meet" :i18nData="i18n"></attendantslist>
             </v-flex>
             <v-flex xs12>
               <v-card>
@@ -62,6 +56,7 @@ import AppFooter from '@/components/AppFooter'
 import AppErrorToast from '@/components/AppErrorToast'
 import MeetGeneralEdit from '@/components/MeetGeneralEdit'
 import MeetSubjectsEdit from '@/components/MeetSubjectsEdit'
+import MeetAttendantsEdit from '@/components/MeetAttendantsEdit'
 import Meeting, { MeetingState } from '@/model/meeting'
 
 const appData = window.appData || {}
@@ -72,7 +67,8 @@ export default {
     'appfooter': AppFooter,
     'apperrortoast': AppErrorToast,
     'generaledit': MeetGeneralEdit,
-    'subjectslist': MeetSubjectsEdit
+    'subjectslist': MeetSubjectsEdit,
+    'attendantslist': MeetAttendantsEdit
   },
 
   data () {
@@ -88,7 +84,6 @@ export default {
       user: Object.assign({
       }, appData.user),
       i18n: Object.assign({
-        title_attendants: 'Attendants',
         title_files: 'Files',
         label_search_user: 'Search user',
         btn_addfile: 'Add file',

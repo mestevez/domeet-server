@@ -1,7 +1,7 @@
 import { Model } from 'vue-mc'
 
 /**
- * Task model
+ * Subject model
  */
 export default class Subject extends Model {
   options () {
@@ -23,4 +23,10 @@ export default class Subject extends Model {
       delete: '/app/meet/subject/{subject_id}'
     }
   }
+}
+
+export let SubjectPriority = {
+  IRRELEVANT: 0,
+  NORMAL: 1,
+  ESSENTIAL: 2
 }

@@ -28,7 +28,7 @@ public class SessionFactoryProvider {
 			configuration.setProperty("hibernate.connection.password", 		databaseProps.getUserpassword());
 
 			// JDBC connection pool (use the built-in)
-			configuration.setProperty("hibernate.connection.pool_size", "1");
+			configuration.setProperty("hibernate.connection.pool_size", "5");
 
 			// SQL dialect
 			configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL9Dialect");
@@ -52,6 +52,7 @@ public class SessionFactoryProvider {
 			configuration.addAnnotatedClass(meeting.class);
 			configuration.addAnnotatedClass(meeting_date.class);
 			configuration.addAnnotatedClass(subject.class);
+			configuration.addAnnotatedClass(attend.class);
 
 			sessionFactory = configuration.buildSessionFactory();
 

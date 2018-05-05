@@ -306,6 +306,24 @@ public class MeetEntryResource {
 		}
 	}
 
+	@Path("/{meet_id}/searchAttendants")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response searchAttendants(
+			@Context HttpServletRequest request,
+			@PathParam("meet_id") int meet_id,
+			@QueryParam("q") String query
+	) throws InterruptedException {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+			return Response.ok().entity(meet.searchPendingAttendants(session, query)).build();
+		} finally {
+			session.close();
+		}
+	}
+
 	@Path("/{meet_id}/subjects")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -327,7 +345,9 @@ public class MeetEntryResource {
 	public Response subjectCreate(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			subject.addSubject(session, session.get(meeting.class, meet_id), 0, "[ Auto ]", new Short("10"), SubjectPriority.NORMAL);
+			meeting meet = session.get(meeting.class, meet_id);
+
+			subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "[ Auto ]", new Short("10"), SubjectPriority.NORMAL);
 
 			Map<String, Object> responseData = new HashMap<>();
 			return Response.ok().entity(responseData).build();
@@ -369,6 +389,40 @@ public class MeetEntryResource {
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/attend/{user_id}")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response attendantAdd(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id, @PathParam("user_id") int user_id) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+			user user = session.get(user.class, user_id);
+
+			attend.addAttendant(session, meet, user);
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/attend/{user_id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response attendantDelete(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id, @PathParam("user_id") int user_id) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+
+			meet.getMeetAttendant(user_id).deleteAttendant(session);
+			return Response.ok().build();
 		} finally {
 			session.close();
 		}

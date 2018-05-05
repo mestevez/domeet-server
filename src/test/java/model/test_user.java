@@ -88,7 +88,7 @@ class test_user {
 	}
 
 	@Test
-	void searchUsers() {
+	void searchUsers() throws InterruptedException {
 		user.addUser(session, "searchuser1@test.es", "12345", "Mary", "Walker", "Know Industry", null, null, null);
 		user.addUser(session, "searchuser2@test.es", "12345", "Tony", "Darma", "Bluestone Industry", null, null, null);
 		user.addUser(session, "searchuser3@test.es", "12345", "Elliese", "Indy", "Dharma Indstry", null, null, null);

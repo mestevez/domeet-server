@@ -1,5 +1,6 @@
 package gson;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import util.SerializableOrdinalEnumeration;
@@ -17,6 +18,7 @@ public class GSONConfiguration {
 			.registerTypeAdapterFactory(GsonHibernateProxyTypeAdapter.FACTORY)
 			.registerTypeHierarchyAdapter(SerializableOrdinalEnumeration.class, new GsonOrdinalEnumAdapter())
 			.excludeFieldsWithoutExposeAnnotation()
+			.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)
 			.serializeNulls()
 			.setPrettyPrinting();
 	}

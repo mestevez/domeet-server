@@ -8,8 +8,8 @@ CREATE TABLE app.subject (
   subject_time_start  TIMESTAMP,
   subject_time_end    TIMESTAMP
 );
-CREATE UNIQUE INDEX u_subject ON app.subject(subject_id, subject_order);
 ALTER TABLE app.subject ADD CONSTRAINT pk_subject PRIMARY KEY (subject_id);
+CREATE UNIQUE INDEX u_subject ON app.subject(meet_id, subject_order);
 ALTER TABLE app.subject ADD CONSTRAINT f_subject_meeting FOREIGN KEY (meet_id) REFERENCES app.meeting(meet_id) ON DELETE CASCADE ;
 ALTER TABLE app.subject ADD CONSTRAINT c_subject_info_end CHECK (
   subject_time_end IS NULL OR subject_time_start IS NOT NULL

@@ -1,6 +1,7 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.gson.annotations.Expose;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -24,24 +25,29 @@ public class user implements Serializable {
 
 	@Id
 	@Expose
+	@JsonProperty("user_id")	// Necessary because jackson converts attribute name to CamelCase style
 	private Integer user_id;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
 	@Expose
+	@JsonProperty("user_firstname")	// Necessary because jackson converts attribute name to CamelCase style
 	private String user_firstname;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
 	@Expose
+	@JsonProperty("user_lastname")	// Necessary because jackson converts attribute name to CamelCase style
 	private String user_lastname;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
 	@Expose
+	@JsonProperty("user_company")	// Necessary because jackson converts attribute name to CamelCase style
 	private String user_company;
 
 	@Expose
 	private String user_phone;
 
 	@Expose
+	@JsonProperty("user_photo")	// Necessary because jackson converts attribute name to CamelCase style
 	private byte[] user_photo;
 
 	@ManyToOne
@@ -166,10 +172,11 @@ public class user implements Serializable {
 		return user_schedule;
 	}
 
-	public static List<user> searchUsers(Session session, String query) {
+	public static List<user> searchUsers(Session session, String query) throws InterruptedException {
 		EntityManager em = session.getEntityManagerFactory().createEntityManager();
 
 		FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
+		fullTextEntityManager.createIndexer().startAndWait();
 
 		em.getTransaction().begin();
 
