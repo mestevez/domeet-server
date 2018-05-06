@@ -34,6 +34,7 @@ public class PageCommons {
 		Map<String, Object> sessUser = new HashMap<>();
 		user user = RestSessionUtils.getUserApp(request, session);
 		if (user != null) {
+			sessUser.put("user_id", user.getUserId());
 			sessUser.put("user_email", user.getUserAuth().getUserMail());
 			sessUser.put("user_first_name", user.getUserFirstname());
 			sessUser.put("user_last_name", user.getUserLastname());

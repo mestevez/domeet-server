@@ -344,12 +344,20 @@ public class meeting implements Serializable {
 
 			Join<meeting_date, Object> meet_dates = from.join("meet_dates", JoinType.INNER);
 
+			Subquery<attend> attendantSubQuery = query.subquery(attend.class);
+			Root<attend> attendantsFrom = attendantSubQuery.from(attend.class);
+			attendantSubQuery.where(criteriaBuilder.equal(attendantsFrom.get("meet_id"), from.get("meet_id")));
+			attendantSubQuery.select(attendantsFrom);
+
 			query.orderBy(criteriaBuilder.asc(meet_dates.get("meet_date")));
 
 			CriteriaQuery<meeting> select = query.select(from);
 
 			query.where(
-				criteriaBuilder.equal(from.get("meet_leader"), user_id),
+				criteriaBuilder.or(
+					criteriaBuilder.equal(from.get("meet_leader"), user_id),
+					criteriaBuilder.exists(attendantSubQuery)
+				),
 				criteriaBuilder.notEqual(from.get("meet_state"), MeetingState.STARTED),
 				criteriaBuilder.or(
 					criteriaBuilder.greaterThanOrEqualTo(from.get("meet_state"), MeetingState.CANCELLED),
@@ -375,12 +383,20 @@ public class meeting implements Serializable {
 
 			Join<meeting_date, Object> meet_dates = from.join("meet_dates", JoinType.INNER);
 
+			Subquery<attend> attendantSubQuery = query.subquery(attend.class);
+			Root<attend> attendantsFrom = attendantSubQuery.from(attend.class);
+			attendantSubQuery.where(criteriaBuilder.equal(attendantsFrom.get("meet_id"), from.get("meet_id")));
+			attendantSubQuery.select(attendantsFrom);
+
 			query.orderBy(criteriaBuilder.asc(meet_dates.get("meet_date")));
 
 			CriteriaQuery<meeting> select = query.select(from);
 
 			query.where(
-				criteriaBuilder.equal(from.get("meet_leader"), user_id),
+				criteriaBuilder.or(
+					criteriaBuilder.equal(from.get("meet_leader"), user_id),
+					criteriaBuilder.exists(attendantSubQuery)
+				),
 				criteriaBuilder.or(
 						criteriaBuilder.equal(from.get("meet_state"), MeetingState.STARTED),
 						criteriaBuilder.and(

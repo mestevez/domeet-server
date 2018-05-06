@@ -97,37 +97,54 @@ class test_meeting {
 		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
 		int meetUser2Id = auth_user.getUser(session, "meetinguser2@test.es").getUserID();
 
-		meeting meet1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
+		meeting meet1_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
 				.setMeetState(session, MeetingState.READY);
-		meeting meet2 = meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED )
+		meeting meet2_usr1 = meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED )
 				.startMeeting(session);
-		meeting meet3 = meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
+		meeting meet3_usr1 = meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
 				.setMeetState(session, MeetingState.READY);
 
-		meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED );
-		meeting.addMeeting(session, meetUser2Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED );
-		meeting.addMeeting(session, meetUser2Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
+		meeting meet1_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED )
+				.setMeetState(session, MeetingState.READY);;
+		meeting meet2_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED )
+				.startMeeting(session);
+		meeting meet3_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
 				.setMeetState(session, MeetingState.READY);
 
 		session.beginTransaction();
 
-		meeting_date meetDate1 = meet1.getMeetDates().iterator().next();
-		meetDate1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate1);
+		meeting_date meetDate1_usr1 = meet1_usr1.getMeetDates().iterator().next();
+		meetDate1_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate1_usr1);
 
-		meeting_date meetDate2 = meet2.getMeetDates().iterator().next();
-		meetDate1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate2);
+		meeting_date meetDate2_usr1 = meet2_usr1.getMeetDates().iterator().next();
+		meetDate1_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate2_usr1);
 
-		meeting_date meetDate3 = meet3.getMeetDates().iterator().next();
-		meetDate3.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
-		session.persist(meetDate3);
+		meeting_date meetDate3_usr1 = meet3_usr1.getMeetDates().iterator().next();
+		meetDate3_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+		session.persist(meetDate3_usr1);
+
+		meeting_date meetDate1_usr2 = meet1_usr2.getMeetDates().iterator().next();
+		meetDate1_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate1_usr2);
+
+		meeting_date meetDate2_usr2 = meet2_usr2.getMeetDates().iterator().next();
+		meetDate1_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate2_usr2);
+
+		meeting_date meetDate3_usr2 = meet3_usr2.getMeetDates().iterator().next();
+		meetDate3_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+		session.persist(meetDate3_usr2);
 
 		session.getTransaction().commit();
 
-		List<meeting> onEditMeetings = meeting.getForegoingMeetings(session, meetUser1Id);
+		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser1Id).size());
+		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser2Id).size());
 
-		Assertions.assertEquals(1, onEditMeetings.size());
+		attend.addAttendant(session, meet1_usr1, session.get(user.class, meetUser2Id));
+		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser1Id).size());
+		Assertions.assertEquals(2, meeting.getForegoingMeetings(session, meetUser2Id).size());
 	}
 
 	@Test
@@ -135,37 +152,54 @@ class test_meeting {
 		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
 		int meetUser2Id = auth_user.getUser(session, "meetinguser2@test.es").getUserID();
 
-		meeting meet1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
+		meeting meet1_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
 				.setMeetState(session, MeetingState.READY);
-		meeting meet2 = model.meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED)
+		meeting meet2_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED)
 				.startMeeting(session);
-		meeting meet3 = model.meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED)
+		meeting meet3_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED)
+				.setMeetState(session, MeetingState.READY);
+
+		meeting meet1_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
+				.setMeetState(session, MeetingState.READY);
+		meeting meet2_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED)
+				.startMeeting(session);
+		meeting meet3_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
 				.setMeetState(session, MeetingState.READY);
 
 		session.beginTransaction();
 
-		meeting_date meetDate1 = meet1.getMeetDates().iterator().next();
-		meetDate1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate1);
+		meeting_date meetDate1_usr1 = meet1_usr1.getMeetDates().iterator().next();
+		meetDate1_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate1_usr1);
 
-		meeting_date meetDate2 = meet2.getMeetDates().iterator().next();
-		meetDate2.setMeetDate(DateUtils.parseISOTimestampString2Java("2016-07-04T12:08:56.235Z"));
-		session.persist(meetDate2);
+		meeting_date meetDate2_usr1 = meet2_usr1.getMeetDates().iterator().next();
+		meetDate2_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2016-07-04T12:08:56.235Z"));
+		session.persist(meetDate2_usr1);
 
-		meeting_date meetDate3 = meet3.getMeetDates().iterator().next();
-		meetDate3.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
-		session.persist(meetDate3);
+		meeting_date meetDate3_usr1 = meet3_usr1.getMeetDates().iterator().next();
+		meetDate3_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+		session.persist(meetDate3_usr1);
+
+		meeting_date meetDate1_usr2 = meet1_usr2.getMeetDates().iterator().next();
+		meetDate1_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+		session.persist(meetDate1_usr2);
+
+		meeting_date meetDate2_usr2 = meet2_usr2.getMeetDates().iterator().next();
+		meetDate2_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2016-07-04T12:08:56.235Z"));
+		session.persist(meetDate2_usr2);
+
+		meeting_date meetDate3_usr2 = meet3_usr2.getMeetDates().iterator().next();
+		meetDate3_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+		session.persist(meetDate3_usr2);
 
 		session.getTransaction().commit();
 
-		meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED );
-		meeting.addMeeting(session, meetUser2Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED );
-		meeting.addMeeting(session, meetUser2Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
-				.setMeetState(session, MeetingState.READY);
+		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser1Id).size());
+		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser2Id).size());
 
-		List<meeting> onEditMeetings = meeting.getForthcommingMeetings(session, meetUser1Id);
-
-		Assertions.assertEquals(2, onEditMeetings.size());
+		attend.addAttendant(session, meet3_usr1, session.get(user.class, meetUser2Id));
+		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser1Id).size());
+		Assertions.assertEquals(3, meeting.getForthcommingMeetings(session, meetUser2Id).size());
 	}
 
 	@Test

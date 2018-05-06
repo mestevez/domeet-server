@@ -507,4 +507,23 @@ public class MeetEntryResource {
 			session.close();
 		}
 	}
+
+	@Path("/{meet_id}/attend/{user_id}")
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response attendantSave(@Context HttpServletRequest request, attend att) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			session.beginTransaction();
+
+			session.merge(att);
+
+			session.getTransaction().commit();
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
 }
