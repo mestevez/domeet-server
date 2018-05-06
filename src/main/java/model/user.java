@@ -1,7 +1,7 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -21,33 +21,29 @@ import java.util.List;
 @Entity
 @Indexed
 @Table( schema="app", name="user" )
+@JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
 public class user implements Serializable {
 
 	@Id
 	@Expose
-	@JsonProperty("user_id")	// Necessary because jackson converts attribute name to CamelCase style
 	private Integer user_id;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
 	@Expose
-	@JsonProperty("user_firstname")	// Necessary because jackson converts attribute name to CamelCase style
 	private String user_firstname;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
 	@Expose
-	@JsonProperty("user_lastname")	// Necessary because jackson converts attribute name to CamelCase style
 	private String user_lastname;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)
 	@Expose
-	@JsonProperty("user_company")	// Necessary because jackson converts attribute name to CamelCase style
 	private String user_company;
 
 	@Expose
 	private String user_phone;
 
 	@Expose
-	@JsonProperty("user_photo")	// Necessary because jackson converts attribute name to CamelCase style
 	private byte[] user_photo;
 
 	@ManyToOne

@@ -1,5 +1,7 @@
 package model;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import conf.database.JUnitDatabaseProps;
 import hibernate.SessionFactoryProvider;
 import org.hibernate.HibernateException;
@@ -8,9 +10,12 @@ import org.hibernate.Transaction;
 import org.junit.jupiter.api.*;
 import util.DateUtils;
 
+import java.io.IOException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,6 +36,8 @@ class test_meeting {
 	@BeforeEach
 	void beforeEach() {
 		try {
+			session.clear();
+
 			// Clean previous data
 			Transaction transaction = session.beginTransaction();
 			session.createQuery("DELETE FROM meeting WHERE meet_id > 50").executeUpdate();
@@ -171,10 +178,14 @@ class test_meeting {
 		subject.addSubject(session, meet, 10, "Second subject", new Short("10"), SubjectPriority.NORMAL);
 		subject.addSubject(session, meet, 5, "Third subject", new Short("10"), SubjectPriority.NORMAL);
 
-		Assertions.assertEquals(3, meet.getMeetSubjects().size());
-		Assertions.assertEquals("First subject", meet.getMeetSubjects().get(0).getTitle());
-		Assertions.assertEquals("Third subject", meet.getMeetSubjects().get(1).getTitle());
-		Assertions.assertEquals("Second subject", meet.getMeetSubjects().get(2).getTitle());
+		Iterator<subject> iterator = meet.getMeetSubjects().iterator();
+		Assertions.assertTrue(iterator.hasNext());
+		Assertions.assertEquals("First subject", iterator.next().getTitle());
+		Assertions.assertTrue(iterator.hasNext());
+		Assertions.assertEquals("Third subject", iterator.next().getTitle());
+		Assertions.assertTrue(iterator.hasNext());
+		Assertions.assertEquals("Second subject", iterator.next().getTitle());
+		Assertions.assertFalse(iterator.hasNext());
 	}
 
 	@Test
@@ -183,9 +194,9 @@ class test_meeting {
 
 		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);
 
-		subject first_subject = subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "First subject", new Short("10"), SubjectPriority.NORMAL);
-		subject second_subject = subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "Second subject", new Short("10"), SubjectPriority.NORMAL);
-		subject third_subject = subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "Third subject", new Short("10"), SubjectPriority.NORMAL);
+		subject first_subject = subject.addSubject(session, meet, meet.getSubjectMaxOrder() < 0 ? 0 : meet.getSubjectMaxOrder() + 5, "First subject", new Short("10"), SubjectPriority.NORMAL);
+		subject second_subject = subject.addSubject(session, meet, meet.getSubjectMaxOrder() < 0 ? 0 : meet.getSubjectMaxOrder() + 5, "Second subject", new Short("10"), SubjectPriority.NORMAL);
+		subject third_subject = subject.addSubject(session, meet, meet.getSubjectMaxOrder() < 0 ? 0 : meet.getSubjectMaxOrder() + 5, "Third subject", new Short("10"), SubjectPriority.NORMAL);
 
 		Assertions.assertEquals(0, first_subject.getSubjectOrder());
 		Assertions.assertEquals(5, second_subject.getSubjectOrder());
@@ -239,5 +250,76 @@ class test_meeting {
 
 		assertEquals(1, listUsers.size());
 		assertEquals("meetinguser3@test.es", listUsers.get(0).getUserAuth().getUserMail());
+	}
+
+	@Test
+	void meetingMapper() throws IOException {
+		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
+		user user1 = user.getUser(session, auth_user.getUser(session, "meetinguser2@test.es").getUserID());
+		user user2 = user.getUser(session, auth_user.getUser(session, "meetinguser3@test.es").getUserID());
+
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);
+		subject first_subject = subject.addSubject(session, meet, 0, "First subject", new Short("10"), SubjectPriority.NORMAL);
+		subject third_subject = subject.addSubject(session, meet, 10, "Third subject", new Short("10"), SubjectPriority.NORMAL);
+		subject second_subject = subject.addSubject(session, meet, 5, "Second subject", new Short("10"), SubjectPriority.NORMAL);
+
+		attend.addAttendant(session, meet, user1);
+		attend.addAttendant(session, meet, user2);
+
+		Map<String, Object> mapData = new HashMap();
+		mapData.put("user", user.getUser(session, meetUser1Id));
+		mapData.put("meet", meet);
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonstr = objectMapper.writeValueAsString(mapData);
+		System.out.println(jsonstr);
+		JsonNode jsonNode = objectMapper.reader().readTree(jsonstr);
+		JsonNode meetJSON = jsonNode.get("meet");
+		Assertions.assertEquals(meet.getMeetId().intValue(), meetJSON.get("meet_id").asInt());
+
+		Iterator<JsonNode> meet_subjects = meetJSON.get("meet_subjects").elements();
+		Assertions.assertTrue(meet_subjects.hasNext());
+		Assertions.assertEquals(first_subject.getSubjectOrder(), meet_subjects.next().get("subject_order").asInt());
+		Assertions.assertTrue(meet_subjects.hasNext());
+		Assertions.assertEquals(second_subject.getSubjectOrder(), meet_subjects.next().get("subject_order").asInt());
+		Assertions.assertTrue(meet_subjects.hasNext());
+		Assertions.assertEquals(third_subject.getSubjectOrder(), meet_subjects.next().get("subject_order").asInt());
+		Assertions.assertFalse(meet_subjects.hasNext());
+
+		Iterator<JsonNode> meet_attendants = meetJSON.get("meet_attendants").elements();
+		Assertions.assertTrue(meet_attendants.hasNext());
+		meet_attendants.next();
+		Assertions.assertTrue(meet_attendants.hasNext());
+		meet_attendants.next();
+		Assertions.assertFalse(meet_attendants.hasNext());
+	}
+
+	@Test
+	void addSubjectNote() {
+		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
+
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED);
+
+		subject first_subject = subject.addSubject(session, meet, 0, "First subject", new Short("10"), SubjectPriority.NORMAL);
+//		subject second_subject = subject.addSubject(session, meet, 10, "Second subject", new Short("10"), SubjectPriority.NORMAL);
+//		subject third_subject = subject.addSubject(session, meet, 5, "Third subject", new Short("10"), SubjectPriority.NORMAL);
+
+		int nextOrder = first_subject.getNotesMaxOrder(SubjectNoteType.AGREEMENT) < 0 ? 0 : first_subject.getNotesMaxOrder(SubjectNoteType.AGREEMENT) + 5;
+		subject_note.addNote(session, first_subject, nextOrder, "First agreement", SubjectNoteType.AGREEMENT);
+		nextOrder = first_subject.getNotesMaxOrder(SubjectNoteType.AGREEMENT) < 0 ? 0 : first_subject.getNotesMaxOrder(SubjectNoteType.AGREEMENT) + 5;
+		subject_note.addNote(session, first_subject, nextOrder, "Second agreement", SubjectNoteType.AGREEMENT);
+		nextOrder = first_subject.getNotesMaxOrder(SubjectNoteType.AGREEMENT) < 0 ? 0 : first_subject.getNotesMaxOrder(SubjectNoteType.AGREEMENT) + 5;
+		subject_note.addNote(session, first_subject, nextOrder, "Third agreement", SubjectNoteType.AGREEMENT);
+		nextOrder = first_subject.getNotesMaxOrder(SubjectNoteType.COMMENT) < 0 ? 0 : first_subject.getNotesMaxOrder(SubjectNoteType.COMMENT) + 5;
+		subject_note.addNote(session, first_subject, nextOrder, "First comment", SubjectNoteType.COMMENT);
+		nextOrder = first_subject.getNotesMaxOrder(SubjectNoteType.COMMENT) < 0 ? 0 : first_subject.getNotesMaxOrder(SubjectNoteType.COMMENT) + 5;
+		subject_note.addNote(session, first_subject, nextOrder, "Second comment", SubjectNoteType.COMMENT);
+		nextOrder = first_subject.getNotesMaxOrder(SubjectNoteType.COMMENT) < 0 ? 0 : first_subject.getNotesMaxOrder(SubjectNoteType.COMMENT) + 5;
+		subject_note.addNote(session, first_subject, nextOrder, "Third comment", SubjectNoteType.COMMENT);
+
+		Assertions.assertEquals(6, first_subject.getSubjectNotes().size());
+//		Assertions.assertEquals("First subject", meet.getMeetSubjects().get(0).getTitle());
+//		Assertions.assertEquals("Third subject", meet.getMeetSubjects().get(1).getTitle());
+//		Assertions.assertEquals("Second subject", meet.getMeetSubjects().get(2).getTitle());
 	}
 }

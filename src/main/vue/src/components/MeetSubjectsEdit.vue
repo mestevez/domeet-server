@@ -107,15 +107,16 @@ export default {
         method: 'POST'
       }).send().then((response) => {
         this.onUpdate = false
-        this.meetData.subjects.fetch().then((response) => {
-          console.log('OK')
-        })
+        window.location = window.location
+        // this.meetData.subjects.fetch().then((response) => { })
       }).catch(() => {
         this.onUpdate = false
       })
     },
     deleteSubject: function (subject) {
-      subject.delete()
+      subject.delete().then((response) => {
+        window.location = window.location
+      })
     },
     updateSubject: function (subject) {
       if (this.updateTimeout != null) {

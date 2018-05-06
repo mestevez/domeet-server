@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title primary-title>
+      <v-card-title primary-title>
       <v-container flex xs12>
         <div class="headline">{{ i18n.title_general }}</div>
         <v-layout row wrap>

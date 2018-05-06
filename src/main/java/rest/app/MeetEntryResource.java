@@ -306,6 +306,68 @@ public class MeetEntryResource {
 		}
 	}
 
+	@Path("/subject/{subject_id}/note")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response noteCreate(
+			@Context HttpServletRequest request,
+			@PathParam("subject_id") int subject_id,
+			@QueryParam("note_type") String note_type
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			subject sbjobj = session.get(subject.class, subject_id);
+			SubjectNoteType type = SubjectNoteType.fromKey(Short.parseShort(note_type));
+
+			int nextOrder = sbjobj.getNotesMaxOrder(type) < 0 ? 0 : sbjobj.getNotesMaxOrder(type) + 5;
+			subject_note.addNote(session, sbjobj, nextOrder, "[ Auto ]", type);
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/note/{note_id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response noteDelete(
+		@Context HttpServletRequest request,
+		@PathParam("note_id") int note_id
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			session.get(subject_note.class, note_id).deleteNote(session);
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/note/{note_id}")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response noteSave(
+		@Context HttpServletRequest request,
+		subject_note note
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			session.beginTransaction();
+
+			session.merge(note);
+
+			session.getTransaction().commit();
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
 	@Path("/{meet_id}/searchAttendants")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -347,7 +409,7 @@ public class MeetEntryResource {
 		try {
 			meeting meet = session.get(meeting.class, meet_id);
 
-			subject.addSubject(session, meet, meet.getMaxOrder() < 0 ? 0 : meet.getMaxOrder() + 5, "[ Auto ]", new Short("10"), SubjectPriority.NORMAL);
+			subject.addSubject(session, meet, meet.getSubjectMaxOrder() < 0 ? 0 : meet.getSubjectMaxOrder() + 5, "[ Auto ]", new Short("10"), SubjectPriority.NORMAL);
 
 			Map<String, Object> responseData = new HashMap<>();
 			return Response.ok().entity(responseData).build();
@@ -384,6 +446,24 @@ public class MeetEntryResource {
 			session.merge(subject);
 
 			session.getTransaction().commit();
+
+			return Response.ok().build();
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/subject/{subject_id}/start")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response subjectStart(@Context HttpServletRequest request, @PathParam("subject_id") int subject_id) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			session.get(subject.class, subject_id).startSubject(session);
 
 			return Response.ok().build();
 		} catch (HibernateException ex){

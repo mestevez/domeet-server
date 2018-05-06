@@ -15,7 +15,7 @@ public class GSONConfiguration {
 	private GSONConfiguration() {
 		gsonBuilder = new GsonBuilder()
 			.registerTypeAdapter(Date.class, new GsonUTCDateAdapter())
-			.registerTypeAdapterFactory(GsonHibernateProxyTypeAdapter.FACTORY)
+			//.registerTypeAdapterFactory(GsonHibernateProxyTypeAdapter.FACTORY)
 			.registerTypeHierarchyAdapter(SerializableOrdinalEnumeration.class, new GsonOrdinalEnumAdapter())
 			.excludeFieldsWithoutExposeAnnotation()
 			.setFieldNamingPolicy(FieldNamingPolicy.IDENTITY)

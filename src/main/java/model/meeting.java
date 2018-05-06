@@ -1,5 +1,8 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -21,6 +24,7 @@ import java.util.*;
 
 @Entity
 @Table( schema="app", name="meeting" )
+@JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
 public class meeting implements Serializable {
 
 	@Id
@@ -66,7 +70,7 @@ public class meeting implements Serializable {
 	@OneToMany(targetEntity=subject.class, mappedBy="meet_id", fetch=FetchType.EAGER)
 	@OrderBy("subject_order")
 	@Expose
-	private List<subject> subjects = new ArrayList<>();
+	private Set<subject> subjects = new HashSet<>();
 
 	@OneToMany(targetEntity=attend.class, mappedBy="meet_id", fetch=FetchType.EAGER)
 	@Expose
@@ -121,8 +125,32 @@ public class meeting implements Serializable {
 		subjects.add(subject);
 	}
 
-	public int getMaxOrder() {
-		return subjects.size() <= 0 ? -1 : subjects.get(subjects.size()-1).getSubjectOrder();
+	public int getSubjectMaxOrder() {
+		int max = -1;
+		for (subject subject : subjects) {
+			if (subject.getSubjectOrder() > max)
+				max = subject.getSubjectOrder();
+		}
+		return max;
+	}
+
+	public void finishRunningSubjects(Session session) {
+		try {
+			session.beginTransaction();
+
+			// FINISH PREVIOUS SUBJECTS
+			getMeetSubjects().forEach((sbjobj) -> {
+				if (sbjobj.isExecuting()) {
+					sbjobj.finishExecution();
+					session.persist(sbjobj);
+				}
+			});
+
+			session.getTransaction().commit();
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
 	}
 
 	public void removeSubject(subject subject) {
@@ -407,7 +435,7 @@ public class meeting implements Serializable {
 		return meet_leader;
 	}
 
-	public List<subject> getMeetSubjects() {
+	public Collection<subject> getMeetSubjects() {
 		return subjects;
 	}
 

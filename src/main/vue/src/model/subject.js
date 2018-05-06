@@ -1,4 +1,5 @@
-import { Model } from 'vue-mc'
+import { Model, Collection } from 'vue-mc'
+import SubjectNote from '@/model/subject_note'
 
 /**
  * Subject model
@@ -13,7 +14,8 @@ export default class Subject extends Model {
   // Attribute mutations.
   mutations () {
     return {
-      subject_duration: Number
+      subject_duration: Number,
+      notes: (notes) => new NotesList().add(notes)
     }
   }
 
@@ -29,4 +31,16 @@ export let SubjectPriority = {
   IRRELEVANT: 0,
   NORMAL: 1,
   ESSENTIAL: 2
+}
+
+class NotesList extends Collection {
+  model () {
+    return SubjectNote
+  }
+
+  routes () {
+    return {
+      fetch: '/app/meet/subject/{subject_id}/notes'
+    }
+  }
 }

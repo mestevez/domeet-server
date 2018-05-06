@@ -53,6 +53,7 @@ public class SessionFactoryProvider {
 			configuration.addAnnotatedClass(meeting_date.class);
 			configuration.addAnnotatedClass(subject.class);
 			configuration.addAnnotatedClass(attend.class);
+			configuration.addAnnotatedClass(subject_note.class);
 
 			sessionFactory = configuration.buildSessionFactory();
 
