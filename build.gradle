@@ -55,6 +55,9 @@ dependencies {
     // Gson
     compile "com.google.code.gson:gson:$gson_version"
 
+    // Apache FOP
+    compile "org.apache.xmlgraphics:fop:$fop_version"
+
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_version")

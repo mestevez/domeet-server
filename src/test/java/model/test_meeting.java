@@ -3,19 +3,27 @@ package model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import conf.database.JUnitDatabaseProps;
+import fop.FOPConfiguration;
+import fop.FOPMeeting;
+import fop.FOPProducer;
+import freemarker.template.TemplateException;
+import ftl.FTLConfiguration;
+import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.*;
+import org.xml.sax.SAXException;
 import util.DateUtils;
+import util.Path;
 
+import javax.xml.transform.TransformerException;
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -355,5 +363,35 @@ class test_meeting {
 //		Assertions.assertEquals("First subject", meet.getMeetSubjects().get(0).getTitle());
 //		Assertions.assertEquals("Third subject", meet.getMeetSubjects().get(1).getTitle());
 //		Assertions.assertEquals("Second subject", meet.getMeetSubjects().get(2).getTitle());
+	}
+
+	@Test
+	void minutesOfTheMeeting() throws IOException, SAXException, TransformerException, TemplateException {
+		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
+
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Progression control and exercices unification", null, new Short("30"), MeetingType.UNDETERMINED);
+		meet.startMeeting(session);
+		meet.endMeeting(session);
+		meet.concludeMeeting(session);
+
+		Locale locale = Locale.getDefault();
+		ResourceBundle bundle = ResourceBundle.getBundle("i18n/minutes", locale);
+
+		Map<String, Object> data =  new HashMap<>();
+		data.put("meet", new FOPMeeting(meet, locale));
+		data.put("i18n", bundle);
+
+		String templateOutput = FTLParser.getParsedStringFromFile(FTLConfiguration.getTestInstance(), data, "minute.ftl");
+
+		FOPProducer fopProducer = new FOPProducer(
+			FOPConfiguration.getInstance(),
+			templateOutput
+		);
+
+		fopProducer.transform();
+
+		FileUtils.copyFile(fopProducer.getPDF(), new File(Path.getTempPathFile("fop", "minute", "pdf")));
+
+		fopProducer.clean();
 	}
 }

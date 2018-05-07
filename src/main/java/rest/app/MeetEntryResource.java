@@ -279,7 +279,7 @@ public class MeetEntryResource {
 	public Response meetingConclude(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			session.get(meeting.class, meet_id).setMeetState(session, MeetingState.CONCLUDED);
+			session.get(meeting.class, meet_id).concludeMeeting(session);
 
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("redirect", UriBuilder.fromPath("/app/meet/{meet_id}").build(meet_id));

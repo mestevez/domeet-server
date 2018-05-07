@@ -265,6 +265,23 @@ public class meeting implements Serializable {
 		}
 	}
 
+	public meeting concludeMeeting(Session session) {
+		try {
+			this.meet_state = MeetingState.CONCLUDED;
+
+			session.beginTransaction();
+
+			session.persist(this);
+
+			session.getTransaction().commit();
+
+			return this;
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
+	}
+
 	public meeting endMeeting(Session session) {
 		try {
 			this.meet_state = MeetingState.ENDED;
@@ -457,5 +474,13 @@ public class meeting implements Serializable {
 
 	public MeetingState getMeetState() {
 		return meet_state;
+	}
+
+	public Timestamp getMeetTimeStart() {
+		return meet_time_start;
+	}
+
+	public Timestamp getMeetTimeEnd() {
+		return meet_time_end;
 	}
 }
