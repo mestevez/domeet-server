@@ -28,5 +28,4 @@
 	<!-- or for binary file -->
 	<hyphenation-pattern lang="fr" extension="hyp">lang/fr.hyp</hyphenation-pattern>
 
-	<!-- etc. etc..... -->
 </fop>

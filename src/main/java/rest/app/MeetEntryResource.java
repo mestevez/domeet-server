@@ -1,22 +1,24 @@
 package rest.app;
 
 import conf.database.MainDatabaseProps;
+import fop.FOPMeeting;
 import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
+import mail.MailConfiguration;
 import model.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.xml.sax.SAXException;
 import rest.util.PageCommons;
 import rest.util.RestSessionUtils;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.*;
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.util.*;
 
@@ -225,10 +227,10 @@ public class MeetEntryResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response meetingCreate(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
+	public Response meetingCreate(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) throws TemplateException, IOException, MessagingException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			session.get(meeting.class, meet_id).setMeetState(session, MeetingState.READY);
+			session.get(meeting.class, meet_id).createMeeting(session);
 
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("redirect", "/");
@@ -522,6 +524,26 @@ public class MeetEntryResource {
 			session.getTransaction().commit();
 
 			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/minute")
+	@GET
+	@Produces({"application/pdf"})
+	public Response getMinutesOfTheMeeting(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) throws TemplateException, TransformerException, SAXException, IOException {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+
+			String fileName = meet.getMeetTitle().replaceAll("\\s+", "_").toLowerCase();
+			StreamingOutput fileStream = new FOPMeeting(meet, request.getLocale()).getMinutesOfTheMeeting();
+
+			return Response
+					.ok(fileStream, MediaType.APPLICATION_OCTET_STREAM)
+					.header("Content-Disposition","attachment; filename=\"" + fileName + ".pdf\"")
+					.build();
 		} finally {
 			session.close();
 		}

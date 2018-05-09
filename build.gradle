@@ -58,6 +58,10 @@ dependencies {
     // Apache FOP
     compile "org.apache.xmlgraphics:fop:$fop_version"
 
+    // Java Mail
+    compile "javax.mail:javax.mail-api:$mail_version"
+    compile "com.sun.mail:javax.mail:$mail_version"
+
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")
     testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_version")

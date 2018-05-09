@@ -92,5 +92,8 @@ export default {
 </script>
 
 <style scoped>
-
+.headline {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>

@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
+import freemarker.template.TemplateException;
+import mail.MailConfiguration;
+import mail.MailMeetInvitation;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
@@ -15,8 +19,10 @@ import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import util.DateUtils;
 
+import javax.mail.MessagingException;
 import javax.persistence.*;
 import javax.persistence.criteria.*;
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -135,8 +141,10 @@ public class meeting implements Serializable {
 	}
 
 	public void finishRunningSubjects(Session session) {
+		boolean isOnTrx = session.getTransaction() != null && session.getTransaction().getStatus() == TransactionStatus.ACTIVE;
 		try {
-			session.beginTransaction();
+			if (!isOnTrx)
+				session.beginTransaction();
 
 			// FINISH PREVIOUS SUBJECTS
 			getMeetSubjects().forEach((sbjobj) -> {
@@ -146,9 +154,11 @@ public class meeting implements Serializable {
 				}
 			});
 
-			session.getTransaction().commit();
+			if (!isOnTrx)
+				session.getTransaction().commit();
 		} catch (HibernateException ex){
-			session.getTransaction().rollback();
+			if (!isOnTrx)
+				session.getTransaction().rollback();
 			throw ex;
 		}
 	}
@@ -288,6 +298,8 @@ public class meeting implements Serializable {
 			this.meet_time_end = new Timestamp(System.currentTimeMillis());
 
 			session.beginTransaction();
+
+			finishRunningSubjects(session);
 
 			session.persist(this);
 
@@ -482,5 +494,10 @@ public class meeting implements Serializable {
 
 	public Timestamp getMeetTimeEnd() {
 		return meet_time_end;
+	}
+
+	public void createMeeting(Session session) throws IOException, TemplateException, MessagingException {
+		session.get(meeting.class, meet_id).setMeetState(session, MeetingState.READY);
+		MailConfiguration.getInstance().sendMail(new MailMeetInvitation(this).getMail());
 	}
 }

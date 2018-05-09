@@ -2,6 +2,7 @@ package ftl;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
+import util.Path;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +20,8 @@ import java.util.TimeZone;
 public class FTLConfiguration {
 	private static FTLConfiguration FTLConfigurationMainInstance;
 	private static FTLConfiguration FTLConfigurationTestInstance;
-	private static String 			FTLTemplateMainDirectory = "src/main/resources/ftl/";
-	//private static String 			FTLTemplateTestDirectory = "src/test/resources/ftl/";
-	private static String 			FTLTemplateTestDirectory = "D:\\workspace\\UOC\\Projecte final\\domeet.project\\src\\test\\resources\\ftl";
+	private static String 			FTLTemplateMainDirectory = Path.getRootPath() + "/src/main/resources/ftl/";
+	private static String 			FTLTemplateTestDirectory = Path.getRootPath() + "/src/test/resources/ftl/";
 
 	private Configuration configuration;
 

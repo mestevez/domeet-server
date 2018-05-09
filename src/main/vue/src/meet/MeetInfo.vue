@@ -158,7 +158,7 @@ export default {
       this.showErrorDialog = true
     },
     download: function () {
-      console.log('download')
+      window.open(this.app.meet.getURL('/app/meet/{meet_id}/minute', this.app.meet))
     },
     getIconStar: function (range, value) {
       let icon

@@ -3,14 +3,11 @@ package model;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import conf.database.JUnitDatabaseProps;
-import fop.FOPConfiguration;
 import fop.FOPMeeting;
-import fop.FOPProducer;
 import freemarker.template.TemplateException;
-import ftl.FTLConfiguration;
-import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
-import org.apache.commons.io.FileUtils;
+import mail.MailConfiguration;
+import mail.MailMeetInvitation;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -19,8 +16,10 @@ import org.xml.sax.SAXException;
 import util.DateUtils;
 import util.Path;
 
+import javax.mail.MessagingException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
@@ -59,6 +58,9 @@ class test_meeting {
 			user.addUser(session, "meetinguser4@test.es", "12345", "Jessica", "Donald", null, null, null, "OFFICE");
 			user.addUser(session, "meetinguser5@test.es", "12345", "Peter", "Machine", null, null, null, "OFFICE");
 			user.addUser(session, "meetinguser6@test.es", "12345", "Olivia", "Maxwell", null, null, null, "OFFICE");
+
+			user.addUser(session, "mestevez85@gmail.com", "12345", "Marc", "Estévez", "UOC", null, null, "OFFICE");
+			user.addUser(session, "raquel.cubina@gmail.com", "12345", "Raquel", "Cubiñá", null, null, null, "OFFICE");
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
@@ -375,23 +377,25 @@ class test_meeting {
 		meet.concludeMeeting(session);
 
 		Locale locale = Locale.getDefault();
-		ResourceBundle bundle = ResourceBundle.getBundle("i18n/minutes", locale);
 
-		Map<String, Object> data =  new HashMap<>();
-		data.put("meet", new FOPMeeting(meet, locale));
-		data.put("i18n", bundle);
+		File file = new File(Path.getTempPathFile("fop", "minute", "pdf"));
+		FileOutputStream fileOutputStream = new FileOutputStream(file);
+		new FOPMeeting(meet, locale).getMinutesOfTheMeeting().write(fileOutputStream);
+		fileOutputStream.close();
+	}
 
-		String templateOutput = FTLParser.getParsedStringFromFile(FTLConfiguration.getTestInstance(), data, "minute.ftl");
+	@Test
+	void sendInviteNotificationEmail() throws IOException, TemplateException, MessagingException {
+		int meetUser1Id = auth_user.getUser(session, "mestevez85@gmail.com").getUserID();
+		user user1 = user.getUser(session, auth_user.getUser(session, "meetinguser2@test.es").getUserID());
+		user user2 = user.getUser(session, auth_user.getUser(session, "meetinguser3@test.es").getUserID());
+		user user3 = user.getUser(session, auth_user.getUser(session, "raquel.cubina@gmail.com").getUserID());
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Progression control and exercices unification", null, new Short("30"), MeetingType.UNDETERMINED);
 
-		FOPProducer fopProducer = new FOPProducer(
-			FOPConfiguration.getInstance(),
-			templateOutput
-		);
+		attend.addAttendant(session, meet, user1);
+		attend.addAttendant(session, meet, user2);
+		attend.addAttendant(session, meet, user3);
 
-		fopProducer.transform();
-
-		FileUtils.copyFile(fopProducer.getPDF(), new File(Path.getTempPathFile("fop", "minute", "pdf")));
-
-		fopProducer.clean();
+		MailConfiguration.getInstance().sendMail(new MailMeetInvitation(meet).getMail());
 	}
 }
