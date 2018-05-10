@@ -20,7 +20,7 @@
 						</td>
 				</tr>
 				<tr>
-						<td colspan="2"><a href="${meet.getMeetURL()}">${i18n.label_goto}</a></td>
+						<td colspan="2"><a href="${meet.getMeetURL()}" target="_blank">${i18n.label_goto}</a></td>
 				</tr>
 		</tbody>
 	</table>

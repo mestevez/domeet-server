@@ -278,10 +278,14 @@ public class MeetEntryResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response meetingConclude(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
+	public Response meetingConclude(
+			@Context HttpServletRequest request,
+			@PathParam("meet_id") int meet_id,
+			@QueryParam("send_mail") @DefaultValue("false") boolean send_mail)
+			throws TemplateException, IOException, MessagingException, TransformerException, SAXException {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			session.get(meeting.class, meet_id).concludeMeeting(session);
+			session.get(meeting.class, meet_id).concludeMeeting(session, send_mail);
 
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("redirect", UriBuilder.fromPath("/app/meet/{meet_id}").build(meet_id));

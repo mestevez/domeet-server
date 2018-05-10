@@ -368,13 +368,13 @@ class test_meeting {
 	}
 
 	@Test
-	void minutesOfTheMeeting() throws IOException, SAXException, TransformerException, TemplateException {
+	void minutesOfTheMeeting() throws IOException, SAXException, TransformerException, TemplateException, MessagingException {
 		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
 
 		meeting meet = meeting.addMeeting(session, meetUser1Id, "Progression control and exercices unification", null, new Short("30"), MeetingType.UNDETERMINED);
 		meet.startMeeting(session);
 		meet.endMeeting(session);
-		meet.concludeMeeting(session);
+		meet.concludeMeeting(session, false);
 
 		Locale locale = Locale.getDefault();
 
@@ -396,6 +396,24 @@ class test_meeting {
 		attend.addAttendant(session, meet, user2);
 		attend.addAttendant(session, meet, user3);
 
-		MailConfiguration.getInstance().sendMail(new MailMeetInvitation(meet).getMail());
+		meet.createMeeting(session);
+	}
+
+	@Test
+	void sendMinutesOfTheMeetingEmail() throws IOException, TemplateException, MessagingException, TransformerException, SAXException {
+		int meetUser1Id = auth_user.getUser(session, "mestevez85@gmail.com").getUserID();
+		user user1 = user.getUser(session, auth_user.getUser(session, "meetinguser2@test.es").getUserID());
+		user user2 = user.getUser(session, auth_user.getUser(session, "meetinguser3@test.es").getUserID());
+		user user3 = user.getUser(session, auth_user.getUser(session, "raquel.cubina@gmail.com").getUserID());
+		meeting meet = meeting.addMeeting(session, meetUser1Id, "Progression control and exercices unification", null, new Short("30"), MeetingType.UNDETERMINED);
+
+		attend.addAttendant(session, meet, user1);
+		attend.addAttendant(session, meet, user2);
+		attend.addAttendant(session, meet, user3);
+
+		meet.createMeeting(session);
+		meet.startMeeting(session);
+		meet.endMeeting(session);
+		meet.concludeMeeting(session, true);
 	}
 }

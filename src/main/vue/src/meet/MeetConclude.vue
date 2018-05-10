@@ -94,7 +94,7 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="error" @click="confirmDialog = !confirmDialog">{{ i18n.btn_deny }}</v-btn>
-              <v-btn color="success" @click="execConclude">{{ i18n.btn_confirm }}</v-btn>
+              <v-btn color="success" @click="execConclude(false)">{{ i18n.btn_confirm }}</v-btn>
               <v-btn color="success" @click="execConclude(true)">{{ i18n.btn_confirmandmail }}</v-btn>
             </v-card-actions>
           </v-card>
@@ -186,7 +186,7 @@ export default {
     },
     execConclude: function (sendmail) {
       this.app.meet.getRequest({
-        url: this.app.meet.getURL('/app/meet/{meet_id}/conclude', this.app.meet),
+        url: this.app.meet.getURL('/app/meet/{meet_id}/conclude?send_mail=' + sendmail, this.app.meet),
         method: 'POST'
       }).send().then((response) => {
         if (response.response.data.redirect) {

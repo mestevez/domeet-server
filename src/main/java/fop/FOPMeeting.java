@@ -71,4 +71,23 @@ public class FOPMeeting {
 			output.flush();
 		};
 	}
+
+	public FOPProducer getMinutesOfTheMeetingAsFile() throws IOException, TemplateException, SAXException, TransformerException {
+		ResourceBundle bundle = ResourceBundle.getBundle("i18n/minutes", locale);
+
+		Map<String, Object> data =  new HashMap<>();
+		data.put("meet", this);
+		data.put("i18n", bundle);
+
+		String templateOutput = FTLParser.getParsedStringFromFile(FTLConfiguration.getInstance(), data, "minute.ftl");
+
+		FOPProducer fopProducer = new FOPProducer(
+			FOPConfiguration.getInstance(),
+			templateOutput
+		);
+
+		fopProducer.transform();
+
+		return fopProducer;
+	}
 }

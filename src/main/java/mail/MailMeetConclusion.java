@@ -1,12 +1,21 @@
 package mail;
 
+import fop.FOPMeeting;
+import fop.FOPProducer;
 import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import model.attend;
 import model.meeting;
 import model.user;
+import org.xml.sax.SAXException;
+import util.Path;
 
+import javax.activation.FileDataSource;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.transform.TransformerException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -14,20 +23,20 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
 
-public class MailMeetInvitation {
+public class MailMeetConclusion {
 	meeting meet;
 	Locale locale;
 	private DateFormat dateFormat;
 	private DateFormat timeFormat;
 
-	public MailMeetInvitation(meeting meet, Locale locale) {
+	public MailMeetConclusion(meeting meet, Locale locale) {
 		this.meet = meet;
 		this.locale = locale;
 		this.dateFormat = DateFormat.getDateInstance(DateFormat.LONG, locale);
 		this.timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
 	}
 
-	public MailMeetInvitation(meeting meet) {
+	public MailMeetConclusion(meeting meet) {
 		this(meet, Locale.getDefault());
 	}
 
@@ -68,8 +77,8 @@ public class MailMeetInvitation {
 		return timeFormat.format(new Timestamp(meetDate.getTime() + meet.getMeetDuration()*60*1000));
 	}
 
-	public Mail getMail() throws IOException, TemplateException {
-		ResourceBundle bundle = ResourceBundle.getBundle("i18n/mail_invite", locale);
+	public Mail getMail() throws IOException, TemplateException, TransformerException, SAXException {
+		ResourceBundle bundle = ResourceBundle.getBundle("i18n/mail_conclusion", locale);
 
 		Map<String, Object> data =  new HashMap<>();
 		data.put("meet", this);
@@ -81,11 +90,13 @@ public class MailMeetInvitation {
 			mailTo.add(attend.getUser().getUserAuth().getUserMail());
 		}
 
+		FOPProducer fopProducer = new FOPMeeting(meet, locale).getMinutesOfTheMeetingAsFile();
+
 		return new Mail(
 				mailTo,
 				null,
 				"DoMeet - " + meet.getMeetTitle(),
-				FTLParser.getParsedStringFromFile(FTLConfiguration.getInstance(), data, "mail_invite.ftl")
-		).setHTML();
+				FTLParser.getParsedStringFromFile(FTLConfiguration.getInstance(), data, "mail_conclusion.ftl")
+		).setHTML().addFile(new FileDataSource(fopProducer.getPDF()));
 	}
 }

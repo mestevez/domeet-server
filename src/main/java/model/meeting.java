@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
 import freemarker.template.TemplateException;
 import mail.MailConfiguration;
+import mail.MailMeetConclusion;
 import mail.MailMeetInvitation;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -17,11 +18,13 @@ import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import org.xml.sax.SAXException;
 import util.DateUtils;
 
 import javax.mail.MessagingException;
 import javax.persistence.*;
 import javax.persistence.criteria.*;
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -275,7 +278,7 @@ public class meeting implements Serializable {
 		}
 	}
 
-	public meeting concludeMeeting(Session session) {
+	public meeting concludeMeeting(Session session, boolean sendEmail) throws IOException, TemplateException, MessagingException, TransformerException, SAXException {
 		try {
 			this.meet_state = MeetingState.CONCLUDED;
 
@@ -284,6 +287,10 @@ public class meeting implements Serializable {
 			session.persist(this);
 
 			session.getTransaction().commit();
+
+			if (sendEmail) {
+				MailConfiguration.getInstance().sendMail(new MailMeetConclusion(this).getMail());
+			}
 
 			return this;
 		} catch (HibernateException ex){
@@ -375,7 +382,10 @@ public class meeting implements Serializable {
 
 			Subquery<attend> attendantSubQuery = query.subquery(attend.class);
 			Root<attend> attendantsFrom = attendantSubQuery.from(attend.class);
-			attendantSubQuery.where(criteriaBuilder.equal(attendantsFrom.get("meet_id"), from.get("meet_id")));
+			attendantSubQuery.where(
+				criteriaBuilder.equal(attendantsFrom.get("meet_id"), from.get("meet_id")),
+				criteriaBuilder.equal(attendantsFrom.get("user_id"), user_id)
+			);
 			attendantSubQuery.select(attendantsFrom);
 
 			query.orderBy(criteriaBuilder.asc(meet_dates.get("meet_date")));
@@ -387,6 +397,7 @@ public class meeting implements Serializable {
 					criteriaBuilder.equal(from.get("meet_leader"), user_id),
 					criteriaBuilder.exists(attendantSubQuery)
 				),
+				criteriaBuilder.notEqual(from.get("meet_state"), MeetingState.EDIT),
 				criteriaBuilder.notEqual(from.get("meet_state"), MeetingState.STARTED),
 				criteriaBuilder.or(
 					criteriaBuilder.greaterThanOrEqualTo(from.get("meet_state"), MeetingState.CANCELLED),
@@ -414,7 +425,10 @@ public class meeting implements Serializable {
 
 			Subquery<attend> attendantSubQuery = query.subquery(attend.class);
 			Root<attend> attendantsFrom = attendantSubQuery.from(attend.class);
-			attendantSubQuery.where(criteriaBuilder.equal(attendantsFrom.get("meet_id"), from.get("meet_id")));
+			attendantSubQuery.where(
+				criteriaBuilder.equal(attendantsFrom.get("meet_id"), from.get("meet_id")),
+				criteriaBuilder.equal(attendantsFrom.get("user_id"), user_id)
+			);
 			attendantSubQuery.select(attendantsFrom);
 
 			query.orderBy(criteriaBuilder.asc(meet_dates.get("meet_date")));
@@ -422,6 +436,7 @@ public class meeting implements Serializable {
 			CriteriaQuery<meeting> select = query.select(from);
 
 			query.where(
+				criteriaBuilder.notEqual(from.get("meet_state"), MeetingState.EDIT),
 				criteriaBuilder.or(
 					criteriaBuilder.equal(from.get("meet_leader"), user_id),
 					criteriaBuilder.exists(attendantSubQuery)
