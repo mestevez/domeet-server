@@ -1,6 +1,6 @@
 <template>
   <v-footer dark color="primary" app height="auto">
-    <span>&copy; 2018</span>
+    <span class="pl-2">&copy; 2018</span>
     <v-spacer></v-spacer>
     <div>
       <slot name="actions"></slot>

@@ -31,6 +31,7 @@ dependencies {
 
     // Jetty
     //compile "org.eclipse.jetty:jetty-server:$jetty_version"
+    compile "org.eclipse.jetty.websocket:websocket-server:$jetty_version"
 
     // Jersey
     compile "org.glassfish.jersey.containers:jersey-container-servlet-core:$jersey_version"
@@ -61,6 +62,9 @@ dependencies {
     // Java Mail
     compile "javax.mail:javax.mail-api:$mail_version"
     compile "com.sun.mail:javax.mail:$mail_version"
+
+    // Java RX Reactive
+    compile "io.reactivex.rxjava2:rxjava:$rx_version"
 
     // Junit dependencies
     testCompile("org.junit.jupiter:junit-jupiter-api:$junit_version")

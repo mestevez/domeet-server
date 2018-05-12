@@ -6,13 +6,12 @@ import conf.database.JUnitDatabaseProps;
 import fop.FOPMeeting;
 import freemarker.template.TemplateException;
 import hibernate.SessionFactoryProvider;
-import mail.MailConfiguration;
-import mail.MailMeetInvitation;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.jupiter.api.*;
 import org.xml.sax.SAXException;
+import util.BuildSamples;
 import util.DateUtils;
 import util.Path;
 
@@ -23,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -103,113 +103,105 @@ class test_meeting {
 	}
 
 	@Test
-	void getForegoingMeetingsList() throws ParseException {
-		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
-		int meetUser2Id = auth_user.getUser(session, "meetinguser2@test.es").getUserID();
-
-		meeting meet1_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
-				.setMeetState(session, MeetingState.READY);
-		meeting meet2_usr1 = meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED )
-				.startMeeting(session);
-		meeting meet3_usr1 = meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
-				.setMeetState(session, MeetingState.READY);
-
-		meeting meet1_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED )
-				.setMeetState(session, MeetingState.READY);;
-		meeting meet2_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED )
-				.startMeeting(session);
-		meeting meet3_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
-				.setMeetState(session, MeetingState.READY);
+	void getForegoingMeetingsList() {
+		auth_user meetUser1 = auth_user.getUser(session, "meetinguser1@test.es");
+		auth_user meetUser2 = auth_user.getUser(session, "meetinguser2@test.es");
 
 		session.beginTransaction();
 
-		meeting_date meetDate1_usr1 = meet1_usr1.getMeetDates().iterator().next();
-		meetDate1_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate1_usr1);
+		BiConsumer prepareFn = (BiConsumer<meeting, Integer>) (meet, index) -> {
+			try {
+				switch (index) {
+					case 0: {
+						meet.setMeetState(session, MeetingState.READY);
+						meeting_date meetDate = meet.getMeetDates().iterator().next();
+						meetDate.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+						session.persist(meetDate);
+						break;
+					} case 1: {
+						meet.startMeeting(session);
+						meeting_date meetDate = meet.getMeetDates().iterator().next();
+						meetDate.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+						session.persist(meetDate);
+						break;
+					} case 2: {
+						meet.setMeetState(session, MeetingState.READY);
+						meeting_date meetDate = meet.getMeetDates().iterator().next();
+						meetDate.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+						session.persist(meetDate);
+						break;
+					}
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		};
 
-		meeting_date meetDate2_usr1 = meet2_usr1.getMeetDates().iterator().next();
-		meetDate1_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate2_usr1);
+		BuildSamples sampler = new BuildSamples(session);
 
-		meeting_date meetDate3_usr1 = meet3_usr1.getMeetDates().iterator().next();
-		meetDate3_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
-		session.persist(meetDate3_usr1);
+		List<meeting> meetingUser1 = sampler.buildMeetingsForUser(meetUser1.getUserMail(), new String[]{}, 3, prepareFn);
 
-		meeting_date meetDate1_usr2 = meet1_usr2.getMeetDates().iterator().next();
-		meetDate1_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate1_usr2);
-
-		meeting_date meetDate2_usr2 = meet2_usr2.getMeetDates().iterator().next();
-		meetDate1_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate2_usr2);
-
-		meeting_date meetDate3_usr2 = meet3_usr2.getMeetDates().iterator().next();
-		meetDate3_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
-		session.persist(meetDate3_usr2);
+		sampler.buildMeetingsForUser(meetUser2.getUserMail(), new String[]{}, 3, prepareFn);
 
 		session.getTransaction().commit();
 
-		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser1Id).size());
-		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser2Id).size());
+		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser1.getUserID()).size());
+		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser2.getUserID()).size());
 
-		attend.addAttendant(session, meet1_usr1, session.get(user.class, meetUser2Id));
-		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser1Id).size());
-		Assertions.assertEquals(2, meeting.getForegoingMeetings(session, meetUser2Id).size());
+		attend.addAttendant(session, meetingUser1.get(0), session.get(user.class, meetUser2.getUserID()));
+		Assertions.assertEquals(1, meeting.getForegoingMeetings(session, meetUser1.getUserID()).size());
+		Assertions.assertEquals(2, meeting.getForegoingMeetings(session, meetUser2.getUserID()).size());
 	}
 
 	@Test
-	void getForthcommingMeetingsList() throws ParseException {
-		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
-		int meetUser2Id = auth_user.getUser(session, "meetinguser2@test.es").getUserID();
-
-		meeting meet1_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
-				.setMeetState(session, MeetingState.READY);
-		meeting meet2_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED)
-				.startMeeting(session);
-		meeting meet3_usr1 = model.meeting.addMeeting(session, meetUser1Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED)
-				.setMeetState(session, MeetingState.READY);
-
-		meeting meet1_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 1", null, new Short("30"), MeetingType.UNDETERMINED)
-				.setMeetState(session, MeetingState.READY);
-		meeting meet2_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 2", null, new Short("30"), MeetingType.UNDETERMINED)
-				.startMeeting(session);
-		meeting meet3_usr2 = meeting.addMeeting(session, meetUser2Id, "Meet 3", null, new Short("30"), MeetingType.UNDETERMINED )
-				.setMeetState(session, MeetingState.READY);
+	void getForthcommingMeetingsList() {
+		auth_user meetUser1 = auth_user.getUser(session, "meetinguser1@test.es");
+		auth_user meetUser2 = auth_user.getUser(session, "meetinguser2@test.es");
 
 		session.beginTransaction();
 
-		meeting_date meetDate1_usr1 = meet1_usr1.getMeetDates().iterator().next();
-		meetDate1_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate1_usr1);
+		BiConsumer prepareFn = (BiConsumer<meeting, Integer>) (meet, index) -> {
+			try {
+				switch (index) {
+					case 0: {
+						meet.setMeetState(session, MeetingState.READY);
+						meeting_date meetDate = meet.getMeetDates().iterator().next();
+						meetDate.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
+						session.persist(meetDate);
+						break;
+					} case 1: {
+						meet.startMeeting(session);
+						meeting_date meetDate = meet.getMeetDates().iterator().next();
+						meetDate.setMeetDate(DateUtils.parseISOTimestampString2Java("2016-07-04T12:08:56.235Z"));
+						session.persist(meetDate);
+						break;
+					} case 2: {
+						meet.setMeetState(session, MeetingState.READY);
+						meeting_date meetDate = meet.getMeetDates().iterator().next();
+						meetDate.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
+						session.persist(meetDate);
+						break;
+					}
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		};
 
-		meeting_date meetDate2_usr1 = meet2_usr1.getMeetDates().iterator().next();
-		meetDate2_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2016-07-04T12:08:56.235Z"));
-		session.persist(meetDate2_usr1);
+		BuildSamples sampler = new BuildSamples(session);
 
-		meeting_date meetDate3_usr1 = meet3_usr1.getMeetDates().iterator().next();
-		meetDate3_usr1.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
-		session.persist(meetDate3_usr1);
+		List<meeting> meetingsUser1 = sampler.buildMeetingsForUser(meetUser1.getUserMail(), new String[]{}, 3, prepareFn);
 
-		meeting_date meetDate1_usr2 = meet1_usr2.getMeetDates().iterator().next();
-		meetDate1_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2015-07-04T12:08:56.235Z"));
-		session.persist(meetDate1_usr2);
-
-		meeting_date meetDate2_usr2 = meet2_usr2.getMeetDates().iterator().next();
-		meetDate2_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2016-07-04T12:08:56.235Z"));
-		session.persist(meetDate2_usr2);
-
-		meeting_date meetDate3_usr2 = meet3_usr2.getMeetDates().iterator().next();
-		meetDate3_usr2.setMeetDate(DateUtils.parseISOTimestampString2Java("2101-07-04T12:08:56.235Z"));
-		session.persist(meetDate3_usr2);
+		sampler.buildMeetingsForUser(meetUser2.getUserMail(), new String[]{}, 3, prepareFn);
 
 		session.getTransaction().commit();
 
-		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser1Id).size());
-		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser2Id).size());
+		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser1.getUserID()).size());
+		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser2.getUserID()).size());
 
-		attend.addAttendant(session, meet3_usr1, session.get(user.class, meetUser2Id));
-		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser1Id).size());
-		Assertions.assertEquals(3, meeting.getForthcommingMeetings(session, meetUser2Id).size());
+		attend.addAttendant(session, meetingsUser1.get(2), session.get(user.class, meetUser2.getUserID()));
+		Assertions.assertEquals(2, meeting.getForthcommingMeetings(session, meetUser1.getUserID()).size());
+		Assertions.assertEquals(3, meeting.getForthcommingMeetings(session, meetUser2.getUserID()).size());
 	}
 
 	@Test

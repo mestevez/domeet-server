@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Table( schema="app", name="meeting_date" )
 public class meeting_date implements Serializable {
 	@Id
-	@SequenceGenerator(name="meeting_date_generator", sequenceName="meeting_date_seq")
+	@SequenceGenerator(initialValue=101,name="meeting_date_generator", sequenceName="meeting_date_seq")
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="meeting_date_generator")
 	private Integer meet_date_id;
 

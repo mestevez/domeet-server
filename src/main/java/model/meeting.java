@@ -1,6 +1,5 @@
 package model;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
@@ -37,7 +36,7 @@ import java.util.*;
 public class meeting implements Serializable {
 
 	@Id
-	@SequenceGenerator(name="meeting_generator", sequenceName="meeting_seq")
+	@SequenceGenerator(initialValue=101,name="meeting_generator", sequenceName="meeting_seq")
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="meeting_generator")
 	@Expose
 	private Integer meet_id;
@@ -85,8 +84,9 @@ public class meeting implements Serializable {
 	@Expose
 	Set<attend> attendants = new HashSet<>();
 
-	public void addAttendant(attend atobj) {
+	public void addAttendant(Session session, attend atobj) {
 		attendants.add(atobj);
+		notifyAttendantChanges(session);
 	}
 
 	public static meeting addMeeting(
@@ -102,9 +102,11 @@ public class meeting implements Serializable {
 		meeting_date meeting_date = new meeting_date();
 		meeting_date.setMeetDate(new Timestamp(System.currentTimeMillis()));
 
+		user leader = session.get(user.class, meet_leader);
+
 		newMeeting = new meeting();
 		newMeeting.meet_title = meet_title;
-		newMeeting.meet_leader = session.get(user.class, meet_leader);
+		newMeeting.meet_leader = leader;
 		newMeeting.meet_description = meet_description;
 		newMeeting.meet_duration = meet_duration;
 		newMeeting.meet_type = meet_type;
@@ -113,25 +115,51 @@ public class meeting implements Serializable {
 		newMeeting.meet_dates = new HashSet<>();
 		newMeeting.meet_dates.add(meeting_date);
 
+		boolean isOnTrx = session.getTransaction() != null && session.getTransaction().getStatus() == TransactionStatus.ACTIVE;
 		try {
-			session.beginTransaction();
+			if (!isOnTrx)
+				session.beginTransaction();
 
 			session.save(newMeeting);
 
 			meeting_date.setMeetId(newMeeting.meet_id);
 			session.persist(meeting_date);
 
+			if (!isOnTrx)
 			session.getTransaction().commit();
 		} catch (HibernateException ex){
-			session.getTransaction().rollback();
+			if (!isOnTrx)
+				session.getTransaction().rollback();
 			throw ex;
 		}
+
+		leader.notifyLeadingMeeting(session);
 
 		return newMeeting;
 	}
 
-	public void addSubject(subject subject) {
+	public void addSubject(Session session, subject subject) {
 		subjects.add(subject);
+		notifySubjectChanges(session);
+	}
+
+	public void createMeeting(Session session) throws IOException, TemplateException, MessagingException {
+		session.get(meeting.class, meet_id).setMeetState(session, MeetingState.READY);
+		MailConfiguration.getInstance().sendMail(new MailMeetInvitation(this).getMail());
+		notifyMeetingChanges(session);
+	}
+
+	public void deleteMeeting(Session session) {
+		try {
+			session.beginTransaction();
+			session.remove(this);
+			session.getTransaction().commit();
+
+			notifyMeetingChanges(session);
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
 	}
 
 	public int getSubjectMaxOrder() {
@@ -164,14 +192,18 @@ public class meeting implements Serializable {
 				session.getTransaction().rollback();
 			throw ex;
 		}
+
+		notifySubjectChanges(session);
 	}
 
-	public void removeSubject(subject subject) {
+	public void removeSubject(Session session, subject subject) {
 		subjects.remove(subject);
+		notifySubjectChanges(session);
 	}
 
-	public void removeAttendant(attend attdobj) {
+	public void removeAttendant(Session session, attend attdobj) {
 		attendants.remove(attdobj);
+		notifyAttendantChanges(session);
 	}
 
 	public static meeting fromMap(Session session, Map<String, Object> map) throws ParseException {
@@ -244,36 +276,48 @@ public class meeting implements Serializable {
 	}
 
 	public meeting setMeetState(Session session, MeetingState state) {
+		boolean isOnTrx = session.getTransaction() != null && session.getTransaction().getStatus() == TransactionStatus.ACTIVE;
 		try {
 			this.meet_state = state;
 
-			session.beginTransaction();
+			if (!isOnTrx)
+				session.beginTransaction();
 
 			session.persist(this);
 
-			session.getTransaction().commit();
+			if (!isOnTrx)
+				session.getTransaction().commit();
+
+			notifyMeetingChanges(session);
 
 			return this;
 		} catch (HibernateException ex){
-			session.getTransaction().rollback();
+			if (!isOnTrx)
+				session.getTransaction().rollback();
 			throw ex;
 		}
 	}
 
 	public meeting startMeeting(Session session) {
+		boolean isOnTrx = session.getTransaction() != null && session.getTransaction().getStatus() == TransactionStatus.ACTIVE;
 		try {
 			this.meet_state = MeetingState.STARTED;
 			this.meet_time_start = new Timestamp(System.currentTimeMillis());
 
-			session.beginTransaction();
+			if (!isOnTrx)
+				session.beginTransaction();
 
 			session.persist(this);
 
-			session.getTransaction().commit();
+			if (!isOnTrx)
+				session.getTransaction().commit();
+
+			notifyMeetingChanges(session);
 
 			return this;
 		} catch (HibernateException ex){
-			session.getTransaction().rollback();
+			if (!isOnTrx)
+				session.getTransaction().rollback();
 			throw ex;
 		}
 	}
@@ -287,6 +331,8 @@ public class meeting implements Serializable {
 			session.persist(this);
 
 			session.getTransaction().commit();
+
+			notifyMeetingChanges(session);
 
 			if (sendEmail) {
 				MailConfiguration.getInstance().sendMail(new MailMeetConclusion(this).getMail());
@@ -311,6 +357,8 @@ public class meeting implements Serializable {
 			session.persist(this);
 
 			session.getTransaction().commit();
+
+			notifyMeetingChanges(session);
 
 			return this;
 		} catch (HibernateException ex){
@@ -458,16 +506,17 @@ public class meeting implements Serializable {
 		}
 	}
 
-	public static void updateMeeting(Session session, int meet_id, String meet_title) {
-		meeting meeting = session.get(meeting.class, meet_id);
-		meeting.meet_title = meet_title;
-
+	public void updateMeeting(Session session) {
 		try {
 			session.beginTransaction();
 
-			session.persist(meeting);
+			session.merge(this);
+			session.merge(this.getMeetDates().iterator().next());
 
 			session.getTransaction().commit();
+
+			notifyMeetingChanges(session);
+
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
 			throw ex;
@@ -511,8 +560,23 @@ public class meeting implements Serializable {
 		return meet_time_end;
 	}
 
-	public void createMeeting(Session session) throws IOException, TemplateException, MessagingException {
-		session.get(meeting.class, meet_id).setMeetState(session, MeetingState.READY);
-		MailConfiguration.getInstance().sendMail(new MailMeetInvitation(this).getMail());
+	private void _notifyUsers(Session session) {
+		meet_leader.notifyLeadingMeeting(session);
+
+		attendants.forEach((attd) -> {
+			attd.getUser().notifyMeetingAttendance(session);
+		});
+	}
+
+	public void notifyMeetingChanges(Session session) {
+		_notifyUsers(session);
+	}
+
+	public void notifyAttendantChanges(Session session) {
+		_notifyUsers(session);
+	}
+
+	public void notifySubjectChanges(Session session) {
+		_notifyUsers(session);
 	}
 }

@@ -12,11 +12,13 @@ import rest.util.PageCommons;
 import rest.util.RestSessionUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +55,27 @@ public class HomeResource {
 							"home.css",
 							appData),
 					"webapp/vueapp.ftlh");
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/meetings")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getUserMeetings(@Context HttpServletRequest request) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		auth_user authUser = RestSessionUtils.getUserAuth(request, session);
+
+		Map<String, Object> appData = new HashMap<>();
+
+		appData.put("meetingsonedit", meeting.getOnEditMeetings(session, authUser.getUserID()));
+		appData.put("meetingsforthcomming", meeting.getForthcommingMeetings(session, authUser.getUserID()));
+		appData.put("meetingsforegoing", meeting.getForegoingMeetings(session, authUser.getUserID()));
+
+		try {
+			return Response.ok().entity(appData).build();
 		} finally {
 			session.close();
 		}

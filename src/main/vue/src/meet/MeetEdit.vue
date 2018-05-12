@@ -13,7 +13,7 @@
     <apptoolbar></apptoolbar>
     <v-content>
       <v-form v-model="validForm">
-        <v-container fluid grid-list-lg>
+        <v-container fluid grid-list-lg style="max-width: 600px;">
           <v-layout row wrap>
             <v-flex xs12>
               <generaledit :meetData="app.meet" :meetTypes="app.meet_types" :i18nData="i18n" :locale="user.locale"></generaledit>

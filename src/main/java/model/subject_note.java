@@ -15,7 +15,7 @@ import java.util.Map;
 public class subject_note {
 
 	@Id
-	@SequenceGenerator(name="note_generator", sequenceName="note_seq")
+	@SequenceGenerator(initialValue=101,name="note_generator", sequenceName="note_seq")
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="note_generator")
 	@Expose
 	private Integer note_id;

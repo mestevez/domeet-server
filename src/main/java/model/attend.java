@@ -39,17 +39,19 @@ public class attend implements Serializable {
 			user user
 	) {
 		attend atobj = new attend();
-		atobj.meet_id = meet.getMeetId();
-		atobj.user_id = user;
-		atobj.attd_status = AttendantState.PENDING;
-		meet.addAttendant(atobj);
 
 		try {
 			session.beginTransaction();
 
+			atobj.meet_id = meet.getMeetId();
+			atobj.user_id = user;
+			atobj.attd_status = AttendantState.PENDING;
+
 			session.persist(atobj);
 
 			session.getTransaction().commit();
+
+			meet.addAttendant(session, atobj);
 
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
@@ -76,10 +78,12 @@ public class attend implements Serializable {
 
 	public void deleteAttendant(Session session) {
 		meeting meet = session.get(meeting.class, meet_id);
-		meet.removeAttendant(this);
+		try {
+			session.beginTransaction();
 
-		try {session.beginTransaction();
+			meet.removeAttendant(session, this);
 			session.remove(this);
+
 			session.getTransaction().commit();
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();

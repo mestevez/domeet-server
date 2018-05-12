@@ -6,7 +6,6 @@ import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
-import mail.MailConfiguration;
 import model.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -183,17 +182,9 @@ public class MeetEntryResource {
 	public Response meetingSave(@Context HttpServletRequest request, meeting meet) {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			session.beginTransaction();
-
-			session.merge(meet);
-			session.merge(meet.getMeetDates().iterator().next());
-
-			session.getTransaction().commit();
+			meet.updateMeeting(session);
 
 			return Response.ok().build();
-		} catch (HibernateException ex){
-			session.getTransaction().rollback();
-			throw ex;
 		} finally {
 			session.close();
 		}
@@ -206,14 +197,7 @@ public class MeetEntryResource {
 	public Response meetingDelete(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			try {
-				session.beginTransaction();
-				session.remove(session.get(meeting.class, meet_id));
-				session.getTransaction().commit();
-			} catch (HibernateException ex){
-				session.getTransaction().rollback();
-				throw ex;
-			}
+			session.get(meeting.class, meet_id).deleteMeeting(session);
 
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("redirect", "/");

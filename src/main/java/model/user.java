@@ -1,21 +1,29 @@
 package model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.JsonAdapter;
+import gson.GsonUserPhotoAdapter;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.jpa.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
+import rx.exception.RXNotificationException;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -44,7 +52,16 @@ public class user implements Serializable {
 	private String user_phone;
 
 	@Expose
+	@JsonAdapter(GsonUserPhotoAdapter.class)
 	private byte[] user_photo;
+
+	@JsonGetter("user_photo")
+	public String getUserPhotoAsURL() {
+		if (user_photo == null || user_photo.length == 0)
+			return null;
+		else
+			return "/app/resources/userimage/" + user_id;
+	}
 
 	@ManyToOne
 	@JoinColumn(name="user_schedule")
@@ -55,6 +72,9 @@ public class user implements Serializable {
 	@OneToOne
 	@PrimaryKeyJoinColumn
 	private auth_user auth_user;
+
+	// Java RX
+	static Subject<user> meetingsObservable = PublishSubject.create();
 
 	public static user addUser(
 			Session session,
@@ -122,6 +142,10 @@ public class user implements Serializable {
 		}
 	}
 
+	public static Subject<user> getMeetingsObservable() {
+		return meetingsObservable;
+	}
+
 	public static user getUser(Session session, Integer user_id) {
 		return session.get(user.class, user_id);
 	}
@@ -166,6 +190,35 @@ public class user implements Serializable {
 
 	public schedule getUserSchedule() {
 		return user_schedule;
+	}
+
+	private void _notifyMeetingUpdate(Session session, long init) {
+		if (!session.isOpen() || session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
+			meetingsObservable.onNext(this);
+		} else {
+			new Thread(() -> {
+				try {
+					if (new Date().getTime() - init > 10000)
+						throw new RXNotificationException("Notification meeting timeout");
+
+					Thread.sleep(100);
+
+					_notifyMeetingUpdate(session, init);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (RXNotificationException e) {
+					e.printStackTrace();
+				}
+			}).start();
+		}
+	}
+
+	public void notifyLeadingMeeting(Session session) {
+		_notifyMeetingUpdate(session, new Date().getTime());
+	}
+
+	public void notifyMeetingAttendance(Session session) {
+		_notifyMeetingUpdate(session, new Date().getTime());
 	}
 
 	public static List<user> searchUsers(Session session, String query) throws InterruptedException {

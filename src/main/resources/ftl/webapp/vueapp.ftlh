@@ -6,8 +6,8 @@
 
 	<title>${pagetitle}</title>
 
-	<link href=/static/dist/css/${appcss} rel=stylesheet>
 	<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+	<link href=/static/dist/css/${appcss} rel=stylesheet>
 </head>
 <body>
 <div id=${appid}></div>

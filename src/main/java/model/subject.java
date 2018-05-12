@@ -19,7 +19,7 @@ public class subject implements Serializable {
 
 	@Id
 	@SequenceGenerator(name="subject_generator", sequenceName="subject_seq")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="subject_generator")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="subject_generator")
 	@Expose
 	private Integer subject_id;
 
@@ -64,17 +64,17 @@ public class subject implements Serializable {
 			SubjectPriority priority
 	) {
 		subject subj = new subject();
-		subj.meet_id = meet.getMeetId();
-		subj.subject_order = order;
-		subj.subject_title = title;
-		subj.subject_duration = duration;
-		subj.subject_priority = priority;
-		meet.addSubject(subj);
-
 		try {
 			session.beginTransaction();
 
+			subj.meet_id = meet.getMeetId();
+			subj.subject_order = order;
+			subj.subject_title = title;
+			subj.subject_duration = duration;
+			subj.subject_priority = priority;
 			session.persist(subj);
+
+			meet.addSubject(session, subj);
 
 			session.getTransaction().commit();
 
@@ -96,9 +96,9 @@ public class subject implements Serializable {
 
 	public void deleteSubject(Session session) {
 		meeting meet = session.get(meeting.class, meet_id);
-		meet.removeSubject(this);
-
-		try {session.beginTransaction();
+		try {
+			session.beginTransaction();
+			meet.removeSubject(session, this);
 			session.remove(this);
 			session.getTransaction().commit();
 		} catch (HibernateException ex){

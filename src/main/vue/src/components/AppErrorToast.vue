@@ -12,18 +12,18 @@
 <script>
 export default {
   name: 'AppErrorToast',
-  props: ['message', 'showErrorDialog'],
+  props: ['message'],
   data () {
     return {
-      snackbar: this.showErrorDialog,
+      snackbar: this.message != null,
       i18n: {
         'btn_close': 'Close'
       }
     }
   },
   watch: {
-    showErrorDialog: function () {
-      this.snackbar = this.showErrorDialog
+    message: function () {
+      this.snackbar = this.message != null
     }
   }
 }
