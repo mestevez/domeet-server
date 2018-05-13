@@ -23,6 +23,7 @@ export default {
   },
   watch: {
     message: function () {
+      console.log('message changed')
       this.snackbar = this.message != null
     }
   }

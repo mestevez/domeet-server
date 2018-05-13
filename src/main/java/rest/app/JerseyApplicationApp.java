@@ -22,6 +22,7 @@ public class JerseyApplicationApp extends Application {
 
 		// Jersey Readers & Writters
 		classes.add(MeetingMessageBodyReader.class);
+		classes.add(MeetingMessageBodyWriter.class);
 		classes.add(SubjectMessageBodyReader.class);
 		classes.add(SubjectNoteMessageBodyReader.class);
 		classes.add(AttendMessageBodyReader.class);

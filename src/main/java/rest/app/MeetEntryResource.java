@@ -176,6 +176,22 @@ public class MeetEntryResource {
 	}
 
 	@Path("/{meet_id}")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response meetingDispatcherJSON(
+			@Context HttpServletRequest request,
+			@PathParam("meet_id") int meet_id
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return Response.accepted().entity(session.get(meeting.class, meet_id)).build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -346,11 +362,7 @@ public class MeetEntryResource {
 	) {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			session.beginTransaction();
-
-			session.merge(note);
-
-			session.getTransaction().commit();
+			note.updateNote(session);
 
 			return Response.ok().build();
 		} finally {
@@ -431,16 +443,9 @@ public class MeetEntryResource {
 	public Response subjectSave(@Context HttpServletRequest request, subject subject) {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
-			session.beginTransaction();
-
-			session.merge(subject);
-
-			session.getTransaction().commit();
+			subject.updateSubject(session);
 
 			return Response.ok().build();
-		} catch (HibernateException ex){
-			session.getTransaction().rollback();
-			throw ex;
 		} finally {
 			session.close();
 		}
@@ -482,6 +487,24 @@ public class MeetEntryResource {
 		}
 	}
 
+	@Path("/{meet_id}/attend/confirm")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response attendantConfirm(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) throws TemplateException, IOException, MessagingException {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+			int user_id = RestSessionUtils.getUserAuth(request, session).getUserID();
+
+			meet.getMeetAttendant(user_id).confirmAttendant(session);
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
 	@Path("/{meet_id}/attend/{user_id}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
@@ -492,6 +515,60 @@ public class MeetEntryResource {
 			meeting meet = session.get(meeting.class, meet_id);
 
 			meet.getMeetAttendant(user_id).deleteAttendant(session);
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/attend/join")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response attendantJoin(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) throws TemplateException, IOException, MessagingException {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+			int user_id = RestSessionUtils.getUserAuth(request, session).getUserID();
+
+			meet.getMeetAttendant(user_id).joinAttendant(session);
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/attend/leave")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response attendantLeave(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) throws TemplateException, IOException, MessagingException {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+			int user_id = RestSessionUtils.getUserAuth(request, session).getUserID();
+
+			meet.getMeetAttendant(user_id).leaveAttendant(session);
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/attend/reject")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response attendantReject(@Context HttpServletRequest request, @PathParam("meet_id") int meet_id) throws TemplateException, IOException, MessagingException {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meeting meet = session.get(meeting.class, meet_id);
+			int user_id = RestSessionUtils.getUserAuth(request, session).getUserID();
+
+			meet.getMeetAttendant(user_id).rejectAttendant(session);
+
 			return Response.ok().build();
 		} finally {
 			session.close();

@@ -16,14 +16,34 @@ export default class Meeting extends Model {
   mutations () {
     return {
       meet_duration: Number,
-      subjects: (subjects) => new SubjectsList().add(subjects),
-      attendants: (attendants) => new AttendantsList().add(attendants)
+      subjects: (subjects) => {
+        if (!(subjects instanceof SubjectsList)) {
+          let subjectsList = new SubjectsList()
+          subjectsList.add(subjects)
+          subjects = subjectsList
+        }
+
+        return subjects
+      },
+      attendants: (attendants) => {
+        let attendantsList
+
+        if (attendants instanceof AttendantsList) {
+          attendantsList = attendants
+        } else {
+          attendantsList = new AttendantsList()
+          attendantsList.add(attendants)
+        }
+
+        return attendantsList
+      }
     }
   }
 
   routes () {
     return {
       save: '/app/meet/{meet_id}',
+      fetch: '/app/meet/{meet_id}',
       delete: '/app/meet/{meet_id}'
     }
   }

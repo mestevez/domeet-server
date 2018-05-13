@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
 import freemarker.template.TemplateException;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import mail.MailConfiguration;
 import mail.MailMeetConclusion;
 import mail.MailMeetInvitation;
@@ -18,6 +20,7 @@ import org.hibernate.search.jpa.Search;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.xml.sax.SAXException;
+import rx.exception.RXNotificationException;
 import util.DateUtils;
 
 import javax.mail.MessagingException;
@@ -83,6 +86,9 @@ public class meeting implements Serializable {
 	@OneToMany(targetEntity=attend.class, mappedBy="meet_id", fetch=FetchType.EAGER)
 	@Expose
 	Set<attend> attendants = new HashSet<>();
+
+	// Java RX
+	static Subject<meeting> meetingObservable = PublishSubject.create();
 
 	public void addAttendant(Session session, attend atobj) {
 		attendants.add(atobj);
@@ -162,6 +168,10 @@ public class meeting implements Serializable {
 		}
 	}
 
+	public static Subject<meeting> getMeetingObservable() {
+		return meetingObservable;
+	}
+
 	public int getSubjectMaxOrder() {
 		int max = -1;
 		for (subject subject : subjects) {
@@ -179,10 +189,8 @@ public class meeting implements Serializable {
 
 			// FINISH PREVIOUS SUBJECTS
 			getMeetSubjects().forEach((sbjobj) -> {
-				if (sbjobj.isExecuting()) {
-					sbjobj.finishExecution();
-					session.persist(sbjobj);
-				}
+				if (sbjobj.isExecuting())
+					sbjobj.finishExecution(session);
 			});
 
 			if (!isOnTrx)
@@ -194,6 +202,27 @@ public class meeting implements Serializable {
 		}
 
 		notifySubjectChanges(session);
+	}
+
+	private void _notifyMeetingUpdate(Session session, long init) {
+		if (!session.isOpen() || session.getTransaction().getStatus() != TransactionStatus.ACTIVE) {
+			meetingObservable.onNext(this);
+		} else {
+			new Thread(() -> {
+				try {
+					if (new Date().getTime() - init > 10000)
+						throw new RXNotificationException("Notification meeting timeout");
+
+					Thread.sleep(100);
+
+					_notifyMeetingUpdate(session, init);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (RXNotificationException e) {
+					e.printStackTrace();
+				}
+			}).start();
+		}
 	}
 
 	public void removeSubject(Session session, subject subject) {
@@ -570,13 +599,16 @@ public class meeting implements Serializable {
 
 	public void notifyMeetingChanges(Session session) {
 		_notifyUsers(session);
+		_notifyMeetingUpdate(session, new Date().getTime());
 	}
 
 	public void notifyAttendantChanges(Session session) {
 		_notifyUsers(session);
+		_notifyMeetingUpdate(session, new Date().getTime());
 	}
 
 	public void notifySubjectChanges(Session session) {
 		_notifyUsers(session);
+		_notifyMeetingUpdate(session, new Date().getTime());
 	}
 }

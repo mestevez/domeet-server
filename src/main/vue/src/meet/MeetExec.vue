@@ -13,9 +13,6 @@
     <apptoolbar></apptoolbar>
     <v-content>
       <v-layout column>
-        <v-flex xs1 shrink>
-          Header
-        </v-flex>
         <v-flex xs11>
           <h3 class="display-2">
             {{ app.meet.meet_title }}
@@ -23,7 +20,7 @@
           </h3>
           <attendantslist :meetData="app.meet" :i18nData="i18n"></attendantslist>
           <subjectslist :meetData="app.meet" :i18nData="i18n"></subjectslist>
-          <fileslist :meetData="app.meet" :i18nData="i18n"></fileslist>
+          <!--<fileslist :meetData="app.meet" :i18nData="i18n"></fileslist>-->
           <noteslist
             v-if="executingSubject != null"
             :subject="executingSubject"
@@ -64,14 +61,12 @@
         <v-btn dark color="secondary" @click="execEnd">{{ i18n.btn_endmeeting}}</v-btn>
       </template>
     </appfooter>
-    <apperrortoast :message="errorDialogMessage" :showErrorDialog="showErrorDialog" :i18n="i18n"></apperrortoast>
   </v-app>
 </template>
 
 <script>
 import AppToolbar from '@/components/AppToolbar'
 import AppFooter from '@/components/AppFooter'
-import AppErrorToast from '@/components/AppErrorToast'
 import MeetAttendantsList from '@/components/MeetAttendantsList'
 import MeetSubjectsList from '@/components/MeetSubjectsList'
 import MeetFilesList from '@/components/MeetFilesList'
@@ -85,7 +80,6 @@ export default {
   components: {
     'apptoolbar': AppToolbar,
     'appfooter': AppFooter,
-    'apperrortoast': AppErrorToast,
     'attendantslist': MeetAttendantsList,
     'subjectslist': MeetSubjectsList,
     'fileslist': MeetFilesList,
@@ -94,24 +88,18 @@ export default {
 
   computed: {
     executingSubject: function () {
-      let executingSubject = null
-      for (let i = 0, n = this.app.meet.subjects.length; i < n && executingSubject == null; i++) {
-        if (this.app.meet.subjects[i].subject_time_start != null && this.app.meet.subjects[i].subject_time_end == null) {
-          executingSubject = this.app.meet.subjects[i]
-        }
-      }
-      return executingSubject
+      return this.app.meet.subjects.find((subject) => {
+        return subject.subject_time_start != null && subject.subject_time_end == null
+      })
     }
   },
 
   data () {
     return {
       notificationsPanel: true,
-      errorDialogMessage: '',
-      showErrorDialog: false,
       SubjectNoteType: SubjectNoteType,
       app: Object.assign(appData.app, {
-        meet: new Meeting(appData.app.meet)
+        meet: this.$getModelInstance(Meeting, appData.app.meet)
       }),
       user: Object.assign({
       }, appData.user),
@@ -134,19 +122,6 @@ export default {
   },
 
   methods: {
-    _evtRequestError: function (errorResponse) {
-      let errdata = errorResponse.response.data
-      let srverr = errdata.srverr
-
-      if (srverr) {
-        this.errorDialogMessage = srverr.error_message
-      } else {
-        this.errorDialogMessage = this.i18n.error_unhandled
-      }
-
-      this.showErrorDialog = false
-      this.showErrorDialog = true
-    },
     execEnd: function () {
       this.app.meet.getRequest({
         url: this.app.meet.getURL('/app/meet/{meet_id}/end', this.app.meet),
@@ -155,8 +130,6 @@ export default {
         if (response.response.data.redirect) {
           window.location = response.response.data.redirect
         }
-      }).catch((error) => {
-        this._evtRequestError(error.response)
       })
     }
   }

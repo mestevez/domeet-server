@@ -71,12 +71,12 @@ export default {
     'meetingslist': MeetingsList
   },
   created: function () {
-    this.$initWebsocket('/user/meetings', () => {
+    this.$initWebsocket('/entity', () => {
       this.$socket.onmessage = (e) => {
         var data = JSON.parse(e.data)
         if (data.message === 'observe' && data.success === true) {
           // DO NOTHING
-        } else if (data.message === 'update' && data.key === this.user.user_id) {
+        } else if (data.message === 'update' && data.entity === 'user' && data.key === this.user.user_id) {
           this.refreshMeetings()
         }
       }

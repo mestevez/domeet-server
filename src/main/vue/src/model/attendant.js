@@ -33,3 +33,11 @@ export default class Attendant extends Model {
     return { meet_id: this.meet_id, user_id: this.user_id.user_id }
   }
 }
+
+export let AttendState = {
+  PENDING: 0,
+  NOTIFIED: 1,
+  REJECTED: 2,
+  CONFIRMED: 3,
+  ATTEND: 4
+}

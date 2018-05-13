@@ -42,14 +42,15 @@ public class subject_note {
 			SubjectNoteType type
 	) {
 		subject_note note = new subject_note();
-		note.subject_id = subject.getSubjectId();
-		note.note_order = order;
-		note.note_description = description;
-		note.note_type = type;
-		subject.addNote(note);
 
 		try {
 			session.beginTransaction();
+
+			note.subject_id = subject.getSubjectId();
+			note.note_order = order;
+			note.note_description = description;
+			note.note_type = type;
+			subject.addNote(session, note);
 
 			session.persist(note);
 
@@ -92,11 +93,13 @@ public class subject_note {
 
 	public void deleteNote(Session session) {
 		subject sbjobj = session.get(subject.class, subject_id);
-		sbjobj.removeNote(this);
 
 		try {
 			session.beginTransaction();
+
 			session.remove(this);
+			sbjobj.removeNote(session, this);
+
 			session.getTransaction().commit();
 		} catch (HibernateException ex){
 			session.getTransaction().rollback();
@@ -109,6 +112,26 @@ public class subject_note {
 			session.refresh(sbjobj);
 		} finally {
 			session.getTransaction().commit();
+		}
+	}
+
+	public void notifyNoteChanges(Session session) {
+		session.get(subject.class, subject_id).notifySubjectChanges(session);
+	}
+
+	public void updateNote(Session session) {
+		try {
+			session.beginTransaction();
+
+			session.merge(this);
+
+			notifyNoteChanges(session);
+
+			session.getTransaction().commit();
+
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
 		}
 	}
 }

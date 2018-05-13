@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.google.gson.annotations.Expose;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -51,8 +52,9 @@ public class subject implements Serializable {
 	@Expose
 	private Set<subject_note> notes = new HashSet<>();
 
-	public void addNote(subject_note note) {
+	public void addNote(Session session, subject_note note) {
 		notes.add(note);
+		notifySubjectChanges(session);
 	}
 
 	public static subject addSubject(
@@ -148,8 +150,23 @@ public class subject implements Serializable {
 		return subject_time_start != null && subject_time_end == null;
 	}
 
-	public void finishExecution() {
-		subject_time_end = new Timestamp(System.currentTimeMillis());
+	public void finishExecution(Session session) {
+		boolean isOnTrx = session.getTransaction() != null && session.getTransaction().getStatus() == TransactionStatus.ACTIVE;
+		try {
+			if (!isOnTrx)
+				session.beginTransaction();
+
+			subject_time_end = new Timestamp(System.currentTimeMillis());
+			notifySubjectChanges(session);
+			session.persist(this);
+
+			if (!isOnTrx)
+				session.getTransaction().commit();
+		} catch (HibernateException ex){
+			if (!isOnTrx)
+				session.getTransaction().rollback();
+			throw ex;
+		}
 	}
 
 	public void startSubject(Session session) {
@@ -158,9 +175,11 @@ public class subject implements Serializable {
 		try {
 			session.beginTransaction();
 
-			this.subject_time_start = new Timestamp(System.currentTimeMillis());
+			subject_time_start = new Timestamp(System.currentTimeMillis());
 
 			session.persist(this);
+
+			notifySubjectChanges(session);
 
 			session.getTransaction().commit();
 		} catch (HibernateException ex){
@@ -177,7 +196,28 @@ public class subject implements Serializable {
 		return notes;
 	}
 
-	public void removeNote(subject_note note) {
+	public void notifySubjectChanges(Session session) {
+		session.get(meeting.class, meet_id).notifySubjectChanges(session);
+	}
+
+	public void removeNote(Session session, subject_note note) {
 		notes.remove(note);
+		notifySubjectChanges(session);
+	}
+
+	public void updateSubject(Session session) {
+		try {
+			session.beginTransaction();
+
+			session.merge(this);
+
+			notifySubjectChanges(session);
+
+			session.getTransaction().commit();
+
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
 	}
 }

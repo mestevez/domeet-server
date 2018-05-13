@@ -6,15 +6,15 @@
           <v-layout>
             <v-flex>{{ i18n.title_subjects }} ({{ meetData.subjects.length }})</v-flex>
             <v-spacer></v-spacer>
-            <v-flex class="text-xs-right"><v-btn color="primary" @click="createSubject">{{  i18n.btn_addsubject}}</v-btn></v-flex>
+            <v-flex class="text-xs-right"><v-btn v-if="isLeader" color="primary" @click="createSubject">{{  i18n.btn_addsubject}}</v-btn></v-flex>
           </v-layout>
         </div>
         <div v-if="meetData.subjects.length == 0" v-html="i18n.label_nosubjects"></div>
         <v-list v-else>
-          <template v-for="(subject, index) in meetData.subjects">
-            <v-divider v-if="index &gt; 0" :key="index" inset></v-divider>
+          <template v-for="(subject, index) in meetData.subjects.toJSON()">
+            <v-divider v-if="index &gt; 0" :key="index"></v-divider>
             <v-list-tile :key="subject.subject_id">
-              <v-list-tile-action>
+              <v-list-tile-action v-if="isLeader">
                 <v-btn flat icon color="primary" @click="deleteSubject(subject)">
                   <v-icon>delete</v-icon>
                 </v-btn>
@@ -25,34 +25,38 @@
                     <v-text-field
                       :name="'subject_title' + index"
                       :placeholder="i18n.label_subject_title"
-                      v-model="meetData.subjects[index].subject_title"
-                      @input="updateSubject(meetData.subjects[index])"
+                      :readonly="!isLeader"
+                      v-model="subject.subject_title"
+                      @input="updateSubject(subject)"
                     ></v-text-field>
                   </v-flex>
                   <v-flex xs2 pa-0>
                     <v-text-field
                       :name="'subject_duration' + index"
                       :placeholder="i18n.label_subject_duration"
-                      v-model="meetData.subjects[index].subject_duration"
+                      :readonly="!isLeader"
+                      v-model="subject.subject_duration"
                       type="number"
                       suffix="min"
                       step="5"
                       min="0"
-                      @input="updateSubject(meetData.subjects[index])"
+                      @input="updateSubject(subject)"
                     ></v-text-field>
                   </v-flex>
-                  <v-flex xs2 pa-0>
+                  <v-flex xs2 pa-0 class="text-xs-right">
                     <v-btn
-                      v-if="meetData.subjects[index].subject_priority == SubjectPriority.IRRELEVANT"
-                      @click="meetData.subjects[index].subject_priority = SubjectPriority.NORMAL; updateSubject(meetData.subjects[index])"
+                      v-if="subject.subject_priority == SubjectPriority.IRRELEVANT"
+                      @click="subject.subject_priority = SubjectPriority.NORMAL; updateSubject(subject)"
+                      :disabled="!isLeader"
                       flat
                       icon
                       color="orange">
                       <v-icon>star_border</v-icon>
                     </v-btn>
                     <v-btn
-                      v-else-if="meetData.subjects[index].subject_priority == SubjectPriority.NORMAL"
-                      @click="meetData.subjects[index].subject_priority = SubjectPriority.ESSENTIAL; updateSubject(meetData.subjects[index])"
+                      v-else-if="subject.subject_priority == SubjectPriority.NORMAL"
+                      @click="subject.subject_priority = SubjectPriority.ESSENTIAL; updateSubject(subject)"
+                      :disabled="!isLeader"
                       flat
                       icon
                       color="orange">
@@ -60,7 +64,8 @@
                     </v-btn>
                     <v-btn
                       v-else
-                      @click="meetData.subjects[index].subject_priority = SubjectPriority.IRRELEVANT; updateSubject(meetData.subjects[index])"
+                      @click="subject.subject_priority = SubjectPriority.IRRELEVANT; updateSubject(subject)"
+                      :disabled="!isLeader"
                       flat
                       icon
                       color="orange">
@@ -82,12 +87,11 @@ import { SubjectPriority } from '@/model/subject'
 
 export default {
   name: 'MeetSubjectsEdit',
-  props: ['meetData', 'i18nData'],
+  props: ['meetData', 'i18nData', 'isLeader'],
   data () {
     return {
       SubjectPriority: SubjectPriority,
       updateTimeout: null,
-      onUpdate: false,
       i18n: Object.assign({
         title_subjects: 'Subjects',
         label_subject_title: 'Title',
@@ -101,22 +105,13 @@ export default {
   },
   methods: {
     createSubject: function () {
-      this.onUpdate = true
       this.meetData.getRequest({
         url: this.meetData.getURL('/app/meet/{meet_id}/subject/entry', this.meetData),
         method: 'POST'
-      }).send().then((response) => {
-        this.onUpdate = false
-        window.location = window.location
-        // this.meetData.subjects.fetch().then((response) => { })
-      }).catch(() => {
-        this.onUpdate = false
-      })
+      }).send()
     },
     deleteSubject: function (subject) {
-      subject.delete().then((response) => {
-        window.location = window.location
-      })
+      subject.delete()
     },
     updateSubject: function (subject) {
       if (this.updateTimeout != null) {
@@ -125,12 +120,7 @@ export default {
 
       this.updateTimeout = setTimeout(() => {
         this.updateTimeout = null
-        this.onUpdate = true
-        subject.save().then(() => {
-          this.onUpdate = false
-        }).catch(() => {
-          this.onUpdate = false
-        })
+        subject.save()
       }, 500)
     }
   }

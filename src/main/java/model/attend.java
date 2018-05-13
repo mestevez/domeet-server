@@ -6,6 +6,7 @@ import org.hibernate.Session;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Map;
 
 @Entity
@@ -33,6 +34,12 @@ public class attend implements Serializable {
 	@Expose
 	private String attd_comment;
 
+	@Expose
+	private Timestamp attd_time_join;
+
+	@Expose
+	private Timestamp attd_time_left;
+
 	public static attend addAttendant(
 			Session session,
 			meeting meet,
@@ -59,6 +66,22 @@ public class attend implements Serializable {
 		}
 
 		return atobj;
+	}
+
+	public void confirmAttendant(Session session) {
+		try {
+			session.beginTransaction();
+
+			attd_status = AttendantState.CONFIRMED;
+			session.persist(this);
+
+			session.getTransaction().commit();
+
+			session.get(meeting.class, meet_id).notifyAttendantChanges(session);
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
 	}
 
 	public static attend getAttend(Session session, int meet_id, int user_id) {
@@ -93,5 +116,54 @@ public class attend implements Serializable {
 
 	public user getUser() {
 		return user_id;
+	}
+
+	public void joinAttendant(Session session) {
+		try {
+			session.beginTransaction();
+
+			attd_time_join = new Timestamp(System.currentTimeMillis());
+			attd_status = AttendantState.ATTEND;
+			session.persist(this);
+
+			session.getTransaction().commit();
+
+			session.get(meeting.class, meet_id).notifyAttendantChanges(session);
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
+	}
+
+	public void leaveAttendant(Session session) {
+		try {
+			session.beginTransaction();
+
+			attd_time_left = new Timestamp(System.currentTimeMillis());
+			session.persist(this);
+
+			session.getTransaction().commit();
+
+			session.get(meeting.class, meet_id).notifyAttendantChanges(session);
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
+	}
+
+	public void rejectAttendant(Session session) {
+		try {
+			session.beginTransaction();
+
+			attd_status = AttendantState.REJECTED;
+			session.persist(this);
+
+			session.getTransaction().commit();
+
+			session.get(meeting.class, meet_id).notifyAttendantChanges(session);
+		} catch (HibernateException ex){
+			session.getTransaction().rollback();
+			throw ex;
+		}
 	}
 }

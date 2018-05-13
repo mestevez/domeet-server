@@ -6,7 +6,7 @@
           <v-layout row nowrap align-center>
             <v-flex xs6>{{ i18n.title_attendants }} ({{ meetData.attendants.length }})</v-flex>
             <v-flex xs6 class="text-xs-right align-center">
-              <v-menu v-model="showMenu" absolute top offset-y>
+              <v-menu v-if="isLeader" v-model="showMenu" absolute top offset-y>
                 <v-text-field
                   slot="activator"
                   prepend-icon="search"
@@ -25,14 +25,27 @@
         </div>
         <div v-if="meetData.attendants.length == 0" v-html="i18n.label_noattendants"></div>
         <v-list v-else>
-          <v-list-tile v-for="user in meetData.attendants" :key="user.user_id.user_id">
-            <v-list-tile-action>
-              <v-btn flat icon color="primary" @click="deleteAttendant(user.user_id)">
-                <v-icon>delete</v-icon>
-              </v-btn>
-            </v-list-tile-action>
-            <v-list-tile-title>{{ user.user_id.user_firstname }} {{ user.user_id.user_lastname }}</v-list-tile-title>
-          </v-list-tile>
+          <template v-for="(attd, index) in meetData.attendants.toJSON()">
+            <v-divider v-if="index &gt; 0" :key="index"></v-divider>
+            <v-list-tile :key="attd.user_id.user_id">
+              <v-list-tile-action v-if="isLeader">
+                <v-btn flat icon color="primary" @click="deleteAttendant(attd.user_id)">
+                  <v-icon>delete</v-icon>
+                </v-btn>
+              </v-list-tile-action>
+              <v-list-tile-title>
+                <v-layout row nowrap align-center>
+                  <v-flex xs10>{{ attd.user_id.user_firstname }} {{ attd.user_id.user_lastname }}</v-flex>
+                  <v-flex xs2 class="text-xs-right">
+                    <v-icon v-if="attd.attd_status == AttendState.PENDING" color="warning">event</v-icon>
+                    <v-icon v-if="attd.attd_status == AttendState.NOTIFIED" color="primary">event</v-icon>
+                    <v-icon v-if="attd.attd_status == AttendState.REJECTED" color="error">event_busy</v-icon>
+                    <v-icon v-if="attd.attd_status == AttendState.CONFIRMED" color="success">event_available</v-icon>
+                  </v-flex>
+                </v-layout>
+              </v-list-tile-title>
+            </v-list-tile>
+          </template>
         </v-list>
       </v-container>
     </v-card-title>
@@ -40,11 +53,14 @@
 </template>
 
 <script>
+import { AttendState } from '@/model/attendant'
+
 export default {
   name: 'MeetAttendantsEdit',
-  props: ['meetData', 'i18nData'],
+  props: ['meetData', 'i18nData', 'isLeader'],
   data () {
     return {
+      AttendState: AttendState,
       showMenu: false,
       searchQuery: '',
       searchTimeout: null,
@@ -68,23 +84,15 @@ export default {
       this.meetData.getRequest({
         url: this.meetData.getURL('/app/meet/{meet_id}/attend/{user_id}', { meet_id: this.meetData.meet_id, user_id: user.user_id }),
         method: 'POST'
-      }).send().then((response) => {
-        window.location = window.location
-        // this.meetData.subjects.fetch().then((response) => {
-        //
-        // })
+      }).send().then(() => {
+        this.searchQuery = ''
       })
     },
     deleteAttendant: function (user) {
       this.meetData.getRequest({
         url: this.meetData.getURL('/app/meet/{meet_id}/attend/{user_id}', { meet_id: this.meetData.meet_id, user_id: user.user_id }),
         method: 'DELETE'
-      }).send().then((response) => {
-        window.location = window.location
-        // this.meetData.subjects.fetch().then((response) => {
-        //
-        // })
-      })
+      }).send()
     },
     searchUser: function () {
       if (this.searchTimeout != null) {
