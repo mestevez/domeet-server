@@ -24,26 +24,36 @@
           </v-layout>
         </div>
         <div v-if="meetData.attendants.length == 0" v-html="i18n.label_noattendants"></div>
-        <v-list v-else>
+        <v-list v-else three-lines>
           <template v-for="(attd, index) in meetData.attendants.toJSON()">
             <v-divider v-if="index &gt; 0" :key="index"></v-divider>
             <v-list-tile :key="attd.user_id.user_id">
+              <v-list-tile-avatar>
+                <img
+                  v-if="attd.user_id.user_photo != null"
+                  :src="attd.user_id.user_photo"
+                  alt=""
+                >
+                <v-icon v-else x-large>account_circle</v-icon>
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title>
+                  <v-layout row nowrap align-center>
+                    <v-flex xs2 class="text-xs-right">
+                      <v-icon v-if="attd.attd_status == AttendState.PENDING" color="warning">event</v-icon>
+                      <v-icon v-else-if="attd.attd_status == AttendState.NOTIFIED" color="primary">event</v-icon>
+                      <v-icon v-else-if="attd.attd_status == AttendState.REJECTED" color="error">event_busy</v-icon>
+                      <v-icon v-else color="success">event_available</v-icon>
+                    </v-flex>
+                    <v-flex xs10>{{ attd.user_id.user_firstname }} {{ attd.user_id.user_lastname }}</v-flex>
+                  </v-layout>
+                </v-list-tile-title>
+              </v-list-tile-content>
               <v-list-tile-action v-if="isLeader">
                 <v-btn flat icon color="primary" @click="deleteAttendant(attd.user_id)">
                   <v-icon>delete</v-icon>
                 </v-btn>
               </v-list-tile-action>
-              <v-list-tile-title>
-                <v-layout row nowrap align-center>
-                  <v-flex xs10>{{ attd.user_id.user_firstname }} {{ attd.user_id.user_lastname }}</v-flex>
-                  <v-flex xs2 class="text-xs-right">
-                    <v-icon v-if="attd.attd_status == AttendState.PENDING" color="warning">event</v-icon>
-                    <v-icon v-if="attd.attd_status == AttendState.NOTIFIED" color="primary">event</v-icon>
-                    <v-icon v-if="attd.attd_status == AttendState.REJECTED" color="error">event_busy</v-icon>
-                    <v-icon v-if="attd.attd_status == AttendState.CONFIRMED" color="success">event_available</v-icon>
-                  </v-flex>
-                </v-layout>
-              </v-list-tile-title>
             </v-list-tile>
           </template>
         </v-list>

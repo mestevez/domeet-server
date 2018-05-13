@@ -92,8 +92,9 @@ export default {
     attendantState: function () {
       let attendant = null
       this.app.meet.attendants.each((attd) => {
-        if (attd.user_id.user_id === this.user.user_id)
+        if (attd.user_id.user_id === this.user.user_id) {
           attendant = attd
+        }
       })
       return attendant == null ? AttendState.PENDING : attendant.attd_status
     }
@@ -111,8 +112,6 @@ export default {
       user: Object.assign({
       }, appData.user),
       i18n: Object.assign({
-        title_files: 'Files',
-        label_search_user: 'Search user',
         btn_addfile: 'Add file',
         btn_cancelmeeting: 'Cancel',
         btn_confirmmeeting: 'Confirm',
@@ -135,7 +134,11 @@ export default {
         if (data.message === 'observe' && data.success === true) {
           // DO NOTHING
         } else if (data.message === 'update' && data.entity === 'meeting' && data.key === this.app.meet.meet_id) {
-          this.app.meet.fetch()
+          if (!this.isLeader) {
+            this.app.meet.fetch()
+          } else {
+            this.$saveFetch(this.app.meet)
+          }
         }
       }
 

@@ -67,10 +67,13 @@
           v-model="app.user_schedule"
         ></v-select>
         <input type="hidden" name="user_schedule" :value="app.user_schedule">
-        <v-btn color="success" @click="submit">{{ i18n.btn_save }}</v-btn>
       </v-form>
     </v-content>
-    <appfooter></appfooter>
+    <appfooter>
+      <template slot="actions">
+        <v-btn color="success" @click="submit">{{ i18n.btn_save }}</v-btn>
+      </template>
+    </appfooter>
   </v-app>
 </template>
 
@@ -106,15 +109,15 @@ export default {
         working_hours: []
       }, appData.app),
       i18n: Object.assign({
+        btn_change_password: 'Change password',
         btn_change_photo: 'Change picture',
         btn_remove_photo: 'Remove picture',
-        btn_change_password: 'Change password',
         btn_save: 'Save',
+        label_company: 'Company',
         label_email: 'Email',
         label_first_name: 'First name',
         label_last_name: 'Last name',
         label_phonenum: 'Phone number',
-        label_company: 'Company',
         label_workinghours: 'Working hours',
         head_account_info: 'Account info',
         head_personal_data: 'Personal data',

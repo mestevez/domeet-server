@@ -23,7 +23,6 @@ module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
     account: './src/account/main.js',
-    app: './src/main.js',
     error: './src/error/main.js',
     home: './src/home/main.js',
     login: './src/login/main.js',

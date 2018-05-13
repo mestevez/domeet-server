@@ -166,4 +166,14 @@ public class attend implements Serializable {
 			throw ex;
 		}
 	}
+
+	public void updateAttendant(Session session) {
+		session.beginTransaction();
+
+		session.merge(this);
+
+		session.get(meeting.class, meet_id).notifyAttendantChanges(session);
+
+		session.getTransaction().commit();
+	}
 }

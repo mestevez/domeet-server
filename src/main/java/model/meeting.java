@@ -84,6 +84,7 @@ public class meeting implements Serializable {
 	private Set<subject> subjects = new HashSet<>();
 
 	@OneToMany(targetEntity=attend.class, mappedBy="meet_id", fetch=FetchType.EAGER)
+	@OrderBy
 	@Expose
 	Set<attend> attendants = new HashSet<>();
 

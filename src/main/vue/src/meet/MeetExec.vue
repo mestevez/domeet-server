@@ -12,53 +12,73 @@
     </v-navigation-drawer>
     <apptoolbar></apptoolbar>
     <v-content>
-      <v-layout column>
-        <v-flex xs11>
-          <h3 class="display-2">
-            {{ app.meet.meet_title }}
-            <template v-if="executingSubject != null"> - {{ executingSubject.subject_title }}</template>
-          </h3>
-          <attendantslist :meetData="app.meet" :i18nData="i18n"></attendantslist>
-          <subjectslist :meetData="app.meet" :i18nData="i18n"></subjectslist>
-          <!--<fileslist :meetData="app.meet" :i18nData="i18n"></fileslist>-->
-          <noteslist
-            v-if="executingSubject != null"
-            :subject="executingSubject"
-            :noteType="SubjectNoteType.DECISION"
-            :title="i18n.title_subject_decisions"
-            :addLabel="i18n.btn_add_decision"
-            :nodata="i18n.label_nodecisions"
-            :i18nData="i18n"></noteslist>
-          <noteslist
-            v-if="executingSubject != null"
-            :subject="executingSubject"
-            :noteType="SubjectNoteType.AGREEMENT"
-            :title="i18n.title_subject_agreements"
-            :addLabel="i18n.btn_add_agreement"
-            :nodata="i18n.label_noagreement"
-            :i18nData="i18n"></noteslist>
-          <noteslist
-            v-if="executingSubject != null"
-            :subject="executingSubject"
-            :noteType="SubjectNoteType.UNSETTLED"
-            :title="i18n.title_subject_unsettled"
-            :addLabel="i18n.btn_add_unsettled"
-            :nodata="i18n.label_nounsettled"
-            :i18nData="i18n"></noteslist>
-          <noteslist
-            v-if="executingSubject != null"
-            :subject="executingSubject"
-            :noteType="SubjectNoteType.COMMENT"
-            :title="i18n.title_subject_comments"
-            :addLabel="i18n.btn_add_comment"
-            :nodata="i18n.label_nocomment"
-            :i18nData="i18n"></noteslist>
-        </v-flex>
-      </v-layout>
+      <v-container fluid grid-list-lg style="max-width: 600px;">
+        <v-layout row wrap>
+          <v-flex xs12>
+            <h3 class="display-2">
+              {{ app.meet.meet_title }}
+              <template v-if="executingSubject != null"> - {{ executingSubject.subject_title }}</template>
+            </h3>
+           </v-flex>
+           <v-flex xs12>
+            <attendantslist :meetData="app.meet" :i18nData="i18n" :isLeader="isLeader"></attendantslist>
+           </v-flex>
+          <v-flex xs12>
+            <subjectslist :meetData="app.meet" :i18nData="i18n" :isLeader="isLeader"></subjectslist>
+          </v-flex>
+          <!--<v-flex xs12>-->
+            <!--<fileslist :meetData="app.meet" :i18nData="i18n"></fileslist>-->
+          <!--</v-flex>-->
+          <v-flex xs12>
+            <noteslist
+              v-if="executingSubject != null"
+              :subject="executingSubject"
+              :noteType="SubjectNoteType.DECISION"
+              :title="i18n.title_subject_decisions"
+              :addLabel="i18n.btn_add_decision"
+              :nodata="i18n.label_nodecisions"
+              :i18nData="i18n"
+              :isLeader="isLeader"></noteslist>
+          </v-flex>
+          <v-flex xs12>
+            <noteslist
+              v-if="executingSubject != null"
+              :subject="executingSubject"
+              :noteType="SubjectNoteType.AGREEMENT"
+              :title="i18n.title_subject_agreements"
+              :addLabel="i18n.btn_add_agreement"
+              :nodata="i18n.label_noagreement"
+              :i18nData="i18n"
+              :isLeader="isLeader"></noteslist>
+          </v-flex>
+          <v-flex xs12>
+            <noteslist
+              v-if="executingSubject != null"
+              :subject="executingSubject"
+              :noteType="SubjectNoteType.UNSETTLED"
+              :title="i18n.title_subject_unsettled"
+              :addLabel="i18n.btn_add_unsettled"
+              :nodata="i18n.label_nounsettled"
+              :i18nData="i18n"
+              :isLeader="isLeader"></noteslist>
+          </v-flex>
+          <v-flex xs12>
+            <noteslist
+              v-if="executingSubject != null"
+              :subject="executingSubject"
+              :noteType="SubjectNoteType.COMMENT"
+              :title="i18n.title_subject_comments"
+              :addLabel="i18n.btn_add_comment"
+              :nodata="i18n.label_nocomment"
+              :i18nData="i18n"
+              :isLeader="isLeader"></noteslist>
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-content>
     <appfooter>
       <template slot="actions">
-        <v-btn dark color="secondary" @click="execEnd">{{ i18n.btn_endmeeting}}</v-btn>
+        <v-btn v-if="isLeader" dark color="secondary" @click="execEnd">{{ i18n.btn_endmeeting}}</v-btn>
       </template>
     </appfooter>
   </v-app>
@@ -87,11 +107,32 @@ export default {
   },
 
   computed: {
+    isLeader: function () {
+      return this.app.meet.meet_leader.user_id === this.user.user_id
+    },
     executingSubject: function () {
       return this.app.meet.subjects.find((subject) => {
         return subject.subject_time_start != null && subject.subject_time_end == null
       })
     }
+  },
+  created: function () {
+    this.$initWebsocket('/entity', () => {
+      this.$socket.onmessage = (e) => {
+        var data = JSON.parse(e.data)
+        if (data.message === 'observe' && data.success === true) {
+          // DO NOTHING
+        } else if (data.message === 'update' && data.entity === 'meeting' && data.key === this.app.meet.meet_id) {
+          if (!this.isLeader) {
+            this.app.meet.fetch()
+          } else {
+            this.$saveFetch(this.app.meet)
+          }
+        }
+      }
+
+      this.$socket.sendObj({ message: 'observe', entity: 'meeting', key: this.app.meet.meet_id })
+    })
   },
 
   data () {
@@ -108,6 +149,7 @@ export default {
         btn_add_agreement: 'Add agreement',
         btn_add_unsettled: 'Add issue',
         btn_add_comment: 'Add comment',
+        btn_endmeeting: 'End',
         label_nodecisions: 'It looks like you have not taken any decision yet. Add one or more decisions for the executing subject.',
         label_noagreement: 'It looks like you have not reach any agreement yet. Add one or more agreements for the executing subject.',
         label_nounsettled: 'There is not pending issues',
@@ -115,8 +157,7 @@ export default {
         title_subject_decisions: 'Decisions Taken',
         title_subject_agreements: 'Agreements',
         title_subject_unsettled: 'Pending issues',
-        title_subject_comments: 'Comments',
-        btn_endmeeting: 'End'
+        title_subject_comments: 'Comments'
       }, appData.i18n)
     }
   },

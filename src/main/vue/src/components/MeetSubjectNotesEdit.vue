@@ -6,29 +6,33 @@
           <v-layout>
             <v-flex>{{ title }} ({{ notes.length }})</v-flex>
             <v-spacer></v-spacer>
-            <v-flex class="text-xs-right"><v-btn color="primary" @click="createNote">{{  addLabel }}</v-btn></v-flex>
+            <v-flex class="text-xs-right">
+              <v-btn v-if="isLeader" color="primary" @click="createNote">{{ addLabel }}</v-btn>
+            </v-flex>
           </v-layout>
         </div>
         <div v-if="notes.length == 0" v-html="nodata"></div>
-        <v-list v-else three-line>
+        <v-list v-else :three-line="isLeader">
           <template v-for="(note, index) in notes">
             <v-divider v-if="index &gt; 0" :key="index"></v-divider>
             <v-list-tile :key="note.note_id">
-              <v-list-tile-action class="align-start">
+              <v-list-tile-action v-if="isLeader">
                 <v-btn flat icon color="primary" @click="deleteNote(note)">
                   <v-icon>delete</v-icon>
                 </v-btn>
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-text-field
-                  v-model="notes[index].note_description"
+                  v-if="isLeader"
+                  v-model="note.note_description"
                   rows="3"
                   multi-line
                   single-line
                   full-width
-                  @input="updateNote(notes[index])"
+                  @input="updateNote(note)"
                   class="pa-0"
                 ></v-text-field>
+                <v-list-tile-title v-else>{{ note.note_description }}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
           </template>
@@ -41,7 +45,7 @@
 <script>
 export default {
   name: 'MeetSubjectNotesEdit',
-  props: ['subject', 'noteType', 'title', 'addLabel', 'nodata'],
+  props: ['subject', 'noteType', 'title', 'addLabel', 'nodata', 'isLeader'],
   computed: {
     notes: function () {
       let typenotes = []
@@ -56,32 +60,22 @@ export default {
   data () {
     return {
       updateTimeout: null,
-      onUpdate: false,
       i18n: Object.assign({
       }, this.i18nData)
     }
   },
   methods: {
     createNote: function () {
-      this.onUpdate = true
       this.subject.getRequest({
         url: this.subject.getURL('/app/meet/subject/{subject_id}/note', this.subject),
         method: 'POST',
         params: {
           note_type: this.noteType
         }
-      }).send().then((response) => {
-        this.onUpdate = false
-        window.location = window.location
-        // this.meetData.subjects.fetch().then((response) => { })
-      }).catch(() => {
-        this.onUpdate = false
-      })
+      }).send()
     },
     deleteNote: function (note) {
-      note.delete().then((response) => {
-        window.location = window.location
-      })
+      note.delete()
     },
     updateNote: function (note) {
       if (this.updateTimeout != null) {
@@ -90,12 +84,7 @@ export default {
 
       this.updateTimeout = setTimeout(() => {
         this.updateTimeout = null
-        this.onUpdate = true
-        note.save().then(() => {
-          this.onUpdate = false
-        }).catch(() => {
-          this.onUpdate = false
-        })
+        note.save()
       }, 500)
     }
   }

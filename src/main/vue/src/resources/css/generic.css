@@ -1,5 +1,6 @@
 .list.fit-content,
 .list.fit-content a,
-.list.fit-content .list__tile__title {
+.list.fit-content .list__tile__title,
+.list.fit-content .list__tile {
   height: auto;
 }

@@ -12,63 +12,100 @@
     </v-navigation-drawer>
     <apptoolbar></apptoolbar>
     <v-content>
-      <h3 class="display-2">{{ app.meet.meet_title }}</h3>
-      <v-card>
-        <v-card-title>
-          <div>
-            <h3 class="headline mb-0">{{ i18n.title_general_info }}</h3>
-            <div>
-              <div>{{ i18n.label_meet_time_start }}: {{ parseDate(app.meet.meet_time_start) }}</div>
-              <div>{{ i18n.label_meet_time_end }}: {{ parseDate(app.meet.meet_time_end) }}</div>
-              <div>{{ i18n.label_meet_duration }}: {{ app.meet.meet_duration }}</div>
-            </div>
-          </div>
-        </v-card-title>
-      </v-card>
-      <v-card v-for="(subject) in app.meet.subjects" :key="subject.subject_id">
-        <v-card-title>
-          <div>
-            <h3 class="headline mb-0">{{ subject.subject_title }}</h3>
-            <div v-if="subject.subject_time_end != null">
-              <div>{{ i18n.label_subject_time_start }}: {{ parseDate(subject.subject_time_start) }}</div>
-              <div>{{ i18n.label_subject_time_end }}: {{ parseDate(subject.subject_time_end) }}</div>
-              <div>{{ i18n.label_subject_duration }}: {{ subject.subject_duration }}</div>
-            </div>
-          </div>
-        </v-card-title>
-        <noteslist
-          :subject="subject"
-          :noteType="SubjectNoteType.DECISION"
-          :title="i18n.title_subject_decisions"
-          :addLabel="i18n.btn_add_decision"
-          :nodata="i18n.label_nodecisions"
-          :i18nData="i18n"></noteslist>
-        <noteslist
-          :subject="subject"
-          :noteType="SubjectNoteType.AGREEMENT"
-          :title="i18n.title_subject_agreements"
-          :addLabel="i18n.btn_add_agreement"
-          :nodata="i18n.label_noagreement"
-          :i18nData="i18n"></noteslist>
-        <noteslist
-          :subject="subject"
-          :noteType="SubjectNoteType.UNSETTLED"
-          :title="i18n.title_subject_unsettled"
-          :addLabel="i18n.btn_add_unsettled"
-          :nodata="i18n.label_nounsettled"
-          :i18nData="i18n"></noteslist>
-        <noteslist
-          :subject="subject"
-          :noteType="SubjectNoteType.COMMENT"
-          :title="i18n.title_subject_comments"
-          :addLabel="i18n.btn_add_comment"
-          :nodata="i18n.label_nocomment"
-          :i18nData="i18n"></noteslist>
-      </v-card>
+      <v-container fluid grid-list-lg style="max-width: 600px;">
+        <v-layout row wrap>
+          <v-flex xs12>
+            <h3 class="display-2">{{ app.meet.meet_title }}</h3>
+          </v-flex>
+          <v-flex xs12>
+            <v-card>
+              <v-card-title>
+                <div>
+                  <h3 class="headline mb-0">{{ i18n.title_general_info }}</h3>
+                  <div>
+                    <div>{{ i18n.label_meet_time_start }}: {{ parseDate(app.meet.meet_time_start) }}</div>
+                    <div>{{ i18n.label_meet_time_end }}: {{ parseDate(app.meet.meet_time_end) }}</div>
+                    <div>{{ i18n.label_meet_duration }}: {{ app.meet.meet_duration }}</div>
+                  </div>
+                </div>
+              </v-card-title>
+            </v-card>
+          </v-flex>
+          <v-flex xs12 v-for="(subject, index) in app.meet.subjects.toJSON()" :key="subject.subject_id">
+            <v-card>
+              <v-toolbar card prominent dark color="secondary">
+                <v-toolbar-title class="body-3">{{ subject.subject_title }}</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="toggleCollapse(index)">
+                  <v-icon v-if="isCollapsed(index)">expand_more</v-icon>
+                  <v-icon v-else>expand_less</v-icon>
+                </v-btn>
+              </v-toolbar>
+              <template v-if="!isCollapsed(index)">
+                <v-divider></v-divider>
+                <v-card-text>
+                  <v-container fluid grid-list-lg style="max-width: 600px;">
+                    <v-layout row wrap>
+                      <v-flex xs12>
+                        <div v-if="subject.subject_time_end != null">
+                          <div>{{ i18n.label_subject_time_start }}: {{ parseDate(subject.subject_time_start) }}</div>
+                          <div>{{ i18n.label_subject_time_end }}: {{ parseDate(subject.subject_time_end) }}</div>
+                          <div>{{ i18n.label_subject_duration }}: {{ subject.subject_duration }}</div>
+                        </div>
+                      </v-flex>
+
+                      <v-flex xs12>
+                        <noteslist
+                          :subject="subject"
+                          :noteType="SubjectNoteType.DECISION"
+                          :title="i18n.title_subject_decisions"
+                          :addLabel="i18n.btn_add_decision"
+                          :nodata="i18n.label_nodecisions"
+                          :i18nData="i18n"
+                          :isLeader="isLeader"></noteslist>
+                      </v-flex>
+                      <v-flex xs12>
+                        <noteslist
+                          :subject="subject"
+                          :noteType="SubjectNoteType.AGREEMENT"
+                          :title="i18n.title_subject_agreements"
+                          :addLabel="i18n.btn_add_agreement"
+                          :nodata="i18n.label_noagreement"
+                          :i18nData="i18n"
+                          :isLeader="isLeader"></noteslist>
+                      </v-flex>
+                      <v-flex xs12>
+                        <noteslist
+                          :subject="subject"
+                          :noteType="SubjectNoteType.UNSETTLED"
+                          :title="i18n.title_subject_unsettled"
+                          :addLabel="i18n.btn_add_unsettled"
+                          :nodata="i18n.label_nounsettled"
+                          :i18nData="i18n"
+                          :isLeader="isLeader"></noteslist>
+                      </v-flex>
+                      <v-flex xs12>
+                        <noteslist
+                          :subject="subject"
+                          :noteType="SubjectNoteType.COMMENT"
+                          :title="i18n.title_subject_comments"
+                          :addLabel="i18n.btn_add_comment"
+                          :nodata="i18n.label_nocomment"
+                          :i18nData="i18n"
+                          :isLeader="isLeader"></noteslist>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+                </v-card-text>
+              </template>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-content>
     <appfooter>
       <template slot="actions">
-        <v-dialog v-model="confirmDialog" persistent>
+        <v-dialog v-if="isLeader" v-model="confirmDialog" persistent>
           <v-btn color="secondary" slot="activator">{{ i18n.btn_concludemeeting}}</v-btn>
           <v-card>
             <v-toolbar dark color="primary">
@@ -101,7 +138,6 @@
         </v-dialog>
       </template>
     </appfooter>
-    <apperrortoast :message="errorDialogMessage" :showErrorDialog="showErrorDialog" :i18n="i18n"></apperrortoast>
   </v-app>
 </template>
 
@@ -109,7 +145,6 @@
 import moment from 'moment'
 import AppToolbar from '@/components/AppToolbar'
 import AppFooter from '@/components/AppFooter'
-import AppErrorToast from '@/components/AppErrorToast'
 import MeetSubjectNotesEdit from '@/components/MeetSubjectNotesEdit'
 import Meeting from '@/model/meeting'
 import { SubjectNoteType } from '@/model/subject_note'
@@ -120,19 +155,23 @@ export default {
   components: {
     'apptoolbar': AppToolbar,
     'appfooter': AppFooter,
-    'apperrortoast': AppErrorToast,
     'noteslist': MeetSubjectNotesEdit
+  },
+
+  computed: {
+    isLeader: function () {
+      return this.app.meet.meet_leader.user_id === this.user.user_id
+    }
   },
 
   data () {
     return {
+      collapsed: 0,
       confirmDialog: false,
       notificationsPanel: true,
-      errorDialogMessage: '',
-      showErrorDialog: false,
       SubjectNoteType: SubjectNoteType,
       app: Object.assign(appData.app, {
-        meet: new Meeting(appData.app.meet)
+        meet: this.$getModelInstance(Meeting, appData.app.meet)
       }),
       user: Object.assign({
       }, appData.user),
@@ -166,21 +205,26 @@ export default {
       }, appData.i18n)
     }
   },
-
-  methods: {
-    _evtRequestError: function (errorResponse) {
-      let errdata = errorResponse.response.data
-      let srverr = errdata.srverr
-
-      if (srverr) {
-        this.errorDialogMessage = srverr.error_message
-      } else {
-        this.errorDialogMessage = this.i18n.error_unhandled
+  created: function () {
+    this.$initWebsocket('/entity', () => {
+      this.$socket.onmessage = (e) => {
+        var data = JSON.parse(e.data)
+        if (data.message === 'observe' && data.success === true) {
+          // DO NOTHING
+        } else if (data.message === 'update' && data.entity === 'meeting' && data.key === this.app.meet.meet_id) {
+          if (!this.isLeader) {
+            this.app.meet.fetch()
+          } else {
+            this.$saveFetch(this.app.meet)
+          }
+        }
       }
 
-      this.showErrorDialog = false
-      this.showErrorDialog = true
-    },
+      this.$socket.sendObj({ message: 'observe', entity: 'meeting', key: this.app.meet.meet_id })
+    })
+  },
+
+  methods: {
     parseDate: function (isodate) {
       return moment(isodate).format(this.user.locale.timestampformat)
     },
@@ -192,9 +236,18 @@ export default {
         if (response.response.data.redirect) {
           window.location = response.response.data.redirect
         }
-      }).catch((error) => {
-        this._evtRequestError(error.response)
       })
+    },
+    isCollapsed: function (index) {
+      let bin = (this.collapsed >>> 0).toString(2).padStart(index, '0')
+      let backwiseindex = bin.length - (index + 1)
+      return Number.parseInt(bin.charAt(backwiseindex)) === 1
+    },
+    toggleCollapse: function (index) {
+      let bin = (this.collapsed >>> 0).toString(2).padStart(index, '0')
+      let backwiseindex = bin.length - (index + 1)
+      bin = bin.substring(0, backwiseindex) + (this.isCollapsed(index) ? 0 : 1) + bin.substring(backwiseindex + 1)
+      this.collapsed = parseInt(bin, 2).toString(10)
     }
   }
 }

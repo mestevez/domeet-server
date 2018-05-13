@@ -1,22 +1,24 @@
 <template>
-  <v-container>
-    <v-card v-for="noteType in noteTypes" :key="noteType.note_type" v-if="noteType.notes.length &gt; 0">
-      <v-card-title primary-title>
-        <v-container flex xs12>
-          <div class="headline">{{ noteType.title }} ({{ noteType.notes.length }})</div>
-          <v-list three-line>
-            <template v-for="(note, inote) in noteType.notes">
-              <v-subheader :key="inote" v-if="inote === 0">{{ note.subject }}</v-subheader>
-              <v-divider :key="inote*-1" v-else></v-divider>
-              <v-list-tile :key="note.note_id">
-                <v-list-tile-content>{{ note.note_description }}</v-list-tile-content>
-              </v-list-tile>
-            </template>
-          </v-list>
-        </v-container>
-      </v-card-title>
-    </v-card>
-  </v-container>
+  <v-layout row wrap>
+    <v-flex xs12 v-for="noteType in noteTypes" :key="noteType.note_type" v-if="noteType.notes.length &gt; 0">
+      <v-card>
+        <v-card-title primary-title>
+          <v-container flex xs12>
+            <div class="headline">{{ noteType.title }} ({{ noteType.notes.length }})</div>
+            <v-list>
+              <template v-for="(note, inote) in noteType.notes">
+                <v-subheader :key="inote" v-if="inote === 0">{{ note.subject }}</v-subheader>
+                <v-divider :key="inote*-1" v-else></v-divider>
+                <v-list-tile :key="note.note_id">
+                  <v-list-tile-content>{{ note.note_description }}</v-list-tile-content>
+                </v-list-tile>
+              </template>
+            </v-list>
+          </v-container>
+        </v-card-title>
+      </v-card>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
@@ -31,7 +33,7 @@ export default {
       let agreements = []
       let unsettleds = []
       let comments = []
-      this.meetData.subjects.forEach((subject) => {
+      this.meetData.subjects.each((subject) => {
         subject.notes.forEach((note) => {
           note.subject = subject.subject_title
           switch (note.note_type) {

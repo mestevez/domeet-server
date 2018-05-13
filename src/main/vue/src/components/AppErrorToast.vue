@@ -12,13 +12,10 @@
 <script>
 export default {
   name: 'AppErrorToast',
-  props: ['message'],
+  props: ['message', 'i18n'],
   data () {
     return {
-      snackbar: this.message != null,
-      i18n: {
-        'btn_close': 'Close'
-      }
+      snackbar: this.message != null
     }
   },
   watch: {

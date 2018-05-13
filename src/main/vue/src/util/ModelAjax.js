@@ -28,6 +28,20 @@ ModelAjax.install = function (Vue) {
     }
   }
 
+  Vue.prototype.$saveFetch = function (model) {
+    // Prevent reload while typing
+    if (document.activeElement && (
+      document.activeElement.tagName === 'TEXTAREA' ||
+      document.activeElement.tagName === 'INPUT')
+    ) {
+      setTimeout(() => {
+        this.$saveFetch(model)
+      }, 500)
+    } else {
+      model.fetch()
+    }
+  }
+
   Vue.prototype.$getModelInstance = function (ModelClass, data) {
     let classInstance = new ModelClass(data)
     classInstance.on('save', (event) => {
