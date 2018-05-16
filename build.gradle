@@ -119,6 +119,7 @@ task(ServerStartUp, dependsOn: 'classes', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 project.afterEvaluate {
+    tasks.appRun.dependsOn npm
     tasks.appRun.dependsOn ServerStartUp
 }
 
@@ -139,7 +140,7 @@ ext {
     npmCommand = Os.isFamily(Os.FAMILY_WINDOWS) ? 'npm.cmd' : 'npm'
     bowerCommand = Os.isFamily(Os.FAMILY_WINDOWS) ? 'bower.cmd' : 'bower'
 }
-task(npm, type: Exec) {
+task(npm) {
     doLast {
         new ByteArrayOutputStream().withStream { os ->
             try {
@@ -159,10 +160,25 @@ task(npm, type: Exec) {
         }
     }
 
-    description = 'Internal task for compile Javascript application'
+    // run npm install command for installing
+    // new dependencies
+    task (runNpmInstallCmd, type:Exec) {
+        description = 'Internal task for compile Javascript libraries downloading'
 
-    commandLine = [npmCommand, "run", "build"]
-    workingDir = file("${project.projectDir}/src/main/vue")
-    inputs.file "package.json"
-    outputs.dir "node_modules"
+        commandLine = [npmCommand, "install"]
+        workingDir = file("${project.projectDir}/src/main/vue")
+    }
+    // run npm install command for installing
+    // new dependencies
+    task (runNpmBuild, type:Exec, dependsOn: runNpmInstallCmd) {
+        // run the npm build command
+        description = 'Internal task for compile Javascript application'
+
+        commandLine = [npmCommand, "run", "build"]
+        workingDir = file("${project.projectDir}/src/main/vue")
+        inputs.file "package.json"
+        outputs.dir "node_modules"
+    }
+
+    npm.dependsOn  runNpmBuild
 }

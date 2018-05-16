@@ -612,4 +612,25 @@ public class meeting implements Serializable {
 		_notifyUsers(session);
 		_notifyMeetingUpdate(session, new Date().getTime());
 	}
+
+	public List<MeetingIssue> validate(Session session, Locale locale) {
+		List<MeetingIssue> issues = new ArrayList<>();
+
+		Timestamp meetDate = getMeetDates().iterator().next().getMeetDate();
+		ResourceBundle bundle = ResourceBundle.getBundle("i18n/meetissues", locale);
+
+		if (meet_state.getKey() < MeetingState.STARTED.getKey()) {
+			// Check meeting date
+			if (meetDate.getTime() < System.currentTimeMillis())
+				issues.add(new MeetingIssue(MeetingIssueCode.EDIT_DATEOVERDUE, MeetingIssueType.ERROR, bundle.getString(MeetingIssueCode.EDIT_DATEOVERDUE.name())));
+
+			if (subjects.size() == 0)
+				issues.add(new MeetingIssue(MeetingIssueCode.EDIT_SUBJECTS_ZERO, MeetingIssueType.ERROR, bundle.getString(MeetingIssueCode.EDIT_SUBJECTS_ZERO.name())));
+
+			if (attendants.size() == 0)
+				issues.add(new MeetingIssue(MeetingIssueCode.EDIT_ATTENDANTS_ZERO, MeetingIssueType.ERROR, bundle.getString(MeetingIssueCode.EDIT_ATTENDANTS_ZERO.name())));
+		}
+
+		return issues;
+	}
 }

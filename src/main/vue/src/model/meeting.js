@@ -3,7 +3,7 @@ import Subject from '@/model/subject'
 import Attendant from '@/model/attendant'
 
 /**
- * Attendant model
+ * Meeting model
  */
 export default class Meeting extends Model {
   options () {

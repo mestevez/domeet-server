@@ -1,6 +1,17 @@
 package conf.database;
 
+import util.Path;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public abstract class DatabaseProps {
+	private static Properties databaseConfProperties;
 	private String	hostname;
 	private int 	port;
 	private String	databasename;
@@ -43,5 +54,55 @@ public abstract class DatabaseProps {
 
 	public String getUserpassword() {
 		return userpassword;
+	}
+
+	private static Properties _getCommonProperties() {
+		if (databaseConfProperties == null) {
+			databaseConfProperties = new Properties();
+			InputStream input = null;
+			try {
+				input = new FileInputStream(Path.getConfPath("security/jetty-realm-dbms.properties"));
+
+				databaseConfProperties.load(input);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (input != null) {
+					try {
+						input.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			String url = databaseConfProperties.get("url").toString();
+			Matcher matcher = Pattern.compile("[^/]+//(\\w+):(\\d+)/(\\w+)").matcher(url);
+			if (matcher.find()) {
+				databaseConfProperties.setProperty("host", matcher.group(1));
+				databaseConfProperties.setProperty("port", matcher.group(2));
+				databaseConfProperties.setProperty("database", matcher.group(3));
+			}
+		}
+
+		return databaseConfProperties;
+	}
+
+	public static String getCommonHost() {
+		return _getCommonProperties().get("host").toString();
+	}
+	public static String getCommonDatabase() {
+		return _getCommonProperties().get("database").toString();
+	}
+	public static Integer getCommonPort() {
+		return Integer.parseInt(_getCommonProperties().get("port").toString());
+	}
+	public static String getCommonUserName() {
+		return _getCommonProperties().get("username").toString();
+	}
+	public static String getCommonPassword() {
+		return _getCommonProperties().get("password").toString();
 	}
 }

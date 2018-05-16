@@ -294,6 +294,19 @@ public class JDBCDatabaseStatus {
 		appConnection.close();
 	}
 
+	public static boolean doApplicationDatabaseExists(DatabaseProps databaseProps)
+		throws SQLException, ClassNotFoundException
+	{
+
+		JDBCConnection appConnection = JDBCConnectionFactory.getServerConnection();
+		String databaseName = databaseProps.getDatabasename();
+		try {
+			return appConnection.getDatabasesList().contains(databaseName);
+		} finally {
+			appConnection.close();
+		}
+	}
+
 	public static void loadApplicationDatabaseData(DatabaseProps databaseProps)
 			throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
 

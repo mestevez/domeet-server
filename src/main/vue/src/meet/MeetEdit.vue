@@ -1,15 +1,6 @@
 <template>
   <v-app id="meetedit">
-    <v-navigation-drawer
-      fixed
-      v-model="notificationsPanel"
-      right
-      clipped
-      app
-      permanent
-      width="150"
-    >
-    </v-navigation-drawer>
+    <appmeetissues :meetIssues="app.meet_issues" :i18nData="i18n"></appmeetissues>
     <apptoolbar></apptoolbar>
     <v-content>
       <v-form v-model="validForm">
@@ -68,10 +59,12 @@
 <script>
 import AppToolbar from '@/components/AppToolbar'
 import AppFooter from '@/components/AppFooter'
+import AppMeetIssues from '@/components/AppMeetIssues'
 import MeetGeneralEdit from '@/components/MeetGeneralEdit'
 import MeetSubjectsEdit from '@/components/MeetSubjectsEdit'
 import MeetAttendantsEdit from '@/components/MeetAttendantsEdit'
 import Meeting, { MeetingState } from '@/model/meeting'
+import MeetingIssues from '@/model/meet_issue'
 import { AttendState } from '@/model/attendant'
 
 const appData = window.appData || {}
@@ -80,6 +73,7 @@ export default {
   components: {
     'apptoolbar': AppToolbar,
     'appfooter': AppFooter,
+    'appmeetissues': AppMeetIssues,
     'generaledit': MeetGeneralEdit,
     'subjectslist': MeetSubjectsEdit,
     'attendantslist': MeetAttendantsEdit
@@ -101,11 +95,14 @@ export default {
   },
 
   data () {
+    let meetIssues = this.$getModelInstance(MeetingIssues, appData.app.meet_issues)
+    meetIssues.set('meet_id', appData.app.meet.meet_id)
+
     return {
-      notificationsPanel: true,
       validForm: true,
       app: Object.assign(appData.app, {
-        meet: this.$getModelInstance(Meeting, appData.app.meet)
+        meet: this.$getModelInstance(Meeting, appData.app.meet),
+        meet_issues: meetIssues
       }),
       AttendState: AttendState,
       MeetingState: MeetingState,
@@ -139,6 +136,7 @@ export default {
           } else {
             this.$saveFetch(this.app.meet)
           }
+          this.app.meet_issues.fetch()
         }
       }
 

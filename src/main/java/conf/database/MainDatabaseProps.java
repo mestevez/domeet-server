@@ -5,7 +5,7 @@ public class MainDatabaseProps extends DatabaseProps {
 	public static DatabaseProps mainDatabase;
 
 	MainDatabaseProps() {
-		super("localhost", 5432, "domeet", "org.postgresql.Driver", "domeetadmin", "12345");
+		super(DatabaseProps.getCommonHost(), DatabaseProps.getCommonPort(), DatabaseProps.getCommonDatabase(), "org.postgresql.Driver", DatabaseProps.getCommonUserName(), DatabaseProps.getCommonPassword());
 	}
 
 	/**
@@ -16,8 +16,9 @@ public class MainDatabaseProps extends DatabaseProps {
 	 * @return
 	 */
 	public static final DatabaseProps getDatabaseProps() {
-		if (mainDatabase == null)
+		if (mainDatabase == null) {
 			mainDatabase = new MainDatabaseProps();
+		}
 
 		return mainDatabase;
 	}

@@ -5,7 +5,7 @@ public class StatusDatabaseProps extends DatabaseProps {
 	public static DatabaseProps statusDatabase;
 
 	StatusDatabaseProps() {
-		super("localhost", 5432, "domeet_status", "org.postgresql.Driver", "domeetadmin", "12345");
+		super(DatabaseProps.getCommonHost(), DatabaseProps.getCommonPort(), "domeet_status", "org.postgresql.Driver", DatabaseProps.getCommonUserName(), DatabaseProps.getCommonPassword());
 	}
 
 	/**

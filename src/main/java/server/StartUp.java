@@ -1,5 +1,6 @@
 package server;
 
+import conf.database.DatabaseProps;
 import conf.database.MainDatabaseProps;
 import jdbc.*;
 import org.slf4j.Logger;
@@ -16,11 +17,18 @@ public class StartUp {
 
 		logger.info("Application server starting up");
 
-		// Verify application database
-		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(MainDatabaseProps.getDatabaseProps());
-		if (status.getFatalError() != null || status.getErrorsList().size() > 0)
-			throw new ServerException("Main database has structural errors. Unable to start application server.");
-		else
-			logger.info("Application database OK");
+		DatabaseProps databaseProps = MainDatabaseProps.getDatabaseProps();
+
+		if (!JDBCDatabaseStatus.doApplicationDatabaseExists(databaseProps)) {
+			JDBCDatabaseStatus.createApplicationDatabase(databaseProps, false);
+			logger.info("Application database CREATED!");
+		} else {
+			// Verify application database
+			JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(databaseProps);
+			if (status.getFatalError() != null || status.getErrorsList().size() > 0)
+				throw new ServerException("Main database has structural errors. Unable to start application server.");
+			else
+				logger.info("Application database OK");
+		}
 	}
 }

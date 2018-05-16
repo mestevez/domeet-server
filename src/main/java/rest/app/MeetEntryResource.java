@@ -39,6 +39,7 @@ public class MeetEntryResource {
 		appData.put("meet_types", meetingTypes);
 
 		appData.put("meet", meet);
+		appData.put("meet_issues", meet.validate(session, request.getLocale()));
 
 		Map<String, String> navigation = new HashMap<>();
 		navigation.put("meetedit", "/app/meet/{meet_id}");
@@ -63,6 +64,7 @@ public class MeetEntryResource {
 		Map<String, Object> appData = new HashMap<>();
 
 		appData.put("meet", meet);
+		appData.put("meet_issues", meet.validate(session, request.getLocale()));
 
 		Map<String, String> navigation = new HashMap<>();
 		navigation.put("back", "/");
@@ -86,6 +88,7 @@ public class MeetEntryResource {
 		Map<String, Object> appData = new HashMap<>();
 
 		appData.put("meet", meet);
+		appData.put("meet_issues", meet.validate(session, request.getLocale()));
 
 		Map<String, String> navigation = new HashMap<>();
 		navigation.put("back", "/");
@@ -186,6 +189,22 @@ public class MeetEntryResource {
 		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
 		try {
 			return Response.accepted().entity(session.get(meeting.class, meet_id)).build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/issues")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response meetingIssues(
+			@Context HttpServletRequest request,
+			@PathParam("meet_id") int meet_id
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			return Response.accepted().entity(session.get(meeting.class, meet_id).validate(session, request.getLocale())).build();
 		} finally {
 			session.close();
 		}
