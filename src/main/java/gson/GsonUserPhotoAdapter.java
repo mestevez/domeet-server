@@ -13,7 +13,7 @@ public class GsonUserPhotoAdapter implements JsonSerializer<byte[]> {
 
 	@Override
 	public JsonElement serialize(byte[] src, Type typeOfSrc, JsonSerializationContext context) {
-		if (src != null) {
+		if (src != null && src.length > 0) {
 			try {
 				return new JsonPrimitive(Image.getImageForURL(src, 128, 128));
 			} catch (IOException e) {

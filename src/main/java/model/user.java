@@ -266,6 +266,27 @@ public class user implements Serializable {
 	 * @param user_lastname		New user last name
 	 * @param user_company		New user company
 	 * @param user_phone		New user phone
+	 * @param user_schedule		New user schedule
+	 */
+	public void updateUser(
+		Session session,
+		String 	user_firstname,
+		String 	user_lastname,
+		String 	user_company,
+		String 	user_phone,
+		String 	user_schedule
+	) {
+		updateUser(session, user_firstname, user_lastname, user_company, user_phone, user_photo, user_schedule);
+	}
+
+	/**
+	 * Modify user personal data
+	 *
+	 * @param session			Hibernate database configuration
+	 * @param user_firstname	New user first name
+	 * @param user_lastname		New user last name
+	 * @param user_company		New user company
+	 * @param user_phone		New user phone
 	 * @param user_photo		New user photo
 	 * @param user_schedule		New user schedule
 	 */

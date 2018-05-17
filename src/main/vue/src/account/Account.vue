@@ -26,8 +26,8 @@
               <v-icon v-else size="96">account_circle</v-icon>
             </v-avatar>
             <div>
-              <input type="file" name="user_photo" accept="image/*" @change="onFileChange" style="display: none">
-              <v-btn color="primary"  @click="$refs.form.$el.elements['user_photo'].click()">{{ i18n.btn_change_photo }}</v-btn>
+              <input type="file" ref="user_photo" :name="photo_changed ? 'user_photo' : 'user_photo_no'" accept="image/*" @change="onFileChange" style="display: none">
+              <v-btn color="primary"  @click="$refs.user_photo.click()">{{ i18n.btn_change_photo }}</v-btn>
               <v-tooltip bottom lazy>
                 <v-btn v-if="app.user_photo != null" slot="activator" fab small dark color="error" @click="removeFile">
                   <v-icon dark>delete_forever</v-icon>
@@ -92,6 +92,7 @@ export default {
     return {
       valid: true,
       user_photo_src: appData.app.user_photo,
+      photo_changed: false,
       emailRules: [
         v => {
           return !!v || this.i18n.rule_required
@@ -130,7 +131,7 @@ export default {
 
   computed: {
     formEnctype () {
-      return this.app.user_photo == null ? undefined : 'multipart/form-data'
+      return this.photo_changed ? 'multipart/form-data' : undefined
     }
   },
 
@@ -142,6 +143,7 @@ export default {
     },
     onFileChange (file) {
       let me = this
+      me.photo_changed = true
       me.app.user_photo = file
 
       if (typeof photosrc !== 'string') {
@@ -154,6 +156,7 @@ export default {
     },
     removeFile () {
       this.app.user_photo = null
+      this.photo_changed = true
       this.$refs.form.$el.elements['user_photo'].value = ''
     }
   }

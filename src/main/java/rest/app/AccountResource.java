@@ -52,7 +52,7 @@ public class AccountResource {
 			appData.put("user_lastname", app_user.getUserLastname());
 			appData.put("user_company", app_user.getUserCompany());
 			appData.put("user_phone", app_user.getUserPhone());
-			appData.put("user_photo", app_user.getUserPhoto() != null ? "/app/account/photo" : null);
+			appData.put("user_photo", app_user.getUserPhoto() != null && app_user.getUserPhoto().length > 0 ? "/app/account/photo" : null);
 			appData.put("user_schedule", app_user.getUserSchedule() != null ? app_user.getUserSchedule().getScheduleCode() : null);
 			appData.put("working_hours", workingHours);
 
@@ -108,7 +108,7 @@ public class AccountResource {
 		try {
 			user app_user = RestSessionUtils.getUserApp(request, session);
 
-			app_user.updateUser(session,user_firstname, user_lastname, user_company, user_phone, null, user_schedule);
+			app_user.updateUser(session,user_firstname, user_lastname, user_company, user_phone, user_schedule);
 
 			return Response.seeOther(URI.create("/")).build();
 		} finally {
