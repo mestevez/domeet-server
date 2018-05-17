@@ -1,15 +1,6 @@
 <template>
   <v-app id="meetexec">
-    <v-navigation-drawer
-      fixed
-      v-model="notificationsPanel"
-      right
-      clipped
-      app
-      permanent
-      width="150"
-    >
-    </v-navigation-drawer>
+    <appmeetissues :meetIssues="app.meet_issues" :i18nData="i18n"></appmeetissues>
     <apptoolbar></apptoolbar>
     <v-content>
       <v-container fluid grid-list-lg style="max-width: 600px;">
@@ -87,11 +78,13 @@
 <script>
 import AppToolbar from '@/components/AppToolbar'
 import AppFooter from '@/components/AppFooter'
+import AppMeetIssues from '@/components/AppMeetIssues'
 import MeetAttendantsList from '@/components/MeetAttendantsList'
 import MeetSubjectsList from '@/components/MeetSubjectsList'
 import MeetFilesList from '@/components/MeetFilesList'
 import MeetSubjectNotesEdit from '@/components/MeetSubjectNotesEdit'
 import Meeting from '@/model/meeting'
+import MeetingIssues from '@/model/meet_issue'
 import { SubjectNoteType } from '@/model/subject_note'
 
 const appData = window.appData || {}
@@ -100,6 +93,7 @@ export default {
   components: {
     'apptoolbar': AppToolbar,
     'appfooter': AppFooter,
+    'appmeetissues': AppMeetIssues,
     'attendantslist': MeetAttendantsList,
     'subjectslist': MeetSubjectsList,
     'fileslist': MeetFilesList,
@@ -128,6 +122,7 @@ export default {
           } else {
             this.$saveFetch(this.app.meet)
           }
+          this.app.meet_issues.fetch()
         }
       }
 
@@ -136,11 +131,14 @@ export default {
   },
 
   data () {
+    let meetIssues = this.$getModelInstance(MeetingIssues, appData.app.meet_issues)
+    meetIssues.set('meet_id', appData.app.meet.meet_id)
+
     return {
-      notificationsPanel: true,
       SubjectNoteType: SubjectNoteType,
       app: Object.assign(appData.app, {
-        meet: this.$getModelInstance(Meeting, appData.app.meet)
+        meet: this.$getModelInstance(Meeting, appData.app.meet),
+        meet_issues: meetIssues
       }),
       user: Object.assign({
       }, appData.user),
