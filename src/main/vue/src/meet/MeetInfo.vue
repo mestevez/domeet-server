@@ -87,9 +87,9 @@
           <v-flex xs12>
             <attendantslist :meetData="app.meet" :i18nData="i18n" :isLeader="isLeader"></attendantslist>
           </v-flex>
-          <!--<v-flex xs12>-->
-            <!--<fileslist :meetData="app.meet" :i18nData="i18n"></fileslist>-->
-          <!--</v-flex>-->
+          <v-flex xs12>
+            <fileslist :meetData="app.meet" :i18nData="i18n"></fileslist>
+          </v-flex>
           <v-flex xs12>
             <noteslist :meetData="app.meet" :i18nData="i18n" :isLeader="isLeader"></noteslist>
           </v-flex>
@@ -171,11 +171,7 @@ export default {
         if (data.message === 'observe' && data.success === true) {
           // DO NOTHING
         } else if (data.message === 'update' && data.entity === 'meeting' && data.key === this.app.meet.meet_id) {
-          if (!this.isLeader) {
-            this.app.meet.fetch()
-          } else {
-            this.$saveFetch(this.app.meet)
-          }
+          this.$saveFetch(this.app.meet, this.isLeader)
         }
       }
 

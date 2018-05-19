@@ -51,6 +51,7 @@ public class SessionFactoryProvider {
 			configuration.addAnnotatedClass(schedule_time.class);
 			configuration.addAnnotatedClass(meeting.class);
 			configuration.addAnnotatedClass(meeting_date.class);
+			configuration.addAnnotatedClass(meet_doc.class);
 			configuration.addAnnotatedClass(subject.class);
 			configuration.addAnnotatedClass(attend.class);
 			configuration.addAnnotatedClass(subject_note.class);

@@ -15,15 +15,10 @@
             <v-flex xs12>
               <attendantslist :meetData="app.meet" :i18nData="i18n" :isLeader="isLeader"></attendantslist>
             </v-flex>
-            <!--<v-flex xs12>-->
-              <!--<v-card>-->
-                <!--<v-card-title primary-title>-->
-                  <!--<v-container flex xs12>-->
-                    <!--<div class="headline">{{ i18n.title_files }}</div>-->
-                  <!--</v-container>-->
-                <!--</v-card-title>-->
-              <!--</v-card>-->
-            <!--</v-flex>-->
+            <v-flex xs12>
+              <filesedit v-if="isLeader" :source="this" :meetData="app.meet" :i18nData="i18n" :isLeader="isLeader"></filesedit>
+              <fileslist v-else :meetData="app.meet" :i18nData="i18n" :isLeader="isLeader"></fileslist>
+            </v-flex>
           </v-layout>
         </v-container>
       </v-form>
@@ -61,6 +56,8 @@ import AppToolbar from '@/components/AppToolbar'
 import AppFooter from '@/components/AppFooter'
 import AppMeetIssues from '@/components/AppMeetIssues'
 import MeetGeneralEdit from '@/components/MeetGeneralEdit'
+import MeetFilesEdit from '@/components/MeetFilesEdit'
+import MeetFilesList from '@/components/MeetFilesList'
 import MeetSubjectsEdit from '@/components/MeetSubjectsEdit'
 import MeetAttendantsEdit from '@/components/MeetAttendantsEdit'
 import Meeting, { MeetingState } from '@/model/meeting'
@@ -75,6 +72,8 @@ export default {
     'appfooter': AppFooter,
     'appmeetissues': AppMeetIssues,
     'generaledit': MeetGeneralEdit,
+    'filesedit': MeetFilesEdit,
+    'fileslist': MeetFilesList,
     'subjectslist': MeetSubjectsEdit,
     'attendantslist': MeetAttendantsEdit
   },
@@ -131,12 +130,8 @@ export default {
         if (data.message === 'observe' && data.success === true) {
           // DO NOTHING
         } else if (data.message === 'update' && data.entity === 'meeting' && data.key === this.app.meet.meet_id) {
-          if (!this.isLeader) {
-            this.app.meet.fetch()
-          } else {
-            this.$saveFetch(this.app.meet)
-          }
-          this.app.meet_issues.fetch()
+          this.$saveFetch(this.app.meet, this.isLeader)
+          this.$saveFetch(this.app.meet_issues)
         }
       }
 

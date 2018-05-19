@@ -88,11 +88,21 @@ public class meeting implements Serializable {
 	@Expose
 	Set<attend> attendants = new HashSet<>();
 
+	@OneToMany(targetEntity=meet_doc.class, mappedBy="meet_id", fetch=FetchType.EAGER)
+	@OrderBy
+	@Expose
+	Set<meet_doc> documents = new HashSet<>();
+
 	// Java RX
 	static Subject<meeting> meetingObservable = PublishSubject.create();
 
 	public void addAttendant(Session session, attend atobj) {
 		attendants.add(atobj);
+		notifyAttendantChanges(session);
+	}
+
+	public void addDocument(Session session, meet_doc doc) {
+		documents.add(doc);
 		notifyAttendantChanges(session);
 	}
 
@@ -233,6 +243,11 @@ public class meeting implements Serializable {
 
 	public void removeAttendant(Session session, attend attdobj) {
 		attendants.remove(attdobj);
+		notifyAttendantChanges(session);
+	}
+
+	public void removeDocument(Session session, meet_doc doc) {
+		documents.remove(doc);
 		notifyAttendantChanges(session);
 	}
 

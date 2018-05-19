@@ -7,6 +7,8 @@ import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
 import model.*;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.xml.sax.SAXException;
@@ -18,7 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.xml.transform.TransformerException;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.*;
 
 @Path("/meet")
@@ -326,6 +330,81 @@ public class MeetEntryResource {
 			Map<String, Object> responseData = new HashMap<>();
 			responseData.put("redirect", "/");
 			return Response.ok().entity(responseData).build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/meet_doc")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response documentAdd(
+		@Context HttpServletRequest request,
+		@PathParam("meet_id") int meet_id,
+		@FormDataParam("file") InputStream fileInputStream,
+		@FormDataParam("file") FormDataContentDisposition contentDispositionHeader
+	) throws IOException {
+		String filepath = util.Path.getTempPathFile("upload", contentDispositionHeader.getFileName());
+		java.nio.file.Path path = FileSystems.getDefault().getPath(filepath);
+
+		Files.copy(fileInputStream, path);
+		byte[] bytes = Files.readAllBytes(path);
+
+		String mymetype = Files.probeContentType(path);
+
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meet_doc.addDocument(
+					session,
+					session.get(meeting.class, meet_id),
+					contentDispositionHeader.getFileName(),
+					bytes,
+					mymetype,
+					bytes.length);
+
+			return Response.ok().build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/meet_doc/{doc_id}")
+	@GET
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response documenGet(
+		@Context HttpServletRequest request,
+		@PathParam("meet_id") int meet_id,
+		@PathParam("doc_id") int doc_id
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			meet_doc doc = session.get(meet_doc.class, doc_id);
+			InputStream is = new BufferedInputStream(new ByteArrayInputStream(doc.getDocumentData()));
+
+			return Response
+					.ok(is, MediaType.APPLICATION_OCTET_STREAM)
+					.header("Content-Disposition","attachment; filename=\"" + doc.getDocumentName() + "\"")
+					.build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/{meet_id}/meet_doc/{doc_id}")
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response documenDelete(
+		@Context HttpServletRequest request,
+		@PathParam("meet_id") int meet_id,
+		@PathParam("doc_id") int doc_id
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			session.get(meet_doc.class, doc_id).deleteDocument(session);
+			return Response.ok().build();
 		} finally {
 			session.close();
 		}

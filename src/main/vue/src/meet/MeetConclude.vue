@@ -22,6 +22,9 @@
               </v-card-title>
             </v-card>
           </v-flex>
+          <v-flex xs12>
+            <fileslist :meetData="app.meet" :i18nData="i18n"></fileslist>
+          </v-flex>
           <v-flex xs12 v-for="(subject, index) in app.meet.subjects.toJSON()" :key="subject.subject_id">
             <v-card>
               <v-toolbar card prominent dark color="secondary">
@@ -137,6 +140,7 @@ import moment from 'moment'
 import AppToolbar from '@/components/AppToolbar'
 import AppFooter from '@/components/AppFooter'
 import AppMeetIssues from '@/components/AppMeetIssues'
+import MeetFilesList from '@/components/MeetFilesList'
 import MeetSubjectNotesEdit from '@/components/MeetSubjectNotesEdit'
 import Meeting from '@/model/meeting'
 import MeetingIssues from '@/model/meet_issue'
@@ -149,7 +153,8 @@ export default {
     'apptoolbar': AppToolbar,
     'appfooter': AppFooter,
     'appmeetissues': AppMeetIssues,
-    'noteslist': MeetSubjectNotesEdit
+    'noteslist': MeetSubjectNotesEdit,
+    'fileslist': MeetFilesList
   },
 
   computed: {
@@ -210,12 +215,8 @@ export default {
         if (data.message === 'observe' && data.success === true) {
           // DO NOTHING
         } else if (data.message === 'update' && data.entity === 'meeting' && data.key === this.app.meet.meet_id) {
-          if (!this.isLeader) {
-            this.app.meet.fetch()
-          } else {
-            this.$saveFetch(this.app.meet)
-          }
-          this.app.meet_issues.fetch()
+          this.$saveFetch(this.app.meet, this.isLeader)
+          this.$saveFetch(this.app.meet_issues)
         }
       }
 

@@ -10,7 +10,8 @@ ModelAjax.install = function (Vue) {
     },
     data () {
       return {
-        ajaxerror: null
+        ajaxerror: null,
+        lockFetch: {}
       }
     }
   })
@@ -28,17 +29,37 @@ ModelAjax.install = function (Vue) {
     }
   }
 
-  Vue.prototype.$saveFetch = function (model) {
-    // Prevent reload while typing
-    if (document.activeElement && (
-      document.activeElement.tagName === 'TEXTAREA' ||
-      document.activeElement.tagName === 'INPUT')
+  Vue.prototype.$saveFetch = function (model, input) {
+    if (
+      // Prevent reload while typing
+      (
+        input &&
+        document.activeElement && (
+          document.activeElement.tagName === 'TEXTAREA' ||
+          document.activeElement.tagName === 'INPUT'
+        )
+      ) ||
+      this.lockFetch[model.getFetchURL()]
     ) {
       setTimeout(() => {
-        this.$saveFetch(model)
+        this.$saveFetch(model, input)
       }, 500)
     } else {
       model.fetch()
+    }
+  }
+
+  Vue.prototype.$lockFetch = function (model) {
+    let lockLevel = this.lockFetch[model.getFetchURL()] || 0
+    this.lockFetch[model.getFetchURL()] = lockLevel + 1
+  }
+
+  Vue.prototype.$unlockFetch = function (model) {
+    let lockLevel = this.lockFetch[model.getFetchURL()] || 0
+    if (lockLevel) {
+      this.lockFetch[model.getFetchURL()] = lockLevel - 1
+    } else {
+      delete this.lockFetch[model.getFetchURL()]
     }
   }
 
