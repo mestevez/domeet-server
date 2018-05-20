@@ -14,7 +14,67 @@
               :readonly="true"
               style="min-height: 96px;"
             ></v-text-field>
-            <v-btn color="primary">{{ i18n.btn_change_password }}</v-btn>
+            <v-dialog v-model="passwordDialog" persistent>
+              <v-btn color="primary" slot="activator" @click="passwordDialog = !passwordDialog">{{ i18n.btn_change_password }}</v-btn>
+              <v-card>
+                <v-toolbar dark color="primary">
+                  <v-tooltip bottom class="ma-0">
+                    <v-btn
+                      icon
+                      large
+                      slot="activator"
+                      @click="passwordDialog = !passwordDialog"
+                    >
+                      <v-icon large>keyboard_arrow_left</v-icon>
+                    </v-btn>
+                    <span>{{ i18n.btn_cancel }}</span>
+                  </v-tooltip>
+                  <v-toolbar-title>{{ i18n.title_change_password }}</v-toolbar-title>
+                </v-toolbar>
+                <v-card-title primary-title>
+                  <v-container fluid>
+                    <v-form method="POST" action="/app/account/password" v-model="validPass" ref="formpass">
+                      <v-text-field
+                        :label="i18n.label_password_old"
+                        :rules="[v => v.length > 0 || i18n.rule_required]"
+                        :append-icon="password_old_view ? 'visibility' : 'visibility_off'"
+                        :append-icon-cb="() => (password_old_view = !password_old_view)"
+                        autofocus
+                        :type="password_old_view ? 'password' : 'text'"
+                        v-model="password_old_data"
+                        name="password_old"
+                        required
+                      ></v-text-field>
+                      <v-text-field
+                        :label="i18n.label_password_new"
+                        :rules="[v => v.length > 0 || i18n.rule_required]"
+                        :append-icon="password_new_view ? 'visibility' : 'visibility_off'"
+                        :append-icon-cb="() => (password_new_view = !password_new_view)"
+                        :type="password_new_view ? 'password' : 'text'"
+                        v-model="password_new_data"
+                        name="password_new"
+                        required
+                      ></v-text-field>
+                      <v-text-field
+                        :label="i18n.label_password_confirm"
+                        :rules="[v => v.length == 0 ? i18n.rule_required : (password_new_data == v || i18n.rule_password_confirm)]"
+                        :append-icon="password_confirm_view ? 'visibility' : 'visibility_off'"
+                        :append-icon-cb="() => (password_confirm_view = !password_confirm_view)"
+                        :type="password_confirm_view ? 'password' : 'text'"
+                        v-model="password_confirm_data"
+                        required
+                      ></v-text-field>
+                    </v-form>
+
+                  </v-container>
+                </v-card-title>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="error" @click="passwordDialog = !passwordDialog">{{ i18n.btn_cancel }}</v-btn>
+                  <v-btn color="success" @click="$refs.formpass.validate() && $refs.formpass.$el.submit()">{{ i18n.btn_ok }}</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
           </v-flex>
           <v-flex sm5 xs12 class="text-xs-left text-sm-center">
             <v-avatar size="96">
@@ -91,7 +151,15 @@ export default {
   data () {
     return {
       valid: true,
+      validPass: true,
       user_photo_src: appData.app.user_photo,
+      passwordDialog: false,
+      password_old_data: '',
+      password_new_data: '',
+      password_confirm_data: '',
+      password_old_view: true,
+      password_new_view: true,
+      password_confirm_view: true,
       photo_changed: false,
       emailRules: [
         v => {
@@ -118,13 +186,19 @@ export default {
         label_email: 'Email',
         label_first_name: 'First name',
         label_last_name: 'Last name',
+        label_change_password: 'Change password',
+        label_password_old: 'Old password',
+        label_password_new: 'New password',
+        label_password_confirm: 'Confirm password',
         label_phonenum: 'Phone number',
         label_workinghours: 'Working hours',
         head_account_info: 'Account info',
         head_personal_data: 'Personal data',
         head_workinfo: 'Work info',
         rule_invalid_mail: 'E-mail must be valid',
-        rule_required: 'This field is required'
+        rule_required: 'This field is required',
+        rule_password_confirm: 'Password does not match the confirm password',
+        title_change_password: 'Change password'
       }, appData.i18n)
     }
   },

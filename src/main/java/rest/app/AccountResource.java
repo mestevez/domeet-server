@@ -5,6 +5,7 @@ import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import hibernate.SessionFactoryProvider;
+import model.auth_user;
 import model.schedule;
 import model.user;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -132,6 +133,29 @@ public class AccountResource {
 			user app_user = RestSessionUtils.getUserApp(request, session);
 
 			app_user.updateUser(session,user_firstname, user_lastname, user_company, user_phone, IOUtils.readFully(user_photo, -1, false), user_schedule);
+
+			return Response.seeOther(URI.create("/")).build();
+		} finally {
+			session.close();
+		}
+	}
+
+	@Path("/password")
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response updatePassword(
+		@Context HttpServletRequest request,
+		@FormParam("password_old") String password_old,
+		@FormParam("password_new") String password_new
+	) {
+		Session session = SessionFactoryProvider.getSessionFactory(MainDatabaseProps.getDatabaseProps()).openSession();
+		try {
+			auth_user app_user = RestSessionUtils.getUserAuth(request, session);
+
+			app_user.updateUserPassword(session, request.getLocale(), password_old, password_new);
+
+			// Log out to force put new password
+			request.getSession().invalidate();
 
 			return Response.seeOther(URI.create("/")).build();
 		} finally {

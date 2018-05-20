@@ -1,5 +1,6 @@
 package model;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;
@@ -7,10 +8,9 @@ import org.hibernate.search.annotations.Index;
 import org.hibernate.search.annotations.Store;
 
 import javax.persistence.*;
+import javax.ws.rs.ForbiddenException;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table( schema="app", name="auth_user" )
@@ -88,5 +88,25 @@ public class auth_user implements Serializable {
 
 	public void setUserPassword(String user_passhash) {
 		this.user_passhash = user_passhash;
+	}
+
+	public void updateUserPassword(Session session, Locale locale, String confirmOldPassword, String newPassword)
+	{
+		if (!this.user_passhash.equalsIgnoreCase(confirmOldPassword)) { ;
+			throw new ForbiddenException(ResourceBundle.getBundle("i18n/account", locale).getString("error_incorrect_password"));
+		}
+
+		this.user_passhash = newPassword;
+
+		try {
+			session.beginTransaction();
+
+			session.merge(this);
+
+			session.getTransaction().commit();
+		} catch (HibernateException ex) {
+			session.getTransaction().rollback();
+			throw ex;
+		}
 	}
 }
