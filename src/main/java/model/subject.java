@@ -220,4 +220,8 @@ public class subject implements Serializable {
 			throw ex;
 		}
 	}
+
+	public short getSubjectDuration() {
+		return subject_duration;
+	}
 }

@@ -635,15 +635,28 @@ public class meeting implements Serializable {
 		ResourceBundle bundle = ResourceBundle.getBundle("i18n/meetissues", locale);
 
 		if (meet_state.getKey() < MeetingState.STARTED.getKey()) {
+			// Gather subjects info
+			Iterator<subject> iteratorSubjects = subjects.iterator();
+			int subjectsDuration = 0;
+			while (iteratorSubjects.hasNext()) {
+				subject subject = iteratorSubjects.next();
+				subjectsDuration += subject.getSubjectDuration();
+			}
+
 			// Check meeting date
 			if (meetDate.getTime() < System.currentTimeMillis())
 				issues.add(new MeetingIssue(MeetingIssueCode.EDIT_DATEOVERDUE, MeetingIssueType.ERROR, bundle.getString(MeetingIssueCode.EDIT_DATEOVERDUE.name())));
 
+			// No SUBJECTS
 			if (subjects.size() == 0)
 				issues.add(new MeetingIssue(MeetingIssueCode.EDIT_SUBJECTS_ZERO, MeetingIssueType.ERROR, bundle.getString(MeetingIssueCode.EDIT_SUBJECTS_ZERO.name())));
 
+			// No ATTENDANTS
 			if (attendants.size() == 0)
 				issues.add(new MeetingIssue(MeetingIssueCode.EDIT_ATTENDANTS_ZERO, MeetingIssueType.ERROR, bundle.getString(MeetingIssueCode.EDIT_ATTENDANTS_ZERO.name())));
+
+			if (subjectsDuration > meet_duration)
+				issues.add(new MeetingIssue(MeetingIssueCode.EDIT_SUBJECTS_EXCEED_DURATION, MeetingIssueType.WARNING, bundle.getString(MeetingIssueCode.EDIT_SUBJECTS_EXCEED_DURATION.name())));
 		}
 
 		return issues;

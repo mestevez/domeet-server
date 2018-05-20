@@ -3,5 +3,6 @@ package model;
 public enum MeetingIssueCode {
 	EDIT_DATEOVERDUE,
 	EDIT_SUBJECTS_ZERO,
+	EDIT_SUBJECTS_EXCEED_DURATION,
 	EDIT_ATTENDANTS_ZERO
 }

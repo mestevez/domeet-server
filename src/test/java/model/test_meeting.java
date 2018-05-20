@@ -363,7 +363,28 @@ class test_meeting {
 	void minutesOfTheMeeting() throws IOException, SAXException, TransformerException, TemplateException, MessagingException {
 		int meetUser1Id = auth_user.getUser(session, "meetinguser1@test.es").getUserID();
 
-		meeting meet = meeting.addMeeting(session, meetUser1Id, "Progression control and exercices unification", null, new Short("30"), MeetingType.UNDETERMINED);
+		meeting meet = meeting.addMeeting(
+				session,
+				meetUser1Id,
+				"Axional v.2018.1 project",
+				"The objective of the meeting is following up the state of the project.\n" +
+						"After evaluating its state, it has to be decided if is necessary to apply any " +
+						"measure to redirect the project or if it can be concluded it in time.",
+				new Short("60"),
+				MeetingType.DECISION_MAKING
+		);
+
+		attend.addAttendant(session, meet, session.get(user.class, auth_user.getUser(session, "meetinguser2@test.es").getUserID()));
+		attend.addAttendant(session, meet, session.get(user.class, auth_user.getUser(session, "meetinguser3@test.es").getUserID()));
+		attend.addAttendant(session, meet, session.get(user.class, auth_user.getUser(session, "meetinguser4@test.es").getUserID()));
+		attend.addAttendant(session, meet, session.get(user.class, auth_user.getUser(session, "meetinguser5@test.es").getUserID()));
+		attend.addAttendant(session, meet, session.get(user.class, auth_user.getUser(session, "meetinguser6@test.es").getUserID()));
+
+		subject.addSubject(session, meet, 0, "Review and priorize open issues", new Short("30"), SubjectPriority.ESSENTIAL);
+		subject.addSubject(session, meet, 10, "Estimate time to solve high priority issues", new Short("15"), SubjectPriority.NORMAL);
+		subject.addSubject(session, meet, 20, "Analyze the state o the project", new Short("20"), SubjectPriority.NORMAL);
+		subject.addSubject(session, meet, 30, "Estimate a concluding date", new Short("10"), SubjectPriority.NORMAL);
+
 		meet.startMeeting(session);
 		meet.endMeeting(session);
 		meet.concludeMeeting(session, false);
