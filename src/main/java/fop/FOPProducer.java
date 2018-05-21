@@ -28,7 +28,6 @@ public class FOPProducer {
 		this(fopFactory, new File(Path.getTempPathFile("fop", "fo")));
 		this.isTemporaryFile = true;
 
-		//Writer out = new BufferedWriter(new FileWriter(this.foFile));
 		Writer out = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(this.foFile)), "UTF-8");
 		try {
 			out.write(fo);
