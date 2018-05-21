@@ -28,4 +28,13 @@
 	<!-- or for binary file -->
 	<hyphenation-pattern lang="fr" extension="hyp">lang/fr.hyp</hyphenation-pattern>
 
+	<!--<renderers>-->
+		<!--<renderer mime="application/pdf">-->
+			<!--<fonts>-->
+				<!--<font kerning="yes" embed-url="Roboto-Regular.ttf" embedding-mode="subset">-->
+					<!--<font-triplet name="Roboto" style="normal" weight="normal"/>-->
+				<!--</font>-->
+			<!--</fonts>-->
+		<!--</renderer>-->
+	<!--</renderers>-->
 </fop>
