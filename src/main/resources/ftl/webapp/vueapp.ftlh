@@ -2,6 +2,7 @@
 <html lang="${lang}">
 <head>
 	<meta charset="${charset}">
+	<meta http-equiv="CONTENT-TYPE" CONTENT='text/html;charset=${charset}'>
 	<meta name=viewport content="width=device-width,initial-scale=1">
 
 	<title>${pagetitle}</title>

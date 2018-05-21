@@ -167,6 +167,9 @@ public class MeetEntryResource {
 			String ftl;
 			meeting meet = session.get(meeting.class, meet_id);
 
+			if (meet == null)
+				throw new NotFoundException("The requested meeting does not exists anymore");
+
 			if (meet.getMeetState() == MeetingState.STARTED)
 				ftl = _getMeetExecutionPage(request, session, meet);
 			else if (meet.getMeetState() == MeetingState.ENDED)
@@ -185,7 +188,7 @@ public class MeetEntryResource {
 	@Path("/{meet_id}")
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON + "; charset=utf-8")
 	public Response meetingDispatcherJSON(
 			@Context HttpServletRequest request,
 			@PathParam("meet_id") int meet_id
