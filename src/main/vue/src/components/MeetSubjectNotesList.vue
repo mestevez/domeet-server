@@ -5,12 +5,14 @@
         <v-card-title primary-title>
           <v-container flex xs12>
             <div class="headline">{{ noteType.title }} ({{ noteType.notes.length }})</div>
-            <v-list>
+            <v-list class="fit-content">
               <template v-for="(note, inote) in noteType.notes">
                 <v-subheader :key="inote" v-if="inote === 0">{{ note.subject }}</v-subheader>
                 <v-divider :key="inote*-1" v-else></v-divider>
                 <v-list-tile :key="note.note_id">
-                  <v-list-tile-content>{{ note.note_description }}</v-list-tile-content>
+                  <v-list-tile-content>
+                    <v-list-tile-title style="white-space: normal">{{ note.note_description }}</v-list-tile-title>
+                  </v-list-tile-content>
                 </v-list-tile>
               </template>
             </v-list>

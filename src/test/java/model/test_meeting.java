@@ -380,12 +380,77 @@ class test_meeting {
 		attend.addAttendant(session, meet, session.get(user.class, auth_user.getUser(session, "meetinguser5@test.es").getUserID()));
 		attend.addAttendant(session, meet, session.get(user.class, auth_user.getUser(session, "meetinguser6@test.es").getUserID()));
 
-		subject.addSubject(session, meet, 0, "Review and priorize open issues", new Short("30"), SubjectPriority.ESSENTIAL);
-		subject.addSubject(session, meet, 10, "Estimate time to solve high priority issues", new Short("15"), SubjectPriority.NORMAL);
-		subject.addSubject(session, meet, 20, "Analyze the state o the project", new Short("20"), SubjectPriority.NORMAL);
-		subject.addSubject(session, meet, 30, "Estimate a concluding date", new Short("10"), SubjectPriority.NORMAL);
+		subject sbjDelivery = model.subject.addSubject(session, meet, 0, "Delivery of new version to EcoCompany", new Short("20"), SubjectPriority.ESSENTIAL);
+		subject sbjLowIssues = subject.addSubject(session, meet, 10, "Review and prioritize open issues", new Short("20"), SubjectPriority.ESSENTIAL);
+		subject sbjHighIssues = model.subject.addSubject(session, meet, 20, "Estimate time to solve high priority issues", new Short("10"), SubjectPriority.NORMAL);
+		subject sbjSpeedIssues = model.subject.addSubject(session, meet, 30, "Causes of decreasing efficiency of issues resolution", new Short("10"), SubjectPriority.NORMAL);
+		subject sbjSystemSpeed = subject.addSubject(session, meet, 40, "System speed", new Short("10"), SubjectPriority.NORMAL);
+		subject sbjAnalize = model.subject.addSubject(session, meet, 50, "Analyze the state o the project", new Short("20"), SubjectPriority.NORMAL);
+		subject sbjVersConclude = subject.addSubject(session, meet, 60, "Estimate a concluding date", new Short("10"), SubjectPriority.NORMAL);
 
+		meet.createMeeting(session);
 		meet.startMeeting(session);
+
+		subject_note.addNote(session, sbjDelivery, 0,
+				"Today, the 18th of may of 2018 the version 2018.1 is concluded and be delivered to EcoCompany for the initial phases of the project"
+				, SubjectNoteType.AGREEMENT);
+		subject_note.addNote(session, sbjDelivery, 10,
+				"By the 25 of may of 2018 the project must be ready for the EcoCompany testing"
+				, SubjectNoteType.AGREEMENT);
+		subject_note.addNote(session, sbjDelivery, 0,
+				"The 4 pending critical issues has been resolved, and are pending to verify by internal testing team."
+				, SubjectNoteType.COMMENT);
+
+		subject_note.addNote(session, sbjLowIssues, 0,
+				"It still exists open low priority issues, which will be resolved in further phases."
+				, SubjectNoteType.UNSETTLED);
+
+		subject_note.addNote(session, sbjHighIssues, 0,
+				"It exists 20 solved bugs pending to test by the internal testing team."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjHighIssues, 10,
+				"It exists 8 bugs currently being solved."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjHighIssues, 20,
+				"It exists 29 pending to resolve with HIGH priority."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjHighIssues, 30,
+				"It exists 66 pending to resolve with LOW priority."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjHighIssues, 40,
+				"It exists 48 enhancements. Some of them requires an special attention."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjHighIssues, 50,
+				"It exists 3 bugs which cannot be reproduced by the development team."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjHighIssues, 0,
+				"Do not use the images added to Trello cards as card cover, in order to minimize each issue height."
+				, SubjectNoteType.DECISION);
+
+		subject_note.addNote(session, sbjSpeedIssues, 0,
+				"In front of the feeling that issue resolving speed has considerably decreased during the last week," +
+						"the development team argued that has been working on 2 essential new features for the EcoCompany version." +
+						"Those features has been finished, so issue resolving time has to increase again."
+				, SubjectNoteType.COMMENT);
+
+		subject_note.addNote(session, sbjSystemSpeed, 0,
+				"It has been exposed the perception of a decrease of system speed while using the application.\n" +
+						"As an example, when accessing a page for the fist time it last about 5 seconds, when in previous " +
+						"versions this action was executed immediately."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjSystemSpeed, 0,
+				"The development team will investigate those issues and expose the possible solutions and consequences in the next meeting."
+				, SubjectNoteType.DECISION);
+		subject_note.addNote(session, sbjAnalize, 0,
+				"Despite of the mentioned issues, the application is ready to be delivered for being used in the first phases of a project."
+				, SubjectNoteType.COMMENT);
+		subject_note.addNote(session, sbjVersConclude, 0,
+				"The development team has agreed to deliver a version TODAY"
+				, SubjectNoteType.AGREEMENT);
+		subject_note.addNote(session, sbjVersConclude, 0,
+				"The pending issues will be fixed on the version branch, so further new implementation will not affect the version"
+				, SubjectNoteType.DECISION);
+
 		meet.endMeeting(session);
 		meet.concludeMeeting(session, false);
 
