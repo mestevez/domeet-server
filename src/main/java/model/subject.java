@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class subject implements Serializable {
 
 	@Id
-	@SequenceGenerator(name="subject_generator", sequenceName="subject_seq")
+	@SequenceGenerator(name="subject_generator", schema="app", sequenceName="subject_seq", initialValue = 100)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="subject_generator")
 	@Expose
 	private Integer subject_id;

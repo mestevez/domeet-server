@@ -15,8 +15,8 @@ import java.util.Map;
 public class subject_note {
 
 	@Id
-	@SequenceGenerator(initialValue=101,name="note_generator", sequenceName="note_seq")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="note_generator")
+	@SequenceGenerator(name="note_generator", schema="app", sequenceName="note_seq", initialValue = 100)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="note_generator")
 	@Expose
 	private Integer note_id;
 
@@ -133,5 +133,9 @@ public class subject_note {
 			session.getTransaction().rollback();
 			throw ex;
 		}
+	}
+
+	public String getNoteDescription() {
+		return note_description;
 	}
 }

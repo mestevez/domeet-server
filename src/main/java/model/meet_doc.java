@@ -14,7 +14,7 @@ import javax.persistence.*;
 public class meet_doc {
 
 	@Id
-	@SequenceGenerator(name="doc_generator", sequenceName="doc_seq")
+	@SequenceGenerator(name="doc_generator", schema="app", sequenceName="doc_seq", initialValue = 100)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator="doc_generator")
 	@Expose
 	private Integer doc_id;

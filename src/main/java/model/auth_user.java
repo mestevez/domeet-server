@@ -17,8 +17,8 @@ import java.util.*;
 public class auth_user implements Serializable {
 
 	@Id
-	@SequenceGenerator(initialValue=101,name="auth_generator", sequenceName="auth_user_seq")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="auth_generator")
+	@SequenceGenerator(name="auth_generator", schema="app", sequenceName="auth_user_seq", initialValue = 100)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="auth_generator")
 	private Integer user_id;
 
 	@Field(index=Index.YES, analyze=Analyze.YES, store=Store.NO)

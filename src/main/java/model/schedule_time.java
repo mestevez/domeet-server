@@ -15,8 +15,8 @@ import java.util.*;
 public class schedule_time implements Serializable {
 
 	@Id
-	@SequenceGenerator(initialValue=101,name="schedule_time_generator", sequenceName="schedule_time_seq")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="schedule_time_generator")
+	@SequenceGenerator(name="schedule_time_generator", schema="app", sequenceName="schedule_time_seq", initialValue = 100)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="schedule_time_generator")
 	private Integer sch_id;
 
 	@Column(columnDefinition = "bpchar")

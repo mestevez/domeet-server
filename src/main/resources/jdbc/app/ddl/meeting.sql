@@ -1,5 +1,5 @@
 CREATE TABLE app.meeting (
-  meet_id           SERIAL,
+  meet_id           INTEGER,
   meet_title        VARCHAR(100) NOT NULL,
   meet_description  TEXT,
   meet_duration     SMALLINT NOT NULL DEFAULT 0,
@@ -32,4 +32,4 @@ ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_info_end CHECK (
 ALTER TABLE app.meeting ADD CONSTRAINT c_meeting_info_mom CHECK (
   meet_mom IS NULL OR meet_state >= 5
 );
-CREATE SEQUENCE meeting_seq START 101;
+CREATE SEQUENCE app.meeting_seq START 100 INCREMENT BY 50 OWNED BY app.meeting.meet_id;

@@ -39,8 +39,8 @@ import java.util.*;
 public class meeting implements Serializable {
 
 	@Id
-	@SequenceGenerator(initialValue=101,name="meeting_generator", sequenceName="meeting_seq")
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator="meeting_generator")
+	@SequenceGenerator(name="meeting_generator", schema="app", sequenceName="meeting_seq", initialValue = 100)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="meeting_generator")
 	@Expose
 	private Integer meet_id;
 

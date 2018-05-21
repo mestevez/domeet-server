@@ -1,5 +1,5 @@
 CREATE TABLE app.subject (
-  subject_id          SERIAL,
+  subject_id          INTEGER,
   meet_id             INTEGER NOT NULL,
   subject_order       INTEGER NOT NULL DEFAULT 0,
   subject_title       VARCHAR(100) NOT NULL,
@@ -14,4 +14,4 @@ ALTER TABLE app.subject ADD CONSTRAINT f_subject_meeting FOREIGN KEY (meet_id) R
 ALTER TABLE app.subject ADD CONSTRAINT c_subject_info_end CHECK (
   subject_time_end IS NULL OR subject_time_start IS NOT NULL
 );
-CREATE SEQUENCE subject_seq START 101;
+CREATE SEQUENCE app.subject_seq START 100 INCREMENT BY 50 OWNED BY app.subject.subject_id;

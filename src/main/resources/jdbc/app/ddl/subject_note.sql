@@ -1,8 +1,8 @@
 CREATE TABLE app.subject_note (
-  note_id           SERIAL,
+  note_id           INTEGER,
   subject_id        INTEGER NOT NULL,
   note_order        INTEGER NOT NULL DEFAULT 0,
-  note_description  VARCHAR(255) NOT NULL,
+  note_description  TEXT NOT NULL,
   note_type         SMALLINT NOT NULL DEFAULT 0     -- 0: Comment, 1: Decision, 2: Agreement, 3: Unsettled
 );
 ALTER TABLE app.subject_note ADD CONSTRAINT pk_subject_note PRIMARY KEY (note_id);
@@ -11,4 +11,4 @@ ALTER TABLE app.subject_note ADD CONSTRAINT f_subject_note FOREIGN KEY (subject_
 ALTER TABLE app.subject_note ADD CONSTRAINT c_subject_note_type_rang CHECK (
   note_type IN (0, 1, 2, 3)
 );
-CREATE SEQUENCE note_seq START 101;
+CREATE SEQUENCE app.note_seq START 100 INCREMENT BY 50 OWNED BY app.subject_note.note_id;

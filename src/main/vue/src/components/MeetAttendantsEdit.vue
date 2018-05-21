@@ -26,7 +26,7 @@
         <div v-if="meetData.attendants.length == 0" v-html="i18n.label_noattendants"></div>
         <v-list v-else three-lines>
           <template v-for="(attd, index) in meetData.attendants.toJSON()">
-            <v-divider v-if="index &gt; 0" :key="index"></v-divider>
+            <v-divider v-if="index &gt; 0" :key="index*-1"></v-divider>
             <v-list-tile :key="attd.user_id.user_id">
               <v-list-tile-avatar>
                 <img
