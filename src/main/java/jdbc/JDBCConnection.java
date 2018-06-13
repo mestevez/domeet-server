@@ -70,6 +70,15 @@ public abstract class JDBCConnection implements AutoCloseable {
 		m_conn.close();
 	}
 
+
+	/**
+	 *
+	 * @param schemeName Scheme name
+	 * @return true - if exists an schema with the received name for the current database. false - otherwise.
+	 * @throws SQLException if the occurs an error on database creation
+	 */
+	public abstract boolean checkSchemaExists(String schemeName) throws SQLException;
+
 	/**
 	 *
 	 * @param databaseName Database name

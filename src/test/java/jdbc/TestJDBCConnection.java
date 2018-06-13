@@ -16,12 +16,19 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class TestJDBCConnection {
 
 	@Test
+	void createApplicationDatabaseEmpty() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
+		JDBCDatabaseStatus.createApplicationDatabase(JUnitDatabaseProps.getDatabaseProps(), true, false);
+	}
+
+	@Test
 	void createApplicationDatabase() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
-		JDBCDatabaseStatus.createApplicationDatabase(JUnitDatabaseProps.getDatabaseProps(), true);
+		JDBCDatabaseStatus.createApplicationDatabase(JUnitDatabaseProps.getDatabaseProps(), true, true);
 	}
 
 	@Test
 	void checkAppStatus() throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
+		JDBCDatabaseStatus.createApplicationDatabase(JUnitDatabaseProps.getDatabaseProps(), true, true);
+
 		JDBCCheckStatus status = JDBCDatabaseStatus.checkDatabaseStatus(JUnitDatabaseProps.getDatabaseProps());
 
 		assertNull(status.getFatalError(), "FATAL ERROR");

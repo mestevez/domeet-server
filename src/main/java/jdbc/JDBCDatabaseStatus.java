@@ -239,7 +239,7 @@ public class JDBCDatabaseStatus {
 		return textBuilder.toString();
 	}
 
-	public static void createApplicationDatabase(DatabaseProps databaseProps, boolean dropIfExist)
+	public static void createApplicationDatabase(DatabaseProps databaseProps, boolean dropIfExist, boolean createSchema)
 			throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
 
 		JDBCConnection appConnection = JDBCConnectionFactory.getServerConnection();
@@ -260,7 +260,16 @@ public class JDBCDatabaseStatus {
 			appConnection.close();
 		}
 
-		appConnection = JDBCConnectionFactory.getAppDatabaseConnection(databaseProps);
+		if (createSchema) {
+			createApplicationSchema(databaseProps);
+		}
+	}
+
+	public static void createApplicationSchema(DatabaseProps databaseProps)
+			throws SQLException, ClassNotFoundException, JDBCException, IOException, URISyntaxException {
+
+		JDBCConnection appConnection = JDBCConnectionFactory.getAppDatabaseConnection(databaseProps);
+		String databaseName = databaseProps.getDatabasename();
 		try {
 			appConnection.createSchema(JDBCConnectionFactory.getAppScheme());
 			for (String tableName : _getTableList(RESOURCES.appDir)) {
@@ -289,9 +298,9 @@ public class JDBCDatabaseStatus {
 			}
 
 			throw ex;
+		} finally {
+			appConnection.close();
 		}
-
-		appConnection.close();
 	}
 
 	public static boolean doApplicationDatabaseExists(DatabaseProps databaseProps)
@@ -302,6 +311,17 @@ public class JDBCDatabaseStatus {
 		String databaseName = databaseProps.getDatabasename();
 		try {
 			return appConnection.getDatabasesList().contains(databaseName);
+		} finally {
+			appConnection.close();
+		}
+	}
+
+	public static boolean doApplicationSchemeExists(DatabaseProps databaseProps)
+		throws SQLException, ClassNotFoundException
+	{
+		JDBCConnection appConnection = JDBCConnectionFactory.getAppDatabaseConnection(databaseProps);
+		try {
+			return appConnection.checkSchemaExists(JDBCConnectionFactory.getAppScheme());
 		} finally {
 			appConnection.close();
 		}
@@ -342,7 +362,7 @@ public class JDBCDatabaseStatus {
 			throws SQLException, ClassNotFoundException, URISyntaxException, IOException, JDBCException {
 		JDBCCheckStatus status = new JDBCCheckStatus();
 
-		createApplicationDatabase(StatusDatabaseProps.getDatabaseProps(), true);
+		createApplicationDatabase(StatusDatabaseProps.getDatabaseProps(), true, true);
 
 		JDBCConnection generalConnection = JDBCConnectionFactory.getServerConnection();
 		try {
@@ -351,6 +371,9 @@ public class JDBCDatabaseStatus {
 		} finally {
 			generalConnection.close();
 		}
+
+		if (!doApplicationSchemeExists(checkDatabase))
+			status.setFatalError("Application scheme does not exists");
 
 		if (status.getFatalError() == null)
 			_checkTablesStatus(status, checkDatabase);

@@ -73,6 +73,23 @@ public class JDBCPostgreSQLConnection extends JDBCConnection {
 	}
 
 	@Override
+	public boolean checkSchemaExists(String schemeName) throws SQLException {
+		CallableStatement callableStatement = m_conn.prepareCall("select COUNT(*) from information_schema.schemata WHERE schema_name = ?");
+		ResultSet resultSet = null;
+		try {
+			callableStatement.setString(1, schemeName);
+			callableStatement.execute();
+			resultSet = callableStatement.getResultSet();
+			return resultSet != null && resultSet.next() && resultSet.getInt(1) > 0;
+		} finally {
+			if (resultSet != null)
+				resultSet.close();
+
+			callableStatement.close();
+		}
+	}
+
+	@Override
 	public void createDatabase(String databaseName) throws SQLException {
 		// Set database list to null to reload it on next call
 		databasesList = null;
