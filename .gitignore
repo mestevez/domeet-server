@@ -4,3 +4,5 @@
 /out
 /src/main/webapp/static/dist/
 /logs
+conf/mail-config.xml
+conf/security/jetty-realm-dbms.properties
