@@ -79,7 +79,7 @@ public abstract class DatabaseProps {
 			}
 
 			String url = databaseConfProperties.get("url").toString();
-			Matcher matcher = Pattern.compile("[^/]+//(\\w+):(\\d+)/(\\w+)").matcher(url);
+			Matcher matcher = Pattern.compile("[^/]+//([^:]+):(\\d+)/(\\w+)").matcher(url);
 			if (matcher.find()) {
 				databaseConfProperties.setProperty("host", matcher.group(1));
 				databaseConfProperties.setProperty("port", matcher.group(2));
