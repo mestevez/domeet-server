@@ -67,49 +67,117 @@ version. Then, you will need to install NPM
 <mark>PostgreSQL must be installed with UTF-8 encoding.</mark>
 
 <h2>Installation</h2>
-<h3>Database configuration file</h3>
+
+<h3>Configuration file</h3>
+
+<h4>Database configuration</h4>
 <p>
-	The application is configured by default to connect to a postgres 
+	The application requires connecting to a PostgreSQL database, so some database configuration
+	 is required. By default it connects to a postgreSQL 
 	server at <code>localhost</code> listening by the port <code>5432</code>. 
 	And connecting with the administrative user <code>postgres</code> with password
-	<code>12345</code>. This configuration can be modified in the file 
-	<em>conf/security/jetty-realm-dbms.properties.</em> 
+	<code>12345</code>. This configuration can be modified in the mentioned configuration file. 
 </p>
-<ol>
-	<li>Open configuration file: <pre>vi conf/security/jetty-realm-dbms.properties</pre></li>
-	<li>
-		Which contains:
-		<pre>jdbcdriver = org.postgresql.Driver
-url = jdbc:postgresql://<b>localhost</b>:<b>5432</b>/domeet
-<b>username</b> = <b>postgres</b>
-<b>password</b> = <b>12345</b>
-...</pre>
-	Only the parameters <code>url</code>, <code>username</code> and <code>password</code> can be edited on this file. 
-	Otherwise the application server could not behave as expected.
-	</li>
-</ol>
 
-<h3>SMTP configuration file</h3>
+<h4>SMTP configuration file</h4>
 <p>
 As the application is intended to send emails, it requires some STMP 
-configuration to execute properly.  This configuration can be modified in the file
-<em>conf/mail-config.</em> 
+configuration to execute properly.
 </p>
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
-<properties>
-	<entry key="mail.smtp.host">smtp.gmail.com</entry>
-	<entry key="mail.smtp.port">587</entry>
-	<entry key="mail.smtp.starttls.enable">true</entry>
-	<entry key="mail.smtp.auth">true</entry>
-	<entry key="user">domeet.uoc@gmail.com</entry>
-	<entry key="password">0q4prpb3n0xtd4cs</entry>
-</properties>
-```
+<p>
+	The application configuration is mainly defined by the <b>configuration file</b> <em>conf/domeet.propertes</em>:
+</p>
+<pre>dbms_host = localhost
+dbms_port = 5432
+dbms_name = domeet
+dbms_user = postgres
+dbms_password = 12345
+smtp_host = smtp.gmail.com
+smtp_port = 587
+smtp_user = domeet.uoc@gmail.com
+smtp_password = 0q4prpb3n0xtd4cs
+http_port = 8081</pre>
 
-So, it must be given a valid STMP configuration. 
+<p>
+	The configuration file contains every necessary to set up the application:
+	<table>
+		<thead>
+			<tr>
+				<th>Area</th>
+				<th>Property</th>
+				<th>Default value</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td rowspan='5'>Database</td>
+				<td><b>dbms_host</b></td>
+				<td>localhost</td>
+				<td>Database endpoint. URL identifying the database system manager instance.</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><b>dbms_port</b></td>
+				<td>5432</td>
+				<td>Port throught the database system manager instance handle communications.</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><b>dbms_name</b></td>
+				<td>domeet</td>
+				<td>Name of the database holding enterprise information.</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><b>dbms_user</b></td>
+				<td>postgres</td>
+				<td>
+					User ID for connection to the database. 
+					The user requries administrative permissons over the specifyed database for handling 
+					the database model.
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><b>dbms_password</b></td>
+				<td>12345</td>
+				<td>Credential password related for the defined database user.</td>
+			</tr>
+			<tr>
+				<td rowspan='4'>SMTP</td>
+				<td><b>smtp_host</b></td>
+				<td>smtp.gmail.com</td>
+				<td>SMTP host URL</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><b>smtp_port</b></td>
+				<td>587</td>
+				<td>Port throught the SMTP host handles communications.</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><b>smtp_user</b></td>
+				<td>domeet.uoc@gmail.com</td>
+				<td>E-Mail account used for sending emails via the application.</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><b>smtp_password</b></td>
+				<td>0q4prpb3n0xtd4cs</td>
+				<td>Credential password related for the defined E-Mail account.</td>
+			</tr>
+			<tr>
+				<td>HTTP</td>
+				<td><b>http_port</b></td>
+				<td>8081</td>
+				<td>HTTP Port for the application server</td>
+			</tr>
+		</tbody>
+	</table>
+</p>
 
 <h3>Create application and start server</h3>
 <ol>
