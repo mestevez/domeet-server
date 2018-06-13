@@ -118,19 +118,16 @@ http_port = 8081</pre>
 				<td>Database endpoint. URL identifying the database system manager instance.</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td><b>dbms_port</b></td>
 				<td>5432</td>
 				<td>Port throught the database system manager instance handle communications.</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td><b>dbms_name</b></td>
 				<td>domeet</td>
 				<td>Name of the database holding enterprise information.</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td><b>dbms_user</b></td>
 				<td>postgres</td>
 				<td>
@@ -140,7 +137,6 @@ http_port = 8081</pre>
 				</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td><b>dbms_password</b></td>
 				<td>12345</td>
 				<td>Credential password related for the defined database user.</td>
@@ -152,19 +148,16 @@ http_port = 8081</pre>
 				<td>SMTP host URL</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td><b>smtp_port</b></td>
 				<td>587</td>
 				<td>Port throught the SMTP host handles communications.</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td><b>smtp_user</b></td>
 				<td>domeet.uoc@gmail.com</td>
 				<td>E-Mail account used for sending emails via the application.</td>
 			</tr>
 			<tr>
-				<td></td>
 				<td><b>smtp_password</b></td>
 				<td>0q4prpb3n0xtd4cs</td>
 				<td>Credential password related for the defined E-Mail account.</td>
