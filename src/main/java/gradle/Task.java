@@ -7,8 +7,11 @@ import jdbc.JDBCDatabaseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import server.StartUp;
+import util.Path;
 
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Properties;
 
 public class Task {
 	private final static Logger logger = LoggerFactory.getLogger(StartUp.class);
@@ -20,7 +23,7 @@ public class Task {
 			if (args.length <= 1) {
 				logger.info("Missing arguments at position 1 for task database");
 			} else if (args[1].equalsIgnoreCase("create")) {
-				JDBCDatabaseStatus.createApplicationDatabase(MainDatabaseProps.getDatabaseProps(), false);
+				JDBCDatabaseStatus.createApplicationDatabase(MainDatabaseProps.getDatabaseProps(), false, true);
 			} else if (args[1].equalsIgnoreCase("drop")) {
 				JDBCDatabaseStatus.dropApplicationDatabase(MainDatabaseProps.getDatabaseProps());
 			} else if (args[1].equalsIgnoreCase("load")) {
@@ -40,8 +43,22 @@ public class Task {
 			} else {
 				logger.info("Unhandled argument [" + args[1] + "] for task database");
 			}
+		} else if (args[0].equalsIgnoreCase("loadconf")) {
+			String configFile = args.length > 1 ? args[1] : "domeet.properties";
+			InputStream confPropertiesInput = Path.getConfFileInputStream(configFile);
+			Properties confProperties = new Properties();
+			confProperties.load(confPropertiesInput);
+			confPropertiesInput.close();
+
+			StartUp.initConf(confProperties);
 		} else if (args[0].equalsIgnoreCase("start")) {
-			StartUp.init();
+			String configFile = args.length > 1 ? args[1] : "domeet.properties";
+			InputStream confPropertiesInput = Path.getConfFileInputStream(configFile);
+			Properties confProperties = new Properties();
+			confProperties.load(confPropertiesInput);
+			confPropertiesInput.close();
+
+			StartUp.init(confProperties);
 		}
 	}
 }

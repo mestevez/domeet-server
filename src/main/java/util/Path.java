@@ -2,6 +2,9 @@ package util;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.UUID;
 
 public class Path {
@@ -29,6 +32,10 @@ public class Path {
 
 	public static String getConfPath(String relativePath) {
 		return getRootPath() + "/conf/" + relativePath;
+	}
+
+	public static InputStream getConfFileInputStream(String relativePath) throws FileNotFoundException {
+		return new FileInputStream(getRootPath() + "/conf/" + relativePath);
 	}
 
 	public static String getTempPathFile(String dir, String fileName, String extension) {

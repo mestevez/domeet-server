@@ -128,6 +128,8 @@ So, it must be given a valid STMP configuration.
  <p>Once the server is installed you can access it with the URL <a href="http://localhost:8081">http://localhost:8081</a></p>
 <h2>Maintanance</h2>
  
+<h4>Update configuration</h4>
+<pre>gradlew loadconf</pre 
 <h4>create database</h4>
 <pre>gradlew database -Pcreate</pre>
 <h4>drop database</h4>

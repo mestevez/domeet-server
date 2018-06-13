@@ -115,7 +115,12 @@ gretty {
 }
 
 task(ServerStartUp, dependsOn: 'classes', type: JavaExec) {
-    args(['start'])
+    if (project.hasProperty("config")) {
+        args(['start', project.getProperties().get("config")])
+    } else {
+        args(['start'])
+    }
+
     description = 'Internal task execute before server application starts'
     main = 'gradle.Task'
     classpath = sourceSets.main.runtimeClasspath
@@ -132,6 +137,18 @@ task(database, dependsOn: 'classes', type: JavaExec) {
                                                       'status'))
     ])
     description = 'Database tasks. Allow parameteres: -create'
+    main = 'gradle.Task'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task(loadconf, dependsOn: 'classes', type: JavaExec) {
+    if (project.hasProperty("config")) {
+        args(['loadconf', project.getProperties().get("config")])
+    } else {
+        args(['loadconf'])
+    }
+
+    description = 'Load configuration files from properties file'
     main = 'gradle.Task'
     classpath = sourceSets.main.runtimeClasspath
 }

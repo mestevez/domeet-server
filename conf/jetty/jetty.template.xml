@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+	<Get name="ThreadPool">
+		<Set name="minThreads">10</Set>
+		<Set name="maxThreads">2000</Set>
+		<Set name="detailedDump">false</Set>
+	</Get>
+	<Call name="addConnector">
+		<Arg>
+			<New class="org.eclipse.jetty.server.ServerConnector">
+				<Arg name="server"><Ref refid="Server"/></Arg>
+				<Set name="port">${http_port}</Set>
+			</New>
+		</Arg>
+	</Call>
+	<Call name="addBean">
+		<Arg>
+			<New class="org.eclipse.jetty.security.JDBCLoginService">
+				<Set name="name">auth</Set>
+				<Set name="config">conf/security/jetty-realm-dbms.properties</Set>
+			</New>
+		</Arg>
+	</Call>
+</Configure>
