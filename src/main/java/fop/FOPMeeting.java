@@ -27,12 +27,16 @@ public class FOPMeeting {
 		this.timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
 	}
 
+	private static String _nullToEmptyString(String string) {
+		return string != null ? string : "";
+	}
+
 	public String getMeetTitle() {
 		return this.meet.getMeetTitle();
 	}
 
 	public String getMeetDescription() {
-		return this.meet.getMeetDescription();
+		return _nullToEmptyString(this.meet.getMeetDescription());
 	}
 
 	public String getMeetDate() {
