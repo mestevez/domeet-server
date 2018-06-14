@@ -6,6 +6,7 @@ import freemarker.template.TemplateException;
 import ftl.FTLConfiguration;
 import ftl.FTLParser;
 import jdbc.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,23 @@ import java.util.Properties;
 public class StartUp {
 	private final static Logger logger = LoggerFactory.getLogger(StartUp.class);
 
-	public static void initConf(Properties confProperties) throws IOException, TemplateException {
+	public static void initConf(String configFilePath) throws IOException, TemplateException {
+		InputStream confPropertiesInput;
+		File configConfPropertiesFile = new File(Path.getConfPath("domeet.properties"));
+		if (!configConfPropertiesFile.exists()) {
+			configConfPropertiesFile.createNewFile();
+			FileUtils.writeStringToFile(configConfPropertiesFile, FileUtils.readFileToString(new File(Path.getConfPath(configFilePath)), "UTF-8"), "UTF-8");
+
+			confPropertiesInput = new FileInputStream(configConfPropertiesFile);
+		} else {
+			confPropertiesInput = Path.getConfFileInputStream("domeet.properties");
+		}
+
+		Properties confProperties = new Properties();
+		confProperties.load(confPropertiesInput);
+		confPropertiesInput.close();
+
+
 		Map<String, Object> mapProperties = new HashMap<>();
 		confProperties.keySet().forEach((key) -> mapProperties.put(key.toString(), confProperties.getProperty(key.toString())));
 
@@ -49,13 +66,13 @@ public class StartUp {
 		}
 	}
 
-	public static void init(Properties confProperties) throws SQLException, ClassNotFoundException, URISyntaxException, IOException, JDBCException, ServerException, TemplateException {
+	public static void init(String configFilePath) throws SQLException, ClassNotFoundException, URISyntaxException, IOException, JDBCException, ServerException, TemplateException {
 
 		logger.info("Application server starting up");
 
 		logger.info("Updating config files");
 
-		StartUp.initConf(confProperties);
+		StartUp.initConf(configFilePath);
 
 		logger.info("Config files UP TO DATE");
 

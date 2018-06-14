@@ -44,21 +44,11 @@ public class Task {
 				logger.info("Unhandled argument [" + args[1] + "] for task database");
 			}
 		} else if (args[0].equalsIgnoreCase("loadconf")) {
-			String configFile = args.length > 1 ? args[1] : "domeet.properties";
-			InputStream confPropertiesInput = Path.getConfFileInputStream(configFile);
-			Properties confProperties = new Properties();
-			confProperties.load(confPropertiesInput);
-			confPropertiesInput.close();
-
-			StartUp.initConf(confProperties);
+			String configFile = args.length > 1 ? args[1] : "domeet.template.properties";
+			StartUp.initConf(configFile);
 		} else if (args[0].equalsIgnoreCase("start")) {
-			String configFile = args.length > 1 ? args[1] : "domeet.properties";
-			InputStream confPropertiesInput = Path.getConfFileInputStream(configFile);
-			Properties confProperties = new Properties();
-			confProperties.load(confPropertiesInput);
-			confPropertiesInput.close();
-
-			StartUp.init(confProperties);
+			String configFile = args.length > 1 ? args[1] : "domeet.template.properties";
+			StartUp.init(configFile);
 		}
 	}
 }
