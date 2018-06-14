@@ -6,3 +6,4 @@
 /logs
 conf/mail-config.xml
 conf/security/jetty-realm-dbms.properties
+conf/domeet.properties
