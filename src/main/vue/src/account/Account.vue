@@ -14,67 +14,7 @@
               :readonly="true"
               style="min-height: 96px;"
             ></v-text-field>
-            <v-dialog v-model="passwordDialog" persistent>
-              <v-btn color="primary" slot="activator" @click="passwordDialog = !passwordDialog">{{ i18n.btn_change_password }}</v-btn>
-              <v-card>
-                <v-toolbar dark color="primary">
-                  <v-tooltip bottom class="ma-0">
-                    <v-btn
-                      icon
-                      large
-                      slot="activator"
-                      @click="passwordDialog = !passwordDialog"
-                    >
-                      <v-icon large>keyboard_arrow_left</v-icon>
-                    </v-btn>
-                    <span>{{ i18n.btn_cancel }}</span>
-                  </v-tooltip>
-                  <v-toolbar-title>{{ i18n.title_change_password }}</v-toolbar-title>
-                </v-toolbar>
-                <v-card-title primary-title>
-                  <v-container fluid>
-                    <v-form method="POST" action="/app/account/password" v-model="validPass" ref="formpass">
-                      <v-text-field
-                        :label="i18n.label_password_old"
-                        :rules="[v => v.length > 0 || i18n.rule_required]"
-                        :append-icon="password_old_view ? 'visibility' : 'visibility_off'"
-                        :append-icon-cb="() => (password_old_view = !password_old_view)"
-                        autofocus
-                        :type="password_old_view ? 'password' : 'text'"
-                        v-model="password_old_data"
-                        name="password_old"
-                        required
-                      ></v-text-field>
-                      <v-text-field
-                        :label="i18n.label_password_new"
-                        :rules="[v => v.length > 0 || i18n.rule_required]"
-                        :append-icon="password_new_view ? 'visibility' : 'visibility_off'"
-                        :append-icon-cb="() => (password_new_view = !password_new_view)"
-                        :type="password_new_view ? 'password' : 'text'"
-                        v-model="password_new_data"
-                        name="password_new"
-                        required
-                      ></v-text-field>
-                      <v-text-field
-                        :label="i18n.label_password_confirm"
-                        :rules="[v => v.length == 0 ? i18n.rule_required : (password_new_data == v || i18n.rule_password_confirm)]"
-                        :append-icon="password_confirm_view ? 'visibility' : 'visibility_off'"
-                        :append-icon-cb="() => (password_confirm_view = !password_confirm_view)"
-                        :type="password_confirm_view ? 'password' : 'text'"
-                        v-model="password_confirm_data"
-                        required
-                      ></v-text-field>
-                    </v-form>
-
-                  </v-container>
-                </v-card-title>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="error" @click="passwordDialog = !passwordDialog">{{ i18n.btn_cancel }}</v-btn>
-                  <v-btn color="success" @click="$refs.formpass.validate() && $refs.formpass.$el.submit()">{{ i18n.btn_ok }}</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
+            <v-btn color="primary" slot="activator" @click="passwordDialog = !passwordDialog">{{ i18n.btn_change_password }}</v-btn>
           </v-flex>
           <v-flex sm5 xs12 class="text-xs-left text-sm-center">
             <v-avatar size="96">
@@ -127,7 +67,66 @@
           v-model="app.user_schedule"
         ></v-select>
         <input type="hidden" name="user_schedule" :value="app.user_schedule">
-      </v-form>
+      </v-form><v-dialog v-model="passwordDialog" persistent>
+      <v-card>
+        <v-toolbar dark color="primary">
+          <v-tooltip bottom class="ma-0">
+            <v-btn
+              icon
+              large
+              slot="activator"
+              @click="passwordDialog = !passwordDialog"
+            >
+              <v-icon large>keyboard_arrow_left</v-icon>
+            </v-btn>
+            <span>{{ i18n.btn_cancel }}</span>
+          </v-tooltip>
+          <v-toolbar-title>{{ i18n.title_change_password }}</v-toolbar-title>
+        </v-toolbar>
+        <v-card-title primary-title>
+          <v-container fluid>
+            <v-form method="POST" action="/app/account/password" v-model="validPass" ref="formpass">
+              <v-text-field
+                :label="i18n.label_password_old"
+                :rules="[v => v.length > 0 || i18n.rule_required]"
+                :append-icon="password_old_view ? 'visibility' : 'visibility_off'"
+                :append-icon-cb="() => (password_old_view = !password_old_view)"
+                autofocus
+                :type="password_old_view ? 'password' : 'text'"
+                v-model="password_old_data"
+                name="password_old"
+                required
+              ></v-text-field>
+              <v-text-field
+                :label="i18n.label_password_new"
+                :rules="[v => v.length > 0 || i18n.rule_required]"
+                :append-icon="password_new_view ? 'visibility' : 'visibility_off'"
+                :append-icon-cb="() => (password_new_view = !password_new_view)"
+                :type="password_new_view ? 'password' : 'text'"
+                v-model="password_new_data"
+                name="password_new"
+                required
+              ></v-text-field>
+              <v-text-field
+                :label="i18n.label_password_confirm"
+                :rules="[v => v.length == 0 ? i18n.rule_required : (password_new_data == v || i18n.rule_password_confirm)]"
+                :append-icon="password_confirm_view ? 'visibility' : 'visibility_off'"
+                :append-icon-cb="() => (password_confirm_view = !password_confirm_view)"
+                :type="password_confirm_view ? 'password' : 'text'"
+                v-model="password_confirm_data"
+                required
+              ></v-text-field>
+            </v-form>
+
+          </v-container>
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" @click="passwordDialog = !passwordDialog">{{ i18n.btn_cancel }}</v-btn>
+          <v-btn color="success" @click="$refs.formpass.validate() && $refs.formpass.$el.submit()">{{ i18n.btn_ok }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     </v-content>
     <appfooter>
       <template slot="actions">
